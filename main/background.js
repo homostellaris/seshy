@@ -1,11 +1,8 @@
-// chrome.tabs.onCreated.addListener(addTab)
-// chrome.tabs.onUpdated.addListener(updateTab)
-// chrome.tabs.onMoved.addListener(updateTab)
-// chrome.tabs.onDetached.addListener(removeTab)
-// chrome.tabs.onAttached.addListener(addTab)
-// chrome.tabs.onRemoved.addListener(removeTab)
-// chrome.tabs.onReplaced.addListener(updateTab)
+//---===~ Add listeners. ~===-------------------------------------------------------------------------------------------
+chrome.windows.onCreated.addListener(checkForSession);
+chrome.windows.onRemoved.addListener(saveSession);
 
+//---===~ Initialisation ~===-------------------------------------------------------------------------------------------
 var sessionsFolderId = undefined;
 
 initialise()
@@ -58,44 +55,11 @@ function log() {
   console.log(message);
 }
 
-// ---===~ Session Management ~===--------------------------------------------------------------------------------------
-
-function addTab(tab) {
-  if (tab.url == 'chrome://newtab/') {
-    return;
-  }
-  bookmark = {
-    'parentId': sessionsFolderId,
-    'url': tab.url
-  };
-  chrome.bookmarks.create(bookmark, log);
+//---===~ Session Management ~===---------------------------------------------------------------------------------------
+function checkForSession() {
+  console.log("Checking if tab set is a saved session.");
 }
 
-function updateTab(tabId, changeInfo, tab) {
-  if (tab.url == 'chrome://newtab/') {
-    return;
-  }
-  bookmarkTreeNode = getBookmark();
-  bookmark = {
-    'parentId': sessionsFolderId,
-    'url': tab.url
-  };
-  chrome.bookmarks.create(bookmark, log);
-}
-
-function getBookmark(title, url, index) {
-  var query = '';
-  chrome.bookmarks.search(query, function() {})
-}
-
-function createBookmark() {
-  chrome.bookmarks.search
-}
-
-function removeTab() {
-  console.log("Remove tab.");
-}
-
-function getExistingBookmark(tab) {
-  chrome.bookmarks.search()
+function saveSession() {
+  console.log("Saving tab set into bookmarks folder.");
 }
