@@ -6,13 +6,9 @@
   "version": "1.0",
 
   "background": {
-    "scripts": ["main/background.js"],
+    "scripts": ["main/seshy.js"],
     "persistent": false
   },
-
-  "web_accessible_resources": [
-    "main/session-manager.js"
-  ],
 
   "browser_action": {
     "default_icon": "assets/icon.png",
