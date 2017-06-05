@@ -3,36 +3,17 @@
 // chrome.windows.onRemoved.addListener(saveSession);
 
 //---===~ Initialisation ~===-------------------------------------------------------------------------------------------
-var sessionsFolderId = undefined;
+var seshyFolderId = undefined;
 
 initialise()
-// test()
-
-function test() {
-  alert('BYE');
-  chrome.tabs.query({}, function(tabs) {
-    chrome.tabs.remove(tabs[0].id);
-  });
-}
 
 function initialise() {
   initialiseSessionsFolder();
 }
 
-function createSessionsFolder() {
-  bookmark = {
-    'title': 'Sessions'
-  }
-  chrome.bookmarks.create(bookmark, function(sessionsFolder) {
-    sessionsFolderId = sessionsFolder.id;
-    message = "Created sessions folder.";
-    console.log(message);
-  });
-}
-
 function initialiseSessionsFolder() {
   query = {
-    'title': 'Sessions',
+    'title': 'Seshy',
     'url': null
   }
   chrome.bookmarks.search(query, function(bookmarkTreeNodes) {
@@ -41,13 +22,24 @@ function initialiseSessionsFolder() {
     }
     else if (bookmarkTreeNodes.length == 1) {
       sessionsFolderId = bookmarkTreeNodes[0].id;
-      message = "Sessions folder already exists with ID " + sessionsFolderId;
+      message = "Seshy folder already exists with ID " + sessionsFolderId;
       console.log(message);
     }
     else {
       console.error("More than one Session folder in 'Other Bookmarks'!");
     }
   })
+}
+
+function createSessionsFolder() {
+  bookmark = {
+    'title': 'Seshy'
+  }
+  chrome.bookmarks.create(bookmark, function(seshyFolder) {
+    seshyFolderId = seshyFolder.id;
+    message = "Created seshy folder.";
+    console.log(message);
+  });
 }
 
 function log() {
@@ -71,18 +63,19 @@ function saveSession(windowId) {
     tabs = currentWindow.tabs;
 
     chrome.bookmarks.create({
+      'parentId': seshyFolderId,
       'title': 'Test Session'
     }, saveTabsAsBookmarks)
   }
 
-  function saveTabsAsBookmarks(newFolder) {
-    sessionFolderId = newFolder.id;
+  function saveTabsAsBookmarks(newSessionFolder) {
+    sessionFolderId = newSessionFolder.id;
 
     for (var i = 0; i < tabs.length; i++) {
       tab = tabs[i];
 
       createProperties = {
-        'parentId': newFolder.id,
+        'parentId': newSessionFolder.id,
         'title': 'Tab ' + i,
         'index': tab.index,
         'url': tab.url

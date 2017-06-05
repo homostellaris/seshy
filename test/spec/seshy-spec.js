@@ -1,4 +1,27 @@
-describe("Seshy", function() {
+var tabsInfo = [
+  {
+    'windowId': undefined,
+    'index': 0,
+    'url': 'chrome://extensions/'
+  },
+  {
+    'windowId': undefined,
+    'index': 1,
+    'url': 'chrome://settings/'
+  },
+  {
+    'windowId': undefined,
+    'index': 2,
+    'url': 'chrome://about/'
+  },
+  {
+    'windowId': undefined,
+    'index': 3,
+    'url': 'chrome://newtab/'
+  }
+]
+
+describe("saving sessions", function() {
 
   var windowId;
   var bookmarksFolderId;
@@ -12,29 +35,6 @@ describe("Seshy", function() {
     function checkBookmarksVariable() {
       return bookmarks !== 'undefined';
     }
-
-    tabsInfo = [
-      {
-        'windowId': undefined,
-        'index': 0,
-        'url': 'chrome://extensions/'
-      },
-      {
-        'windowId': undefined,
-        'index': 1,
-        'url': 'chrome://settings/'
-      },
-      {
-        'windowId': undefined,
-        'index': 2,
-        'url': 'chrome://about/'
-      },
-      {
-        'windowId': undefined,
-        'index': 3,
-        'url': 'chrome://newtab/'
-      }
-    ]
 
     function createTabs(newWindow) {
       windowId = newWindow.id;
@@ -66,7 +66,7 @@ describe("Seshy", function() {
     }
   })
 
-  it("should be able to save the tab set as bookmarks in a folder", function() {
+  it("should be able to save a set of tabs as bookmarks in a folder", function() {
     for (var i = 0; i < bookmarks.length; i++) {
       var bookmark = bookmarks[i];
       var expectedTabInfo = tabsInfo[i];
@@ -74,10 +74,6 @@ describe("Seshy", function() {
       expect(bookmark.url).toEqual(expectedTabInfo.url);
     }
   });
-
-  // it("should recognise when a set of opened tabs represents an existing session", function() {
-  //   expect(1).toEqual(1);
-  // });
 
   afterEach(function() {
     cleanUp();
@@ -105,6 +101,27 @@ describe("Seshy", function() {
     }
   });
 });
+
+// describe("recognising sessions", function() {
+//   it("should recognise when a set of opened tabs represents an existing session", function() {
+//     expect(1).toEqual(1);
+//   });
+//
+//   beforeEach(function(done) {
+//     getSessionsFolder();
+//
+//     function getSeshyFolder() {
+//       var query = {
+//         'title': 'Sessions'
+//       }
+//       chrome.bookmarks.search(query, createSessionBookmarksFolder);
+//     }
+//
+//     function createSessionBookmarksFolder() {
+//       chrome.bookmarks.create()
+//     }
+//   })
+// })
 
 // alert('BYE');
 // chrome.tabs.getCurrent(function(tab) {
