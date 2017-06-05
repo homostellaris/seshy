@@ -1,6 +1,6 @@
 //---===~ Add listeners. ~===-------------------------------------------------------------------------------------------
-chrome.windows.onCreated.addListener(checkForSession);
-chrome.windows.onRemoved.addListener(saveSession);
+// chrome.windows.onCreated.addListener(checkForSession);
+// chrome.windows.onRemoved.addListener(saveSession);
 
 //---===~ Initialisation ~===-------------------------------------------------------------------------------------------
 var sessionsFolderId = undefined;
@@ -60,6 +60,34 @@ function checkForSession() {
   console.log("Checking if tab set is a saved session.");
 }
 
-function saveSession() {
+function saveSession(windowId) {
+  var tabs = undefined;
+  var sessionFolderId = undefined;
+
   console.log("Saving tab set into bookmarks folder.");
+  chrome.windows.get(windowId, {'populate': true}, createSessionFolder);
+
+  function createSessionFolder(currentWindow) {
+    tabs = currentWindow.tabs;
+
+    chrome.bookmarks.create({
+      'title': 'Test Session'
+    }, saveTabsAsBookmarks)
+  }
+
+  function saveTabsAsBookmarks(newFolder) {
+    sessionFolderId = newFolder.id;
+
+    for (var i = 0; i < tabs.length; i++) {
+      tab = tabs[i];
+
+      createProperties = {
+        'parentId': newFolder.id,
+        'title': 'Tab ' + i,
+        'index': tab.index,
+        'url': tab.url
+      }
+      chrome.bookmarks.create(createProperties);
+    }
+  }
 }
