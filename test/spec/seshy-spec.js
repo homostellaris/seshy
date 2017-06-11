@@ -1,4 +1,6 @@
-describe("saving sessions", function() {
+var seshyFolderId;
+
+describe("Saving sessions.", function() {
 
   var windowId;
   var bookmarksFolderId;
@@ -6,12 +8,14 @@ describe("saving sessions", function() {
   var tabsInfo;
 
   beforeEach(function(done) {
-    chrome.windows.create({}, function(newWindow) {
-      createTabs(newWindow);
-    });
+    initialise();
+    // Necessary because it takes time to create Seshy folder.
+    setTimeout(begin, 1000);
 
-    function checkBookmarksVariable() {
-      return bookmarks !== 'undefined';
+    function begin() {
+      chrome.windows.create({}, function(newWindow) {
+        createTabs(newWindow);
+      });
     }
 
     function createTabs(newWindow) {
@@ -36,20 +40,28 @@ describe("saving sessions", function() {
     }
 
     function getBookmarks(bookmarkTreeNodes) {
-      chrome.bookmarks.getChildren(bookmarkTreeNodes[0].id, function(bookmarkTreeNodes){
+      chrome.bookmarks.getChildren(bookmarkTreeNodes[0].id, function(bookmarkTreeNodes) {
         bookmarks = bookmarkTreeNodes;
         done();
       });
     }
   })
 
-  it("should be able to save a set of tabs as bookmarks in a folder", function() {
+  it("Should be able to save a set of tabs as bookmarks in a folder.", function() {
     for (var i = 0; i < bookmarks.length; i++) {
       var bookmark = bookmarks[i];
       var expectedTabInfo = tabsInfo[i];
       expect(bookmark.index).toEqual(expectedTabInfo.index);
       expect(bookmark.url).toEqual(expectedTabInfo.url);
     }
+  });
+
+  it("Should delete all the bookmarks in the session folder before saving an existing session.", function() {
+    console.log("Unimplemented test.");
+  });
+
+  it("Only save sessions the user has flagged to be saved.", function() {
+    console.log("Unimplemented test.");
   });
 
   afterEach(function(done) {
@@ -59,7 +71,7 @@ describe("saving sessions", function() {
   });
 });
 
-describe("recognising sessions", function() {
+describe("Recognising existing saved sessions.", function() {
 
   var seshyFolder;
   var expectedSessionFolderId;
@@ -114,8 +126,8 @@ describe("recognising sessions", function() {
       chrome.windows.get(windowToCheck.id, {'populate': true}, callTest);
     }
 
-    function callTest(windowToCheck) {
-      windowToCheck = windowToCheck;
+    function callTest(uptodateWindowToCheck) {
+      windowToCheck = uptodateWindowToCheck;
       checkIfExistingSession(windowToCheck, captureExistingSession); // Method under test.
     }
 
@@ -200,8 +212,3 @@ function removeWindows(windows) {
     chrome.windows.remove(window.id);
   }
 }
-
-// alert('BYE');
-// chrome.tabs.getCurrent(function(tab) {
-//   chrome.tabs.remove(tab.id);
-// });

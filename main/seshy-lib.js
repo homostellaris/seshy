@@ -1,12 +1,4 @@
-//---===~ Add listeners. ~===-------------------------------------------------------------------------------------------
-// chrome.windows.onCreated.addListener(checkForSession);
-// chrome.windows.onRemoved.addListener(saveSession);
-
 //---===~ Initialisation ~===-------------------------------------------------------------------------------------------
-var seshyFolderId;
-
-initialise()
-
 function initialise() {
    checkIfSeshyFolderExists();
 }
@@ -52,11 +44,17 @@ function log() {
 //---===~ Session Management ~===---------------------------------------------------------------------------------------
 function checkIfExistingSession(windowToCheck, callback) {
   console.log("Checking if tab set is a saved session.");
-  var windowToCheck = windowToCheck;
-  var callback = callback;
-  var tabs = windowToCheck.tabs;
 
-  getAllSessionFolders(seshyFolderId, compareWindowWithSessionFolders);
+  var tabs;
+  var callback = callback;
+
+  // chrome.windows.get(windowToCheckId, {'populate': true}, getTabs);
+  getTabs(windowToCheck);
+
+  function getTabs(windowToCheck) {
+    tabs = windowToCheck.tabs;
+    getAllSessionFolders(seshyFolderId, compareWindowWithSessionFolders);
+  }
 
   function compareWindowWithSessionFolders(sessionFolders) {
     var matchingSessionFolder = null;
@@ -70,7 +68,18 @@ function checkIfExistingSession(windowToCheck, callback) {
       }
     }
 
-    callback(matchingSessionFolder);
+    if (matchingSessionFolder === null) {
+      console.log("No existing session found for window with ID " + windowToCheck.id + ".");
+    }
+    else {
+      console.log("Existing session found in bookmark folder with ID " + matchingSessionFolder.id
+      + " for window with ID " + windowToCheck.id + ".");
+    }
+
+    // TODO Properly identify if function.
+    if (typeof callback != 'undefined') {
+      callback(matchingSessionFolder);
+    }
   }
 
   function compareTabsToBookmarks(tabs, bookmarks) {

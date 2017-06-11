@@ -15,12 +15,21 @@ module.exports = function(grunt) {
           // Copy necessary implementation files.
           {expand: true, cwd: 'main/', src: ['seshy-lib.js'], dest: 'output/test/'}
         ]
+      },
+      main: {
+        files: [
+          // Copy all implementation files.
+          {expand: true, src: ['main/**'], dest: 'output/'}
+        ]
       }
     },
 
     exec: {
-      runTest: {
+      test: {
         cmd: 'google-chrome-unstable --load-extension="/home/dan/The Laboratory/Seshy/output/test/"'
+      },
+      run: {
+        cmd: 'google-chrome-unstable --load-extension="/home/dan/The Laboratory/Seshy/output/main/"'
       }
     }
 
@@ -30,5 +39,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-exec');
 
-  grunt.registerTask('test', ['clean:test', 'copy:test', 'exec:runTest']);
+  grunt.registerTask('test', ['clean:test', 'copy:test', 'exec:test']);
+  grunt.registerTask('run', ['clean:main', 'copy:main', 'exec:run']);
 };
