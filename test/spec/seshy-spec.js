@@ -1,5 +1,3 @@
-var seshyFolderId;
-
 describe("Saving sessions.", function() {
 
   var windowId;

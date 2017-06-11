@@ -1,3 +1,5 @@
+var seshyFolderId;
+
 chrome.tabs.query({}, navigateToSpecRunner);
 
 function navigateToSpecRunner(tabs) {
