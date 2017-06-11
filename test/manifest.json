@@ -1,18 +1,16 @@
 {
   "manifest_version": 2,
 
-  "name": "Seshy",
-  "description": "Save sessions and sync them across devices.",
+  "name": "Seshy Test",
+  "description": "Test Seshy using Jasmine.",
   "version": "1.0",
 
   "background": {
-    "scripts": ["main/seshy.js"],
+    "scripts": ["seshy-test.js"],
     "persistent": false
   },
 
   "browser_action": {
-    "default_icon": "assets/icon.png",
-    "default_popup": "main/popup.html",
     "default_title": "Click here!"
   },
 
