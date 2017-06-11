@@ -46,14 +46,21 @@ function checkIfExistingSession(windowToCheck, callback) {
   console.log("Checking if tab set is a saved session.");
 
   var tabs;
-  var callback = callback;
 
   // chrome.windows.get(windowToCheckId, {'populate': true}, getTabs);
   getTabs(windowToCheck);
 
   function getTabs(windowToCheck) {
-    tabs = windowToCheck.tabs;
-    getAllSessionFolders(seshyFolderId, compareWindowWithSessionFolders);
+    if (windowToCheck.tabs) {
+      tabs = windowToCheck.tabs;
+      getAllSessionFolders(seshyFolderId, compareWindowWithSessionFolders);
+    }
+    else {
+      chrome.tabs.getAllInWindow(windowToCheck.id, function(windowToCheckTabs) {
+        tabs = windowToCheckTabs;
+        getAllSessionFolders(seshyFolderId, compareWindowWithSessionFolders);
+      })
+    }
   }
 
   function compareWindowWithSessionFolders(sessionFolders) {
@@ -104,28 +111,41 @@ function checkIfExistingSession(windowToCheck, callback) {
 
 function saveSession(windowId) {
   var tabs;
-  var sessionFolderId;
+  var sessionWindow;
 
   console.log("Saving tab set into bookmarks folder.");
-  chrome.windows.get(windowId, {'populate': true}, createSessionFolder);
+  chrome.windows.get(windowId, {populate: true}, checkIfExistingSessionThenGetSessionFolder);
 
-  function createSessionFolder(currentWindow) {
-    tabs = currentWindow.tabs;
-
-    chrome.bookmarks.create({
-      'parentId': seshyFolderId,
-      'title': 'Test Session'
-    }, saveTabsAsBookmarks)
+  function checkIfExistingSessionThenGetSessionFolder(windowToCheck) {
+    sessionWindow = windowToCheck;
+    tabs = sessionWindow.tabs;
+    checkIfExistingSession(windowToCheck, getSessionFolder);
   }
 
-  function saveTabsAsBookmarks(newSessionFolder) {
-    sessionFolderId = newSessionFolder.id;
+  function getSessionFolder(existingSessionFolder) {
+    if (existingSessionFolder === null) {
+      createSessionFolder(sessionWindow);
+    }
+    else {
+      saveTabsAsBookmarks(existingSessionFolder);
+    }
+  }
 
+  function createSessionFolder(sessionWindow) {
+    console.log("Creating session folder for window with ID " + sessionWindow.id + ".");
+    var bookmarkInfo = {
+      'parentId': seshyFolderId,
+      'title': 'Test Session'
+    }
+    chrome.bookmarks.create(bookmarkInfo, saveTabsAsBookmarks)
+  }
+
+  function saveTabsAsBookmarks(sessionFolder) {
     for (var i = 0; i < tabs.length; i++) {
-      tab = tabs[i];
+      var tab = tabs[i];
 
       createProperties = {
-        'parentId': newSessionFolder.id,
+        'parentId': sessionFolder.id,
         'title': 'Tab ' + i,
         'index': tab.index,
         'url': tab.url
