@@ -9,7 +9,7 @@ function checkIfSeshyFolderExists() {
   query = {
     'title': 'Seshy',
     'url': null
-  }
+  };
   chrome.bookmarks.search(query, function(bookmarkTreeNodes) {
     if (bookmarkTreeNodes.length == 0) {
       console.log("No existing Seshy folder, creating...");
@@ -28,17 +28,12 @@ function checkIfSeshyFolderExists() {
 function createSeshyFolder() {
   bookmark = {
     'title': 'Seshy'
-  }
+  };
   chrome.bookmarks.create(bookmark, function(seshyFolder) {
     seshyFolderId = seshyFolder.id;
     message = "Created seshy folder with ID " + seshyFolderId + ".";
     console.log(message);
   });
-}
-
-function log() {
-  message = "A thing happened.";
-  console.log(message);
 }
 
 //---===~ Session Management ~===---------------------------------------------------------------------------------------
@@ -112,46 +107,79 @@ function checkIfExistingSession(windowToCheck, callback) {
 function saveSession(windowId) {
   var tabs;
   var sessionWindow;
+  var sessionFolderId;
 
   console.log("Saving tab set into bookmarks folder.");
-  chrome.windows.get(windowId, {populate: true}, checkIfExistingSessionThenGetSessionFolder);
+  chrome.windows.get(windowId, {populate: true}, checkIfExistingSavedSessionThenGetSessionFolder);
 
-  function checkIfExistingSessionThenGetSessionFolder(windowToCheck) {
+  function checkIfExistingSavedSessionThenGetSessionFolder(windowToCheck) {
     sessionWindow = windowToCheck;
     tabs = sessionWindow.tabs;
-    checkIfExistingSession(windowToCheck, getSessionFolder);
+    getWindowToSessionFolderMapping(windowId, getSessionFolder);
   }
 
-  function getSessionFolder(existingSessionFolder) {
-    if (existingSessionFolder === null) {
-      createSessionFolder(sessionWindow);
+  function getSessionFolder(existingSavedSessionMapping) {
+    if (typeof existingSavedSessionMapping[sessionWindow.id] != 'undefined') {
+      removeBookmarksInFolder(existingSavedSessionMapping[sessionWindow.id]);
     }
     else {
-      saveTabsAsBookmarks(existingSessionFolder);
+      createSessionFolder(sessionWindow);
     }
   }
 
   function createSessionFolder(sessionWindow) {
     console.log("Creating session folder for window with ID " + sessionWindow.id + ".");
+
     var bookmarkInfo = {
       'parentId': seshyFolderId,
       'title': 'Test Session'
+    };
+    chrome.bookmarks.create(bookmarkInfo, callSaveTabsAsBookmarksWithId);
+
+    function callSaveTabsAsBookmarksWithId(sessionFolder) {
+      saveTabsAsBookmarks(sessionFolder.id);
     }
-    chrome.bookmarks.create(bookmarkInfo, saveTabsAsBookmarks)
   }
 
-  function saveTabsAsBookmarks(sessionFolder) {
+  function removeBookmarksInFolder(bookmarkFolderId) {
+    sessionFolderId = bookmarkFolderId;
+    chrome.bookmarks.getChildren(bookmarkFolderId, removeBookmarks);
+  }
+
+  function removeBookmarks(bookmarkTreeNodes) {
+    for (var i = 0; i < bookmarkTreeNodes.length; i++) {
+      var bookmarkTreeNode = bookmarkTreeNodes[i];
+      chrome.bookmarks.remove(bookmarkTreeNode.id);
+
+      if (i == bookmarkTreeNodes.length - 1) {
+        saveTabsAsBookmarks(sessionFolderId);
+      }
+    }
+  }
+
+  function saveTabsAsBookmarks(newSessionFolderId) {
+    sessionFolderId = newSessionFolderId;
     for (var i = 0; i < tabs.length; i++) {
       var tab = tabs[i];
 
       createProperties = {
-        'parentId': sessionFolder.id,
+        'parentId': sessionFolderId,
         'title': 'Tab ' + i,
         'index': tab.index,
         'url': tab.url
+      };
+
+      if (i == tabs.length - 1) {
+        chrome.bookmarks.create(createProperties, callStoreWindowToSessionFolderMapping);
       }
-      chrome.bookmarks.create(createProperties);
+      else {
+        chrome.bookmarks.create(createProperties);
+      }
     }
+  }
+
+  function callStoreWindowToSessionFolderMapping(bookmarkTreeNode) {
+    storeWindowToSessionFolderMapping(sessionWindow.id, sessionFolderId);
   }
 }
 
@@ -160,5 +188,24 @@ function getAllSessionFolders(seshyFolderId, callback) {
   function returnChildren(seshyFolderSearchResults) {
     seshyFolder = seshyFolderSearchResults[0];
     callback(seshyFolder.children);
+  }
+}
+
+//---===~ Storage ~===--------------------------------------------------------------------------------------------------
+function storeWindowToSessionFolderMapping(windowId, bookmarkFolderId) {
+  var windowToSessionFolderMapping = {};
+  windowToSessionFolderMapping[windowId] = bookmarkFolderId;
+  chrome.storage.local.set(windowToSessionFolderMapping);
+}
+
+function getWindowToSessionFolderMapping(windowId, callback) {
+  chrome.storage.local.get(windowId.toString(), callback);
+}
+
+function removeWindowToSessionFolderMapping(windowId, callback) {
+  chrome.storage.local.remove(windowId.toString());
+  // TODO Properly identify if function.
+  if (typeof callback != 'undefined') {
+    callback();
   }
 }

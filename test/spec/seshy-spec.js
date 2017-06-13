@@ -5,7 +5,7 @@ describe("Saving sessions.", function() {
   var tabsInfo;
 
   beforeEach(function(done) {
-    initialise();
+    clearLocalStorageAndInitialise();
     // Necessary because it takes time to create Seshy folder.
     setTimeout(begin, 1000);
 
@@ -35,7 +35,14 @@ describe("Saving sessions.", function() {
       chrome.bookmarks.create(bookmarksInfo[0]);
       chrome.bookmarks.create(bookmarksInfo[1]);
       chrome.bookmarks.create(bookmarksInfo[2]);
-      chrome.bookmarks.create(bookmarksInfo[3], callTestWithDone);
+      chrome.bookmarks.create(bookmarksInfo[3], addWindowToSessionMapping);
+
+      // Nested function so can reference expectedSessionFolderId.
+      function addWindowToSessionMapping() {
+        var items = {};
+        items[windowId.toString()] = expectedSessionFolderId;
+        chrome.storage.local.set(items, callTestWithDone);
+      }
     }
 
     function callTestWithDone(bookmarkTreeNode) {
@@ -95,7 +102,7 @@ describe("Saving sessions.", function() {
   }
 });
 
-describe("Recognising existing saved sessions.", function() {
+describe("Opening windows.", function() {
 
   var expectedSessionFolderId;
   var windowToCheck;
@@ -103,7 +110,7 @@ describe("Recognising existing saved sessions.", function() {
   var actualSessionFolderId;
 
   beforeEach(function(done) {
-    initialise();
+    clearLocalStorageAndInitialise();
     // Necessary because it takes time to create Seshy folder.
     setTimeout(begin, 1000);
 
@@ -155,8 +162,59 @@ describe("Recognising existing saved sessions.", function() {
     }
   });
 
-  it("should recognise when a set of opened tabs represents an existing session", function() {
+  it("Should recognise when a set of opened tabs represents an existing session.", function() {
     expect(expectedSessionFolderId).toEqual(actualSessionFolderId);
+  });
+
+  afterEach(function() {
+    cleanUp();
+  });
+})
+
+describe("Closing windows.", function() {
+
+  var windowId;
+
+  beforeEach(function(done) {
+    clearLocalStorageAndInitialise();
+    // Necessary because it takes time to create Seshy folder.
+    setTimeout(begin, 1000);
+
+    function begin() {
+      chrome.windows.create({}, addWindowToSessionMapping);
+    }
+
+    function addWindowToSessionMapping(newWindow) {
+      windowId = newWindow.id;
+      var fakeSessionFolderId = 1;
+      var items = {};
+      items[newWindow.id.toString()] = fakeSessionFolderId;
+      chrome.storage.local.set(items, done);
+    }
+  });
+
+  it("Removes any window to session folder mapping from local storage.", function(done) {
+    removeWindowToSessionFolderMapping(windowId, getAllLocalStorage);
+
+    function getAllLocalStorage() {
+      chrome.storage.local.get(null, assertWindowToSessionFolderMappingRemoved);
+    }
+
+    function assertWindowToSessionFolderMappingRemoved(allLocalStorageObject) {
+      var allLocalStorageKeys = Object.keys(allLocalStorageObject);
+
+      var matchingLocalStorageKey = false;
+      var windowIdString = windowId.toString();
+
+      for (var i = 0; i < allLocalStorageKeys.length; i++) {
+        var localStorageKey = allLocalStorageKeys[i];
+        if (localStorageKey == windowIdString) {
+          matchingLocalStorageKey = true;
+        }
+      }
+      expect(matchingLocalStorageKey).toBe(false);
+      done();
+    }
   });
 
   afterEach(function() {
@@ -257,4 +315,8 @@ function removeWindows(windows) {
     var window = windows[i];
     chrome.windows.remove(window.id);
   }
+}
+
+function clearLocalStorageAndInitialise() {
+  chrome.storage.local.clear(initialise);
 }
