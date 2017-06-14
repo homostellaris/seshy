@@ -102,76 +102,118 @@ describe("Saving sessions.", function() {
   }
 });
 
-describe("Opening windows.", function() {
+describe("Resuming sessions.", function() {
 
-  var expectedSessionFolderId;
-  var windowToCheck;
-  var bookmarksInfo;
-  var actualSessionFolderId;
+  describe("Users restores a session from the session manager.", function() {
 
-  beforeEach(function(done) {
-    clearLocalStorageAndInitialise();
-    // Necessary because it takes time to create Seshy folder.
-    setTimeout(begin, 1000);
+    it("Adds a window id to session folder id mapping in local storage.", function(done) {
+      var fakeWindowId = 72;
+      var fakeSessionFolderId = 69;
 
-    function begin() {
-      getSeshyFolder(createSessionBookmarksFolderThenBookmarks);
-    }
+      chrome.storage.local.clear(resumeSession);
 
-    function createSessionBookmarksFolderThenBookmarks(bookmarkTreeNodes) {
-      createSessionBookmarksFolder(bookmarkTreeNodes, createBookmarks);
-    }
+      resumeSession(fakeWindowId, fakeSessionFolderId, () => {
+        getAllLocalStorage(assertWindowToSessionFolderMappingAdded);
+      });
 
-    function createBookmarks(sessionBookmarksFolder) {
-      expectedSessionFolderId = sessionBookmarksFolder.id;
-      var asBookmarks = true;
-      bookmarksInfo = getTabsOrBookmarksInfo(expectedSessionFolderId, asBookmarks);
+      function assertWindowToSessionFolderMappingAdded(allLocalStorageObject) {
+        var allLocalStorageKeys = Object.keys(allLocalStorageObject);
 
-      chrome.bookmarks.create(bookmarksInfo[0]);
-      chrome.bookmarks.create(bookmarksInfo[1]);
-      chrome.bookmarks.create(bookmarksInfo[2]);
-      chrome.bookmarks.create(bookmarksInfo[3], createWindow);
-    }
+        var matchingLocalStorageKey;
+        var matchingLocalStorageKeyValue;
 
-    function createWindow(bookmarkTreeNode) {
-      chrome.windows.create({}, createTabs);
-    }
+        for (var i = 0; i < allLocalStorageKeys.length; i++) {
+          var localStorageKey = allLocalStorageKeys[i];
+          if (localStorageKey == fakeWindowId) {
+            matchingLocalStorageKey = allLocalStorageKeys[i];
+            matchingLocalStorageKeyValue = allLocalStorageObject[fakeWindowId.toString()]
+          }
+        }
+        expect(matchingLocalStorageKey).toBe(fakeWindowId.toString());
+        expect(matchingLocalStorageKeyValue).toBe(fakeSessionFolderId);
+        done();
+      }
+    });
 
-    function createTabs(newWindow) {
-      windowToCheck = newWindow;
-      var tabsInfo = getTabsOrBookmarksInfo(windowToCheck.id);
+    afterEach(function(done) {
+      cleanUp();
+      // Necessary because it takes time to delete Seshy folder in cleanup of previous test.
+      setTimeout(done, 1000);
+    });
+  })
 
-      chrome.tabs.create(tabsInfo[0]);
-      chrome.tabs.create(tabsInfo[1]);
-      chrome.tabs.create(tabsInfo[2], getWindow);
-      // Don't create new tab as the new window creates that for us.
-    }
+  describe("Identifying existing session and prompting to resume.", function() {
 
-    function getWindow() {
-      chrome.windows.get(windowToCheck.id, {'populate': true}, callTest);
-    }
+    // TODO set variables on `this` instead.
+    var expectedSessionFolderId;
+    var windowToCheck;
+    var bookmarksInfo;
+    var actualSessionFolderId;
 
-    function callTest(uptodateWindowToCheck) {
-      windowToCheck = uptodateWindowToCheck;
-      checkIfExistingSession(windowToCheck, captureExistingSession); // Method under test.
-    }
+    beforeEach(function(done) {
+      clearLocalStorageAndInitialise();
+      // Necessary because it takes time to create Seshy folder.
+      setTimeout(begin, 1000);
 
-    function captureExistingSession(actualSessionFolder) {
-      actualSessionFolderId = actualSessionFolder === null ? null : actualSessionFolder.id;
-      done();
-    }
+      function begin() {
+        getSeshyFolder(createSessionBookmarksFolderThenBookmarks);
+      }
+
+      function createSessionBookmarksFolderThenBookmarks(bookmarkTreeNodes) {
+        createSessionBookmarksFolder(bookmarkTreeNodes, createBookmarks);
+      }
+
+      function createBookmarks(sessionBookmarksFolder) {
+        expectedSessionFolderId = sessionBookmarksFolder.id;
+        var asBookmarks = true;
+        bookmarksInfo = getTabsOrBookmarksInfo(expectedSessionFolderId, asBookmarks);
+
+        chrome.bookmarks.create(bookmarksInfo[0]);
+        chrome.bookmarks.create(bookmarksInfo[1]);
+        chrome.bookmarks.create(bookmarksInfo[2]);
+        chrome.bookmarks.create(bookmarksInfo[3], createWindow);
+      }
+
+      function createWindow(bookmarkTreeNode) {
+        chrome.windows.create({}, createTabs);
+      }
+
+      function createTabs(newWindow) {
+        windowToCheck = newWindow;
+        var tabsInfo = getTabsOrBookmarksInfo(windowToCheck.id);
+
+        chrome.tabs.create(tabsInfo[0]);
+        chrome.tabs.create(tabsInfo[1]);
+        chrome.tabs.create(tabsInfo[2], getWindow);
+        // Don't create new tab as the new window creates that for us.
+      }
+
+      function getWindow() {
+        chrome.windows.get(windowToCheck.id, {'populate': true}, callTest);
+      }
+
+      function callTest(uptodateWindowToCheck) {
+        windowToCheck = uptodateWindowToCheck;
+        checkIfExistingSession(windowToCheck, captureExistingSession); // Method under test.
+      }
+
+      function captureExistingSession(actualSessionFolder) {
+        actualSessionFolderId = actualSessionFolder === null ? null : actualSessionFolder.id;
+        done();
+      }
+    });
+
+    afterEach(function() {
+      cleanUp();
+    });
+
+    it("Should recognise when a set of opened tabs represents an existing session.", function() {
+      expect(expectedSessionFolderId).toEqual(actualSessionFolderId);
+    });
   });
+});
 
-  it("Should recognise when a set of opened tabs represents an existing session.", function() {
-    expect(expectedSessionFolderId).toEqual(actualSessionFolderId);
-  });
-
-  afterEach(function() {
-    cleanUp();
-  });
-})
-
-describe("Closing windows.", function() {
+describe("Ending sessions.", function() {
 
   var windowId;
 
@@ -194,11 +236,9 @@ describe("Closing windows.", function() {
   });
 
   it("Removes any window to session folder mapping from local storage.", function(done) {
-    removeWindowToSessionFolderMapping(windowId, getAllLocalStorage);
-
-    function getAllLocalStorage() {
-      chrome.storage.local.get(null, assertWindowToSessionFolderMappingRemoved);
-    }
+    removeWindowToSessionFolderMapping(windowId, () => {
+      getAllLocalStorage(assertWindowToSessionFolderMappingRemoved);
+    });
 
     function assertWindowToSessionFolderMappingRemoved(allLocalStorageObject) {
       var allLocalStorageKeys = Object.keys(allLocalStorageObject);
@@ -220,7 +260,7 @@ describe("Closing windows.", function() {
   afterEach(function() {
     cleanUp();
   });
-})
+});
 
 //---===~ Functions ~===------------------------------------------------------------------------------------------------
 function getTabsOrBookmarksInfo(windowOrParentId, asBookmarks, tabSetNumber) {
@@ -319,4 +359,8 @@ function removeWindows(windows) {
 
 function clearLocalStorageAndInitialise() {
   chrome.storage.local.clear(initialise);
+}
+
+function getAllLocalStorage(callback) {
+  chrome.storage.local.get(null, callback);
 }

@@ -37,6 +37,10 @@ function createSeshyFolder() {
 }
 
 //---===~ Session Management ~===---------------------------------------------------------------------------------------
+function resumeSession(windowId, sessionFolderId, callback) {
+  storeWindowToSessionFolderMapping(windowId, sessionFolderId, callback);
+}
+
 function checkIfExistingSession(windowToCheck, callback) {
   console.log("Checking if tab set is a saved session.");
 
@@ -192,10 +196,16 @@ function getAllSessionFolders(seshyFolderId, callback) {
 }
 
 //---===~ Storage ~===--------------------------------------------------------------------------------------------------
-function storeWindowToSessionFolderMapping(windowId, bookmarkFolderId) {
+function storeWindowToSessionFolderMapping(windowId, bookmarkFolderId, callback) {
   var windowToSessionFolderMapping = {};
   windowToSessionFolderMapping[windowId] = bookmarkFolderId;
-  chrome.storage.local.set(windowToSessionFolderMapping);
+  // TODO Properly identify if function.
+  if (typeof callback != 'undefined') {
+    chrome.storage.local.set(windowToSessionFolderMapping, callback);
+  }
+  else {
+    chrome.storage.local.set(windowToSessionFolderMapping);
+  }
 }
 
 function getWindowToSessionFolderMapping(windowId, callback) {
