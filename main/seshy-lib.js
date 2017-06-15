@@ -132,12 +132,12 @@ function getSession(windowToCheck, callback) {
   function getTabs(windowToCheck) {
     if (windowToCheck.tabs) {
       tabs = windowToCheck.tabs;
-      getAllSessionFolders(seshyFolderId, compareWindowWithSessionFolders);
+      getAllSessionFolders(compareWindowWithSessionFolders);
     }
     else {
       chrome.tabs.getAllInWindow(windowToCheck.id, function(windowToCheckTabs) {
         tabs = windowToCheckTabs;
-        getAllSessionFolders(seshyFolderId, compareWindowWithSessionFolders);
+        getAllSessionFolders(compareWindowWithSessionFolders);
       })
     }
   }
@@ -189,8 +189,21 @@ function getSession(windowToCheck, callback) {
 }
 
 // Private methods
-function getAllSessionFolders(seshyFolderId, callback) {
-  chrome.bookmarks.getSubTree(seshyFolderId, returnChildren);
+function getSeshyFolder(callback) {
+  var query = {
+    'title': 'Seshy'
+  }
+  chrome.bookmarks.search(query, callback);
+}
+
+function getAllSessionFolders(callback) {
+  getSeshyFolder(getSessionFolders);
+
+  function getSessionFolders(bookmarkTreeNodes) {
+    var seshyFolder = bookmarkTreeNodes[0];
+    chrome.bookmarks.getSubTree(seshyFolder.id, returnChildren);
+  }
+
   function returnChildren(seshyFolderSearchResults) {
     seshyFolder = seshyFolderSearchResults[0];
     callback(seshyFolder.children);

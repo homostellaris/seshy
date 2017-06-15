@@ -14,7 +14,8 @@
   },
 
   "browser_action": {
-    "default_title": "Click here!"
+    "default_title": "Manage your sessions.",
+    "default_popup": "session-manager.html"
   },
 
   "permissions": [
