@@ -194,7 +194,7 @@ describe("Resuming sessions.", function() {
 
       function callTest(uptodateWindowToCheck) {
         windowToCheck = uptodateWindowToCheck;
-        checkIfExistingSession(windowToCheck, captureExistingSession); // Method under test.
+        getSession(windowToCheck, captureExistingSession); // Method under test.
       }
 
       function captureExistingSession(actualSessionFolder) {

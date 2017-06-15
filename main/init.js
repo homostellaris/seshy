@@ -8,7 +8,7 @@ chrome.windows.onRemoved.addListener(windowsOnRemovedListener);
 chrome.browserAction.onClicked.addListener(browserActionOnClickedListener);
 
 function windowsOnCreatedListener(windowToCheck) {
-  checkIfExistingSession(windowToCheck);
+  getSession(windowToCheck);
 }
 
 function windowsOnRemovedListener(windowId) {

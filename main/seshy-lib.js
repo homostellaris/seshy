@@ -41,7 +41,7 @@ function resumeSession(windowId, sessionFolderId, callback) {
   storeWindowToSessionFolderMapping(windowId, sessionFolderId, callback);
 }
 
-function checkIfExistingSession(windowToCheck, callback) {
+function getSession(windowToCheck, callback) {
   console.log("Checking if tab set is a saved session.");
 
   var tabs;
