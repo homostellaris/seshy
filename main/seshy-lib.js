@@ -37,80 +37,10 @@ function createSeshyFolder() {
 }
 
 //---===~ Session Management ~===---------------------------------------------------------------------------------------
-function resumeSession(windowId, sessionFolderId, callback) {
-  storeWindowToSessionFolderMapping(windowId, sessionFolderId, callback);
-}
-
-function getSession(windowToCheck, callback) {
-  console.log("Checking if tab set is a saved session.");
-
-  var tabs;
-
-  // chrome.windows.get(windowToCheckId, {'populate': true}, getTabs);
-  getTabs(windowToCheck);
-
-  function getTabs(windowToCheck) {
-    if (windowToCheck.tabs) {
-      tabs = windowToCheck.tabs;
-      getAllSessionFolders(seshyFolderId, compareWindowWithSessionFolders);
-    }
-    else {
-      chrome.tabs.getAllInWindow(windowToCheck.id, function(windowToCheckTabs) {
-        tabs = windowToCheckTabs;
-        getAllSessionFolders(seshyFolderId, compareWindowWithSessionFolders);
-      })
-    }
-  }
-
-  function compareWindowWithSessionFolders(sessionFolders) {
-    var matchingSessionFolder = null;
-
-    for (var i = 0; i < sessionFolders.length; i++) {
-      var sessionFolder = sessionFolders[i];
-      var match = compareTabsToBookmarks(tabs, sessionFolder.children);
-      if (match === true) {
-        matchingSessionFolder = sessionFolder;
-        break;
-      }
-    }
-
-    if (matchingSessionFolder === null) {
-      console.log("No existing session found for window with ID " + windowToCheck.id + ".");
-    }
-    else {
-      console.log("Existing session found in bookmark folder with ID " + matchingSessionFolder.id
-      + " for window with ID " + windowToCheck.id + ".");
-    }
-
-    // TODO Properly identify if function.
-    if (typeof callback != 'undefined') {
-      callback(matchingSessionFolder);
-    }
-  }
-
-  function compareTabsToBookmarks(tabs, bookmarks) {
-    if (tabs.length != bookmarks.length) {
-      return false;
-    }
-
-    for (var i = 0; i < tabs.length && i < bookmarks.length; i++) {
-      var tab = tabs[i];
-      var bookmark = bookmarks[i];
-
-      if (tab.index != bookmark.index) {
-        return false;
-      }
-      if (tab.url != bookmark.url) {
-        return false;
-      }
-    }
-    return true;
-  }
-}
-
+// Public methods
 function saveSession(windowId) {
-  var tabs;
   var sessionWindow;
+  var tabs;
   var sessionFolderId;
 
   console.log("Saving tab set into bookmarks folder.");
@@ -187,6 +117,78 @@ function saveSession(windowId) {
   }
 }
 
+function resumeSession(windowId, sessionFolderId, callback) {
+  storeWindowToSessionFolderMapping(windowId, sessionFolderId, callback);
+}
+
+function getSession(windowToCheck, callback) {
+  console.log("Checking if tab set is a saved session.");
+
+  var tabs;
+
+  // chrome.windows.get(windowToCheckId, {'populate': true}, getTabs);
+  getTabs(windowToCheck);
+
+  function getTabs(windowToCheck) {
+    if (windowToCheck.tabs) {
+      tabs = windowToCheck.tabs;
+      getAllSessionFolders(seshyFolderId, compareWindowWithSessionFolders);
+    }
+    else {
+      chrome.tabs.getAllInWindow(windowToCheck.id, function(windowToCheckTabs) {
+        tabs = windowToCheckTabs;
+        getAllSessionFolders(seshyFolderId, compareWindowWithSessionFolders);
+      })
+    }
+  }
+
+  function compareWindowWithSessionFolders(sessionFolders) {
+    var matchingSessionFolder = null;
+
+    for (var i = 0; i < sessionFolders.length; i++) {
+      var sessionFolder = sessionFolders[i];
+      var match = compareTabsToBookmarks(tabs, sessionFolder.children);
+      if (match === true) {
+        matchingSessionFolder = sessionFolder;
+        break;
+      }
+    }
+
+    if (matchingSessionFolder === null) {
+      console.log("No existing session found for window with ID " + windowToCheck.id + ".");
+    }
+    else {
+      console.log("Existing session found in bookmark folder with ID " + matchingSessionFolder.id
+      + " for window with ID " + windowToCheck.id + ".");
+    }
+
+    // TODO Properly identify if function.
+    if (typeof callback != 'undefined') {
+      callback(matchingSessionFolder);
+    }
+  }
+
+  function compareTabsToBookmarks(tabs, bookmarks) {
+    if (tabs.length != bookmarks.length) {
+      return false;
+    }
+
+    for (var i = 0; i < tabs.length && i < bookmarks.length; i++) {
+      var tab = tabs[i];
+      var bookmark = bookmarks[i];
+
+      if (tab.index != bookmark.index) {
+        return false;
+      }
+      if (tab.url != bookmark.url) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
+// Private methods
 function getAllSessionFolders(seshyFolderId, callback) {
   chrome.bookmarks.getSubTree(seshyFolderId, returnChildren);
   function returnChildren(seshyFolderSearchResults) {
