@@ -2,6 +2,13 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
 
+    eslint: {
+      options: {
+        configFile: '.eslintrc.js',
+      },
+      target: ['main/init.js']
+    },
+
     clean: {
       test: 'output/test',
       main: 'output/main'
@@ -35,10 +42,12 @@ module.exports = function(grunt) {
 
   });
 
+  grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-exec');
 
+  grunt.registerTask('lint', ['eslint']);
   grunt.registerTask('test', ['clean:test', 'copy:test', 'exec:test']);
   grunt.registerTask('run', ['clean:main', 'copy:main', 'exec:run']);
 };
