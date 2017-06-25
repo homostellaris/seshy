@@ -132,7 +132,6 @@ function getSession(windowToCheck, callback) {
 
   var tabs;
 
-  // chrome.windows.get(windowToCheckId, {'populate': true}, getTabs);
   getTabs(windowToCheck);
 
   function getTabs(windowToCheck) {
@@ -144,7 +143,7 @@ function getSession(windowToCheck, callback) {
       chrome.tabs.getAllInWindow(windowToCheck.id, function(windowToCheckTabs) {
         tabs = windowToCheckTabs;
         getAllSessionFolders(compareWindowWithSessionFolders);
-      })
+      });
     }
   }
 
@@ -214,6 +213,10 @@ function getAllSessionFolders(callback) {
     seshyFolder = seshyFolderSearchResults[0];
     callback(seshyFolder.children);
   }
+}
+
+function getAllOpenWindows(callback) {
+  chrome.windows.getAll({'populate': true}, callback);
 }
 
 //---===~ Storage ~===--------------------------------------------------------------------------------------------------

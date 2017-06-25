@@ -19,7 +19,7 @@ body {
   margin-bottom: 1em;
 }
 
-#currently-open-sessions {
+/*#currently-open-sessions {
   min-height: 50px;
   width: 50%;
   float: left;
@@ -40,7 +40,7 @@ body {
 #unsaved-sessions {
   width: 50%;
   float: left;
-}
+}*/
 
 .mdc-list--dense .mdc-list-item__start-detail {
   margin-left: 16px;

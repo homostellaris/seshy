@@ -7,18 +7,23 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   </head>
   <body>
-      <div id="unsaved-sessions" class="mdc-list-group">
-        <h2>Open</h2>
-        <h3 class="mdc-list-group__subheader">Recent</h3>
+      <div class="mdc-list-group">
+        <h3 class="mdc-list-group__subheader">Currently Open Sessions</h3>
+        <ul id="currently-open-sessions" class="mdc-list mdc-list--two-line mdc-list--dense">
+        </ul>
+      </div>
+
+      <div id="recently-closed-sessions" class="mdc-list-group">
+        <h3 class="mdc-list-group__subheader">Recently Closed Sessions</h3>
         <ul class="mdc-list mdc-list--two-line mdc-list--dense">
           <li class="session mdc-list-item mdc-theme--background mdc-elevation--z2">
             <span class="mdc-list-item__start-detail">
               <i class="material-icons">backup</i>
             </span>
             <span class="mdc-list-item__text">
-              Open Session
+              Closed 11:55
               <span class="mdc-list-item__text__secondary">
-                2 tabs
+                7 tabs
               </span>
             </span>
             <span class="mdc-list-item__end-detail">
@@ -30,9 +35,9 @@
               <i class="material-icons">backup</i>
             </span>
             <span class="mdc-list-item__text">
-              Open Session
+              Closed 11:55
               <span class="mdc-list-item__text__secondary">
-                2 tabs
+                7 tabs
               </span>
             </span>
             <span class="mdc-list-item__end-detail">
@@ -42,41 +47,9 @@
         </ul>
       </div>
 
-      <div id="saved-sessions" class="mdc-list-group">
-        <h2>Closed</h2>
-        <h3 class="mdc-list-group__subheader">Recent</h3>
-        <ul class="mdc-list mdc-list--two-line mdc-list--dense">
-          <li class="session mdc-list-item mdc-theme--background mdc-elevation--z2">
-            <span class="mdc-list-item__start-detail">
-              <i class="material-icons">backup</i>
-            </span>
-            <span class="mdc-list-item__text">
-              Closed 11:55
-              <span class="mdc-list-item__text__secondary">
-                7 tabs
-              </span>
-            </span>
-            <span class="mdc-list-item__end-detail">
-              <i class="material-icons">open_in_new</i>
-            </span>
-          </li>
-          <li class="session mdc-list-item mdc-theme--background mdc-elevation--z2">
-            <span class="mdc-list-item__start-detail">
-              <i class="material-icons">backup</i>
-            </span>
-            <span class="mdc-list-item__text">
-              Closed 11:55
-              <span class="mdc-list-item__text__secondary">
-                7 tabs
-              </span>
-            </span>
-            <span class="mdc-list-item__end-detail">
-              <i class="material-icons">open_in_new</i>
-            </span>
-          </li>
-        </ul>
-
-        <ul id="saved-sessions-list" class="mdc-list mdc-list--two-line mdc-list--dense">
+      <div class="mdc-list-group">
+        <h3 class="mdc-list-group__subheader">Saved Sessions</h3>
+        <ul id="saved-sessions" class="mdc-list mdc-list--two-line mdc-list--dense">
         </ul>
       </div>
   </body>
