@@ -40,5 +40,8 @@
   "bugs": {
     "url": "https://github.com/moderatemisbehaviour/seshy/issues"
   },
-  "homepage": "https://github.com/moderatemisbehaviour/seshy#readme"
+  "homepage": "https://github.com/moderatemisbehaviour/seshy#readme",
+  "dependencies": {
+    "material-components-web": "^0.13.0"
+  }
 }

@@ -23,5 +23,9 @@
     "windows",
     "tabs",
     "storage"
+  ],
+
+  "web_accessible_resources": [
+    "node_modules/material-components-web/dist/material-components-web.css"
   ]
 }

@@ -4,8 +4,44 @@
   box-sizing: border-box;
 }
 
+body {
+  background-color: #F1F1F1;
+  width: 600px;
+}
+
 .session {
-  width: 500px;
-  padding: 2em;
-  border: solid 1px #202020;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  padding: 0.5em;
+}
+
+#sessions {
+  margin-bottom: 1em;
+}
+
+#currently-open-sessions {
+  min-height: 50px;
+  width: 50%;
+  float: left;
+}
+
+#recently-closed-sessions {
+  min-height: 50px;
+  width: 50%;
+  float: left;
+  clear: left;
+}
+
+#saved-sessions {
+  width: 50%;
+  float: left;
+}
+
+#unsaved-sessions {
+  width: 50%;
+  float: left;
+}
+
+.mdc-list--dense .mdc-list-item__start-detail {
+  margin-left: 16px;
 }
