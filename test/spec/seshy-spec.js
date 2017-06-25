@@ -21,33 +21,9 @@ describe("Saving sessions.", function() {
   });
 
   it("Should delete all the bookmarks in the session folder before saving an existing session.", function(done) {
-    getSeshyFolder(createSessionBookmarksFolderThenBookmarks);
-
-    function createSessionBookmarksFolderThenBookmarks(bookmarkTreeNodes) {
-      createSessionBookmarksFolder(bookmarkTreeNodes, createBookmarks);
-    }
-
-    function createBookmarks(sessionBookmarksFolder) {
-      expectedSessionFolderId = sessionBookmarksFolder.id;
-      var asBookmarks = true;
-      bookmarksInfo = getTabsOrBookmarksInfo(expectedSessionFolderId, asBookmarks, 2);
-
-      chrome.bookmarks.create(bookmarksInfo[0]);
-      chrome.bookmarks.create(bookmarksInfo[1]);
-      chrome.bookmarks.create(bookmarksInfo[2]);
-      chrome.bookmarks.create(bookmarksInfo[3], addWindowToSessionMapping);
-
-      // Nested function so can reference expectedSessionFolderId.
-      function addWindowToSessionMapping() {
-        var items = {};
-        items[windowId.toString()] = expectedSessionFolderId;
-        chrome.storage.local.set(items, callTestWithDone);
-      }
-    }
-
-    function callTestWithDone(bookmarkTreeNode) {
+    saveTestSession(windowId, () => {
       callTest(done);
-    }
+    });
   });
 
   it("Only save sessions the user has flagged to be saved.", function() {
@@ -153,11 +129,9 @@ describe("Resuming sessions.", function() {
     beforeEach(function(done) {
       clearLocalStorageAndInitialise();
       // Necessary because it takes time to create Seshy folder.
-      setTimeout(begin, 1000);
-
-      function begin() {
+      setTimeout(() => {
         getSeshyFolder(createSessionBookmarksFolderThenBookmarks);
-      }
+      }, 1000);
 
       function createSessionBookmarksFolderThenBookmarks(bookmarkTreeNodes) {
         createSessionBookmarksFolder(bookmarkTreeNodes, createBookmarks);
@@ -220,11 +194,9 @@ describe("Ending sessions.", function() {
   beforeEach(function(done) {
     clearLocalStorageAndInitialise();
     // Necessary because it takes time to create Seshy folder.
-    setTimeout(begin, 1000);
-
-    function begin() {
+    setTimeout(() => {
       chrome.windows.create({}, addWindowToSessionMapping);
-    }
+    }, 1000);
 
     function addWindowToSessionMapping(newWindow) {
       windowId = newWindow.id;
@@ -318,6 +290,30 @@ function getTabsOrBookmarksInfo(windowOrParentId, asBookmarks, tabSetNumber) {
     }
   }
   return tabsInfo;
+}
+
+function saveTestSession(windowId, callback) {
+  getSeshyFolder((seshyFolder) => {
+    createSessionBookmarksFolder(seshyFolder, createBookmarks);
+  });
+
+  function createBookmarks(sessionBookmarksFolder) {
+    expectedSessionFolderId = sessionBookmarksFolder.id;
+    var asBookmarks = true;
+    bookmarksInfo = getTabsOrBookmarksInfo(expectedSessionFolderId, asBookmarks, 2);
+
+    chrome.bookmarks.create(bookmarksInfo[0]);
+    chrome.bookmarks.create(bookmarksInfo[1]);
+    chrome.bookmarks.create(bookmarksInfo[2]);
+    chrome.bookmarks.create(bookmarksInfo[3], addWindowToSessionMapping);
+
+    // Nested function so can reference expectedSessionFolderId.
+    function addWindowToSessionMapping() {
+      var items = {};
+      items[windowId.toString()] = expectedSessionFolderId;
+      chrome.storage.local.set(items, callback);
+    }
+  }
 }
 
 function createSessionBookmarksFolder(bookmarkTreeNodes, callback) {
