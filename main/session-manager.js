@@ -21,7 +21,7 @@ function appendSessions(sessionFolders) {
     '</span>' +
     '</span>' +
     '<span class="mdc-list-item__end-detail">' +
-    '<i class="material-icons">delete</i>' +
+    '<i class="material-icons">open_in_new</i>' +
     '</span>';
 
     sessionList.appendChild(sessionElement);
