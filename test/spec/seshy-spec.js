@@ -73,6 +73,12 @@ describe("Resuming sessions.", function() {
 
   describe("User restores a session from the session manager.", function() {
 
+    beforeEach(function(done) {
+      clearLocalStorageAndInitialise();
+      // Necessary because it takes time to create Seshy folder.
+      setTimeout(done, 1000);
+    });
+
     it("Adds a window id to session folder id mapping in local storage.", function(done) {
       var fakeWindowId = 72;
       var fakeSessionFolderId = 69;
@@ -232,6 +238,7 @@ describe("Ending sessions.", function() {
 describe("Deleting sessions.", function() {
 
   var windowId;
+  var expectedDeletedSessionFolderId;
 
   beforeEach(function(done) {
     clearLocalStorageAndInitialise();
@@ -240,17 +247,35 @@ describe("Deleting sessions.", function() {
       chrome.windows.create({}, (newWindow) => {
         windowId = newWindow.id;
         tabsInfo = getTabsOrBookmarksInfo(newWindow.id, false);
-        createTabs(tabsInfo, saveTestSessionThenCallDone);
+        createTabs(tabsInfo, saveTestSessionAndCaptureSessionFolderId);
       });
     }, 1000);
 
-    function saveTestSessionThenCallDone() {
-      saveTestSession(windowId, done);
+    function saveTestSessionAndCaptureSessionFolderId() {
+      saveTestSession(windowId, captureSessionFolderId);
+
+      function captureSessionFolderId(sessionFolderId) {
+        expectedDeletedSessionFolderId = sessionFolderId;
+        done();
+      }
     }
   });
 
-  it("Deletes the session folder.", function() {
-    console.log("Unimplemented test.");
+  it("Deletes the session folder.", function(done) {
+    deleteSession(expectedDeletedSessionFolderId, tryGetSessionFolder); // Method under test.
+
+    function tryGetSessionFolder(sessionFolderId) {
+      chrome.bookmarks.get(sessionFolderId.toString(), assertSessionFolderDeleted);
+      var sessionFolderDeleted = false;
+
+      function assertSessionFolderDeleted(sessionFolderId) {
+        if (chrome.runtime.lastError) {
+          sessionFolderDeleted = true;
+        }
+        expect(sessionFolderDeleted).toBe(true);
+        done();
+      }
+    }
   })
 
   afterEach(function(done) {
@@ -335,7 +360,7 @@ function saveTestSession(windowId, callback) {
   });
 
   function createBookmarks(sessionBookmarksFolder) {
-    expectedSessionFolderId = sessionBookmarksFolder.id;
+    var expectedSessionFolderId = sessionBookmarksFolder.id;
     var asBookmarks = true;
     bookmarksInfo = getTabsOrBookmarksInfo(expectedSessionFolderId, asBookmarks, 2);
 
@@ -348,7 +373,9 @@ function saveTestSession(windowId, callback) {
     function addWindowToSessionMapping() {
       var items = {};
       items[windowId.toString()] = expectedSessionFolderId;
-      chrome.storage.local.set(items, callback);
+      chrome.storage.local.set(items, () => {
+        callback(expectedSessionFolderId);
+      });
     }
   }
 }

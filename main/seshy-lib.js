@@ -121,6 +121,12 @@ function resumeSession(windowId, sessionFolderId, callback) {
   storeWindowToSessionFolderMapping(windowId, sessionFolderId, callback);
 }
 
+function deleteSession(sessionFolderId, callback) {
+  chrome.bookmarks.removeTree(sessionFolderId, () => {
+    callback(sessionFolderId);
+  });
+}
+
 function getSession(windowToCheck, callback) {
   console.log("Checking if tab set is a saved session.");
 
