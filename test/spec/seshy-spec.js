@@ -7,14 +7,14 @@ describe("Saving sessions.", function() {
   beforeEach(function(done) {
     clearLocalStorageAndInitialise();
     // Necessary because it takes time to create Seshy folder.
-    setTimeout(begin, 1000);
-
-    function begin() {
-      chrome.windows.create({}, function(newWindow) {
-        createTabs(newWindow, done);
+    setTimeout(() => {
+      chrome.windows.create({}, (newWindow) => {
+        windowId = newWindow.id
+        tabsInfo = getTabsOrBookmarksInfo(newWindow.id, false);
+        createTabs(tabsInfo, done);
       });
-    }
-  })
+    }, 1000);
+  });
 
   it("Should be able to save a set of tabs as bookmarks in a folder.", function(done) {
     callTest(done);
@@ -36,15 +36,6 @@ describe("Saving sessions.", function() {
     setTimeout(done, 1000);
   });
 
-  function createTabs(newWindow, callback, tabSetNumber) {
-    windowId = newWindow.id;
-    tabsInfo = getTabsOrBookmarksInfo(windowId, tabSetNumber);
-
-    chrome.tabs.create(tabsInfo[0]);
-    chrome.tabs.create(tabsInfo[1]);
-    chrome.tabs.create(tabsInfo[2], callback);
-  }
-
   function callTest(done) {
     saveSession(windowId); // Method under test.
     setTimeout(getBookmarksFolder, 1000);
@@ -62,14 +53,14 @@ describe("Saving sessions.", function() {
 
       chrome.bookmarks.getChildren(bookmarkSessionFolderSearchResults[0].id, function(bookmarkTreeNodes) {
         bookmarks = bookmarkTreeNodes;
-        assertSavedBookmarks();
+        assertSavedBookmarks(bookmarks, tabsInfo);
       });
     }
 
-    function assertSavedBookmarks() {
+    function assertSavedBookmarks(bookmarks, expectedTabsInfo) {
       for (var i = 0; i < bookmarks.length; i++) {
         var bookmark = bookmarks[i];
-        var expectedTabInfo = tabsInfo[i];
+        var expectedTabInfo = expectedTabsInfo[i];
         expect(bookmark.index).toEqual(expectedTabInfo.index);
         expect(bookmark.url).toEqual(expectedTabInfo.url);
       }
@@ -80,7 +71,7 @@ describe("Saving sessions.", function() {
 
 describe("Resuming sessions.", function() {
 
-  describe("Users restores a session from the session manager.", function() {
+  describe("User restores a session from the session manager.", function() {
 
     it("Adds a window id to session folder id mapping in local storage.", function(done) {
       var fakeWindowId = 72;
@@ -109,6 +100,10 @@ describe("Resuming sessions.", function() {
         expect(matchingLocalStorageKeyValue).toBe(fakeSessionFolderId);
         done();
       }
+    });
+
+    it("Opens a window with all the tabs as they were when the session was saved.", function() {
+      console.log("Unimplemented test.");
     });
 
     afterEach(function(done) {
@@ -234,7 +229,49 @@ describe("Ending sessions.", function() {
   });
 });
 
+describe("Deleting sessions.", function() {
+
+  var windowId;
+
+  beforeEach(function(done) {
+    clearLocalStorageAndInitialise();
+    // Necessary because it takes time to create Seshy folder.
+    setTimeout(() => {
+      chrome.windows.create({}, (newWindow) => {
+        windowId = newWindow.id;
+        tabsInfo = getTabsOrBookmarksInfo(newWindow.id, false);
+        createTabs(tabsInfo, saveTestSessionThenCallDone);
+      });
+    }, 1000);
+
+    function saveTestSessionThenCallDone() {
+      saveTestSession(windowId, done);
+    }
+  });
+
+  it("Deletes the session folder.", function() {
+    console.log("Unimplemented test.");
+  })
+
+  afterEach(function(done) {
+    cleanUp();
+    // Necessary because it takes time to delete Seshy folder in cleanup of previous test.
+    setTimeout(done, 1000);
+  });
+});
+
 //---===~ Functions ~===------------------------------------------------------------------------------------------------
+function createTabs(tabsInfo, callback) {
+  chrome.tabs.create(tabsInfo[0]);
+  chrome.tabs.create(tabsInfo[1]);
+  if (typeof callback != 'undefined') {
+    chrome.tabs.create(tabsInfo[2], callback);
+  }
+  else {
+    chrome.tabs.create(tabsInfo[2]);
+  }
+}
+
 function getTabsOrBookmarksInfo(windowOrParentId, asBookmarks, tabSetNumber) {
   var tabsInfo1 = [
     {
