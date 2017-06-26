@@ -1,8 +1,6 @@
 initialise();
-
-var container = document.getElementById('container');
-
 createSessionElements();
+mdc.autoInit();
 
 function createSessionElements() {
   getAllOpenWindows((windows) => {
@@ -21,7 +19,7 @@ function appendSessions(sessionFoldersOrWindows, listId, windows) {
     var tabs;
 
     if (windows === true) {
-      title = 'Unsaved session';
+      title = 'Unsaved Session';
       tabs = session.tabs;
     }
     else {
@@ -36,22 +34,20 @@ function appendSessions(sessionFoldersOrWindows, listId, windows) {
 
     sessionList.appendChild(sessionElement);
   }
-
-  function getSessionInnerHtml(title, tabs) {
-    var innerHtml = '<span class="mdc-list-item__start-detail">' +
-    '<i class="material-icons">backup</i>' +
-    '</span>' +
-    '<span class="mdc-list-item__text">' +
-    title +
-    '<span class="mdc-list-item__text__secondary">' +
-    tabs.length + ' tabs' +
-    '</span>' +
-    '</span>' +
-    '<span class="mdc-list-item__end-detail">' +
-    '<i class="material-icons">open_in_new</i>' +
-    '</span>';
-    return innerHtml;
-  }
 }
 
-mdc.autoInit();
+function getSessionInnerHtml(title, tabs) {
+  var innerHtml = '<span class="mdc-list-item__start-detail">' +
+  '<i class="material-icons">backup</i>' +
+  '</span>' +
+  '<span class="mdc-list-item__text" contenteditable="true">' +
+  title +
+  '<span class="mdc-list-item__text__secondary">' +
+  tabs.length + ' tabs' +
+  '</span>' +
+  '</span>' +
+  '<span class="mdc-list-item__end-detail">' +
+  '<i class="material-icons">open_in_new</i>' +
+  '</span>';
+  return innerHtml;
+}
