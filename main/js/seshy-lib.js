@@ -117,8 +117,26 @@ function saveSession(windowId) {
   }
 }
 
-function resumeSession(windowId, sessionFolderId, callback) {
-  storeWindowToSessionFolderMapping(windowId, sessionFolderId, callback);
+function resumeSession(sessionFolderId, callback) {
+  chrome.bookmarks.getSubTree(sessionFolderId, extractUrlsFromBookmarks);
+
+  function extractUrlsFromBookmarks(bookmarkTreeNodeResults) {
+    var sessionFolder = bookmarkTreeNodeResults[0];
+    var bookmarks = sessionFolder.children;
+    var urls = bookmarks.map((bookmark) => {return bookmark.url});
+    createWindowForSession(urls);
+  }
+
+  function createWindowForSession(urls) {
+    var createData = {
+      'url': urls
+    };
+    chrome.windows.create(createData, (newWindow) => {
+      storeWindowToSessionFolderMapping(newWindow, sessionFolderId, () => {
+        callback(newWindow);
+      });
+    });
+  }
 }
 
 function deleteSession(sessionFolderId, callback) {
@@ -220,9 +238,9 @@ function getAllOpenWindows(callback) {
 }
 
 //---===~ Storage ~===--------------------------------------------------------------------------------------------------
-function storeWindowToSessionFolderMapping(windowId, bookmarkFolderId, callback) {
+function storeWindowToSessionFolderMapping(windowId, sessionFolderId, callback) {
   var windowToSessionFolderMapping = {};
-  windowToSessionFolderMapping[windowId] = bookmarkFolderId;
+  windowToSessionFolderMapping[windowId] = sessionFolderId;
   // TODO Properly identify if function.
   if (typeof callback != 'undefined') {
     chrome.storage.local.set(windowToSessionFolderMapping, callback);
@@ -242,4 +260,11 @@ function removeWindowToSessionFolderMapping(windowId, callback) {
   if (typeof callback != 'undefined') {
     callback();
   }
+}
+
+//---===~ Utility ~===--------------------------------------------------------------------------------------------------
+function tabEqualToBookmark(tab, bookmark) {
+  indexEqual = tab.index == bookmark.index;
+  urlEqual = tab.url == bookmark.url;
+  return indexEqual && urlEqual;
 }
