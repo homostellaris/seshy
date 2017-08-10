@@ -145,6 +145,10 @@ describe("Resuming sessions.", function() {
       }
     });
 
+    it("Focuses the appropriate window if the session is already open.", function(done) {
+      console.log("Unimplemented test.");
+    });
+
     afterEach(function(done) {
       cleanUp();
       // Necessary because it takes time to delete Seshy folder in cleanup of previous test.

@@ -9,6 +9,14 @@ body {
   width: 600px;
 }
 
+button {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
 .session {
   margin-top: 0.5em;
   margin-bottom: 0.5em;

@@ -32,6 +32,11 @@ function appendSessions(sessionFoldersOrWindows, listId, windows) {
     sessionElement.setAttribute('class', 'session mdc-list-item mdc-theme--background mdc-elevation--z2');
     sessionElement.innerHTML = getSessionInnerHtml(title, tabs);
 
+    if (windows !== true) {
+      sessionElement.addEventListener('click', () => {
+        resumeSession(session.id);
+      })
+    }
     sessionList.appendChild(sessionElement);
   }
 }
@@ -47,7 +52,9 @@ function getSessionInnerHtml(title, tabs) {
   '</span>' +
   '</span>' +
   '<span class="mdc-list-item__end-detail">' +
+  '<button>' +
   '<i class="material-icons">open_in_new</i>' +
+  '</button>' +
   '</span>';
   return innerHtml;
 }
