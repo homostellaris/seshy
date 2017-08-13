@@ -26,14 +26,20 @@ describe("Saving sessions.", function() {
     });
   });
 
-  it("Should prompt the user to save the current session if it is not already saved when the browser action is activated.", function(done){
-    var views = chrome.extension.getViews({'type': 'popup'});
-    setTimeout(() => {}, 1000);
+  it("Saves a session if it is given a name and it is not already saved.", function(done) {
+    console.log("Unimplemented test.");
+    done();
+  })
+
+  it("Puts the text field for the current session's name into edit mode ready to be saved when the session manager " +
+  "is opened and the current session is not already saved.", function(done) {
+    console.log("Unimplemented test.");
     done();
   });
 
-  it("Only saves sessions the user has flagged to be saved.", function() {
+  it("Only saves sessions the user has flagged to be saved.", function(done) {
     console.log("Unimplemented test.");
+    done();
   });
 
   afterEach(function(done) {
@@ -92,7 +98,7 @@ describe("Resuming sessions.", function() {
           bookmarksInfo = getTabsOrBookmarksInfo(newWindow.id, false);
           createTabs(bookmarksInfo, saveTestSessionAndCaptureSessionFolderId);
         });
-      }, 2000);
+      }, 1000);
 
       function saveTestSessionAndCaptureSessionFolderId() {
         saveTestSession(windowId, captureSessionFolderId);
