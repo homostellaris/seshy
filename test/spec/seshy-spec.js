@@ -26,7 +26,13 @@ describe("Saving sessions.", function() {
     });
   });
 
-  it("Only save sessions the user has flagged to be saved.", function() {
+  it("Should prompt the user to save the current session if it is not already saved when the browser action is activated.", function(done){
+    var views = chrome.extension.getViews({'type': 'popup'});
+    setTimeout(() => {}, 1000);
+    done();
+  });
+
+  it("Only saves sessions the user has flagged to be saved.", function() {
     console.log("Unimplemented test.");
   });
 
@@ -73,18 +79,36 @@ describe("Resuming sessions.", function() {
 
   describe("User restores a session from the session manager.", function() {
 
+    var windowId;
+    var sessionFolderId;
+    var bookmarksInfo;
+
     beforeEach(function(done) {
       clearLocalStorageAndInitialise();
       // Necessary because it takes time to create Seshy folder.
-      setTimeout(done, 1000);
+      setTimeout(() => {
+        chrome.windows.create({}, (newWindow) => {
+          windowId = newWindow.id;
+          bookmarksInfo = getTabsOrBookmarksInfo(newWindow.id, false);
+          createTabs(bookmarksInfo, saveTestSessionAndCaptureSessionFolderId);
+        });
+      }, 2000);
+
+      function saveTestSessionAndCaptureSessionFolderId() {
+        saveTestSession(windowId, captureSessionFolderId);
+      }
+
+      function captureSessionFolderId(newSessionFolderId) {
+        sessionFolderId = newSessionFolderId;
+        chrome.windows.remove(windowId, () => {
+          done();
+        });
+      }
     });
 
     it("Adds a window ID to session folder ID mapping in local storage.", function(done) {
-      var fakeWindowId = 72;
-      var fakeSessionFolderId = 69;
-
-      storeWindowToSessionFolderMapping(fakeWindowId, fakeSessionFolderId, () => {
-        getAllLocalStorage(assertWindowToSessionFolderMappingAdded);
+      resumeSession(sessionFolderId, () => {
+        chrome.storage.local.get(null, assertWindowToSessionFolderMappingAdded)
       });
 
       function assertWindowToSessionFolderMappingAdded(allLocalStorageObject) {
@@ -95,36 +119,21 @@ describe("Resuming sessions.", function() {
 
         for (var i = 0; i < allLocalStorageKeys.length; i++) {
           var localStorageKey = allLocalStorageKeys[i];
-          if (localStorageKey == fakeWindowId) {
+          if (localStorageKey == windowId) {
             matchingLocalStorageKey = localStorageKey;
-            matchingLocalStorageKeyValue = allLocalStorageObject[fakeWindowId.toString()]
+            matchingLocalStorageKeyValue = allLocalStorageObject[windowId.toString()]
           }
         }
-        expect(matchingLocalStorageKey).toBe(fakeWindowId.toString());
-        expect(matchingLocalStorageKeyValue).toBe(fakeSessionFolderId);
+        expect(matchingLocalStorageKey).toBe(windowId.toString());
+        expect(matchingLocalStorageKeyValue).toBe(sessionFolderId);
         done();
       }
     });
 
     it("Opens a window with all the tabs as they were when the session was saved.", function(done) {
-      var sessionFolderToRestoreFrom;
-
-      getSeshyFolder(callCreateSessionBookmarksFolder);
-
-      function callCreateSessionBookmarksFolder(bookmarkTreeNodes) {
-        createSessionBookmarksFolder(bookmarkTreeNodes, captureSessionFolderAndCreateBookmarks);
-      }
-
-      function captureSessionFolderAndCreateBookmarks(sessionFolder) {
-        sessionFolderToRestoreFrom = sessionFolder;
-        createBookmarks(sessionFolder, callResumeSession);
-      }
-
-      function callResumeSession(bookmarksInfo) {
-        resumeSession(sessionFolderToRestoreFrom.id, (newWindow) => {
-          assertSessionRestored(newWindow, bookmarksInfo);
-        });
-      }
+      resumeSession(sessionFolderId, (newWindow) => {
+        assertSessionRestored(newWindow, bookmarksInfo);
+      });
 
       function assertSessionRestored(newWindow, bookmarksInfo) {
         var tabs = newWindow.tabs;
@@ -147,6 +156,7 @@ describe("Resuming sessions.", function() {
 
     it("Focuses the appropriate window if the session is already open.", function(done) {
       console.log("Unimplemented test.");
+      done();
     });
 
     afterEach(function(done) {

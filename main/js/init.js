@@ -13,3 +13,8 @@ function windowsOnRemovedListener(windowId) {
 //---===~ Initialisation ~===-------------------------------------------------------------------------------------------
 var seshyFolderId;
 initialise();
+
+function initialise() {
+  console.log('Initialising');
+  checkIfSeshyFolderExists();
+}

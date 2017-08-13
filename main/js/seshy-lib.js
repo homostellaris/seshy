@@ -1,8 +1,4 @@
 //---===~ Initialisation ~===-------------------------------------------------------------------------------------------
-function initialise() {
-   checkIfSeshyFolderExists();
-}
-
 function checkIfSeshyFolderExists() {
   console.log("Checking for existing Seshy folder.");
 
@@ -10,7 +6,7 @@ function checkIfSeshyFolderExists() {
     'title': 'Seshy',
     'url': null
   };
-  chrome.bookmarks.search(query, function(bookmarkTreeNodes) {
+  chrome.bookmarks.search(query, (bookmarkTreeNodes) => {
     if (bookmarkTreeNodes.length == 0) {
       console.log("No existing Seshy folder, creating...");
       createSeshyFolder();
@@ -29,7 +25,7 @@ function createSeshyFolder() {
   bookmark = {
     'title': 'Seshy'
   };
-  chrome.bookmarks.create(bookmark, function(seshyFolder) {
+  chrome.bookmarks.create(bookmark, (seshyFolder) => {
     seshyFolderId = seshyFolder.id;
     message = "Created seshy folder with ID " + seshyFolderId + ".";
     console.log(message);
@@ -132,7 +128,7 @@ function resumeSession(sessionFolderId, callback) {
       'url': urls
     };
     chrome.windows.create(createData, (newWindow) => {
-      storeWindowToSessionFolderMapping(newWindow, sessionFolderId, () => {
+      storeWindowToSessionFolderMapping(newWindow.id, sessionFolderId, () => {
         callback(newWindow);
       });
     });

@@ -20,7 +20,7 @@ module.exports = function(grunt) {
           // Copy all test files.
           {expand: true, src: ['test/**'], dest: 'output/'},
           // Copy necessary implementation files.
-          {expand: true, cwd: 'main/js', src: ['seshy-lib.js'], dest: 'output/test/'}
+          {expand: true, cwd: 'main/js', src: ['init.js', 'seshy-lib.js', 'session-manager.js'], dest: 'output/test/'}
         ]
       },
       main: {
