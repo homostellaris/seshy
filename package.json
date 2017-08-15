@@ -42,6 +42,7 @@
   },
   "homepage": "https://github.com/moderatemisbehaviour/seshy#readme",
   "dependencies": {
-    "material-components-web": "^0.13.0"
+    "material-components-web": "^0.13.0",
+    "mousetrap": "^1.6.1"
   }
 }

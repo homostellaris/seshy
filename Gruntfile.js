@@ -6,7 +6,7 @@ module.exports = function(grunt) {
       options: {
         configFile: '.eslintrc.js',
       },
-      target: ['main/init.js']
+      target: ['main/*']
     },
 
     clean: {
@@ -20,13 +20,18 @@ module.exports = function(grunt) {
           // Copy all test files.
           {expand: true, src: ['test/**'], dest: 'output/'},
           // Copy necessary implementation files.
-          {expand: true, cwd: 'main/js', src: ['init.js', 'seshy-lib.js', 'session-manager.js'], dest: 'output/test/'}
+          {
+            expand: true,
+            cwd: 'main/js',
+            src: ['init.js', 'seshy-lib.js', 'session-manager.js', '../../node_modules/mousetrap/mousetrap.min.js'],
+            dest: 'output/test/'
+          }
         ]
       },
       main: {
         files: [
           // Copy all implementation files.
-          {expand: true, src: ['main/**'], dest: 'output/'}
+          {expand: true, src: ['main/**', 'node_modules/mousetrap/mousetrap.min.js'], dest: 'output/'}
         ]
       }
     },
