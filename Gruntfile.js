@@ -3,10 +3,7 @@ module.exports = function(grunt) {
   grunt.initConfig({
 
     eslint: {
-      options: {
-        configFile: '.eslintrc.js',
-      },
-      target: ['main/*']
+      target: ['main/js/init.js', 'main/js/seshy-lib.js', 'main/js/session-manager.js']
     },
 
     clean: {
