@@ -21,7 +21,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt lint"
   },
   "repository": {
     "type": "git",
