@@ -1,7 +1,7 @@
 /* global chrome seshyFolderId:true */
 
 // ---===~ Initialisation ~===------------------------------------------------------------------------------------------
-checkIfSeshyFolderExists: function () {
+function checkIfSeshyFolderExists () {
   console.log('Checking for existing Seshy folder.')
 
   var query = {
