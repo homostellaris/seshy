@@ -26,18 +26,18 @@ describe("Saving sessions.", function() {
     });
   });
 
-  it("Saves a session if it is given a name and it is not already saved.", function(done) {
+  xit("Saves a session if it is given a name and it is not already saved.", function(done) {
     console.log("Unimplemented test.");
     done();
   })
 
-  it("Puts the text field for the current session's name into edit mode ready to be saved when the session manager " +
+  xit("Puts the text field for the current session's name into edit mode ready to be saved when the session manager " +
   "is opened and the current session is not already saved.", function(done) {
     console.log("Unimplemented test.");
     done();
   });
 
-  it("Only saves sessions the user has flagged to be saved.", function(done) {
+  xit("Only saves sessions the user has flagged to be saved.", function(done) {
     console.log("Unimplemented test.");
     done();
   });
@@ -160,7 +160,7 @@ describe("Resuming sessions.", function() {
       }
     });
 
-    it("Focuses the appropriate window if the session is already open.", function(done) {
+    xit("Focuses the appropriate window if the session is already open.", function(done) {
       console.log("Unimplemented test.");
       done();
     });
