@@ -35,10 +35,14 @@ module.exports = function(grunt) {
 
     exec: {
       test: {
-        cmd: 'google-chrome-unstable --load-extension="/home/dan/The Laboratory/Seshy/output/test/"'
+        cmd: 'node test/run-tests.js'
       },
       run: {
         cmd: 'google-chrome-unstable --load-extension="/home/dan/The Laboratory/Seshy/output/main/"'
+      },
+      createTestArtefact: {
+        // Creates output/test.crx which can then be loaded by Chrome Driver for running the tests.
+        cmd: 'google-chrome-unstable --pack-extension=output/test/ --pack-extension-key=seshy-development.pem  --disable-gpu'
       }
     }
 
@@ -50,6 +54,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-exec');
 
   grunt.registerTask('lint', ['eslint']);
-  grunt.registerTask('test', ['clean:test', 'copy:test', 'exec:test']);
+  grunt.registerTask('test', ['clean:test', 'copy:test', 'exec:createTestArtefact', 'exec:test']);
   grunt.registerTask('run', ['clean:main', 'copy:main', 'exec:run']);
 };
