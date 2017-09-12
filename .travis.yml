@@ -1,4 +1,8 @@
 language: node_js
 node_js:
   - "6"
-before_install: npm install -g grunt-cli
+before_install:
+  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  - sudo dpkg -i google-chrome-stable_current_amd64.deb
+  - npm install -g grunt-cli
+# Default build script is `npm test`

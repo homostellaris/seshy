@@ -3,7 +3,11 @@ module.exports = function(grunt) {
   grunt.initConfig({
 
     eslint: {
-      target: ['main/js/init.js', 'main/js/seshy-lib.js', 'main/js/session-manager.js']
+      target: [
+        'main/js/init.js',
+        'main/js/seshy-lib.js',
+        'main/js/session-manager.js'
+      ]
     },
 
     clean: {
@@ -42,7 +46,7 @@ module.exports = function(grunt) {
       },
       createTestArtefact: {
         // Creates output/test.crx which can then be loaded by Chrome Driver for running the tests.
-        cmd: 'google-chrome-unstable --pack-extension=output/test/ --pack-extension-key=seshy-development.pem  --disable-gpu'
+        cmd: 'google-chrome-stable --pack-extension=output/test/ --pack-extension-key=seshy-development.pem  --disable-gpu'
       }
     }
 
@@ -54,6 +58,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-exec');
 
   grunt.registerTask('lint', ['eslint']);
-  grunt.registerTask('test', ['clean:test', 'copy:test', 'exec:createTestArtefact', 'exec:test']);
+  grunt.registerTask('test', ['lint', 'clean:test', 'copy:test', 'exec:createTestArtefact', 'exec:test']);
   grunt.registerTask('run', ['clean:main', 'copy:main', 'exec:run']);
 };

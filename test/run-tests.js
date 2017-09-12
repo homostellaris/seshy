@@ -35,7 +35,7 @@ function getFailures() {
     )
     return jasmineFailures.findElements(By.css('div'))
   }).then((jasmineFailedSpecs) => {
-    var failedSpecsNumber = jasmineFailedSpecs.length
+    var failedSpecsNumber = jasmineFailedSpecs.length;
     if (failedSpecsNumber > 0) {
       fail(failedSpecsNumber)
     }
