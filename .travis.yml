@@ -5,7 +5,7 @@ before_install:
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome-stable_current_amd64.deb
   - npm install -g grunt-cli
-scripts:
+script:
   - npm test
   - google-chrome-stable --pack-extension=output/test/ --pack-extension-key=seshy-development.pem  --disable-gpu
   - ls output/test.crx
