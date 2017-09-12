@@ -8,4 +8,5 @@ before_install:
 scripts:
   - npm test
   - google-chrome-stable --pack-extension=output/test/ --pack-extension-key=seshy-development.pem  --disable-gpu
+  - ls output/test.crx
 # Default build script is `npm test`
