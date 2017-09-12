@@ -23,7 +23,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test -v"
   },
   "repository": {
     "type": "git",
