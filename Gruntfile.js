@@ -58,6 +58,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-exec');
 
   grunt.registerTask('lint', ['eslint']);
-  grunt.registerTask('test', ['lint', 'clean:test', 'copy:test', 'exec:test']);
+  grunt.registerTask('test', ['lint', 'clean:test', 'copy:test']);
   grunt.registerTask('run', ['clean:main', 'copy:main', 'exec:run']);
 };
