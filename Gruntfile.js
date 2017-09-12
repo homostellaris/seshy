@@ -42,7 +42,7 @@ module.exports = function(grunt) {
         cmd: 'node test/run-tests.js'
       },
       run: {
-        cmd: 'google-chrome-unstable --load-extension="/home/dan/The Laboratory/Seshy/output/main/"'
+        cmd: 'google-chrome-stable --load-extension="/home/dan/The Laboratory/Seshy/output/main/"'
       },
       createTestArtefact: {
         // Creates output/test.crx which can then be loaded by Chrome Driver for running the tests.
@@ -58,6 +58,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-exec');
 
   grunt.registerTask('lint', ['eslint']);
-  grunt.registerTask('test', ['lint', 'clean:test', 'copy:test', 'exec:createTestArtefact', 'exec:test']);
+  grunt.registerTask('test', ['lint', 'clean:test', 'copy:test', 'exec:test']);
   grunt.registerTask('run', ['clean:main', 'copy:main', 'exec:run']);
 };
