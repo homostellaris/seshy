@@ -28,7 +28,7 @@ driver.findElement(By.className('jasmine-results')).then((jasmineResults) => {
 })
 
 function getFailures() {
-  driver.findElement(By.className('jasmine-results')).then((jasmineFailures) => {
+  driver.findElement(By.className('jasmine-failures')).then((jasmineFailures) => {
     console.log(
       'The jasmine-failures element was located. Now expecting it to have child divs for the failed ' +
       'specs. Trying to find...'
@@ -39,10 +39,12 @@ function getFailures() {
     if (failedSpecsNumber > 0) {
       fail(failedSpecsNumber)
     }
-    throw new Error(
-      'Unexpected state. The jasmine-failures element is visible but no child divs ' +
-      'were found which are meant to represent failed specs. This script is probably broken.'
-    )
+    else {
+      throw new Error(
+        'Unexpected state. The jasmine-failures element is visible but no child divs ' +
+        'were found which are meant to represent failed specs. This script is probably broken.'
+      )
+    }
   })
 }
 
