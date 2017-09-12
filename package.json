@@ -23,7 +23,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "grunt test -v; google-chrome-stable --pack-extension=output/test/ --pack-extension-key=seshy-development.pem  --disable-gpu"
+    "test": "grunt test -v"
   },
   "repository": {
     "type": "git",
