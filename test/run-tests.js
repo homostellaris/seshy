@@ -33,7 +33,7 @@ function getFailures() {
       'The jasmine-failures element was located. Now expecting it to have child divs for the failed ' +
       'specs. Trying to find...'
     )
-    return jasmineFailures.findElements(By.css('div'))
+    return jasmineFailures.findElements(By.className('jasmine-spec-detail jasmine-failed'))
   }).then((jasmineFailedSpecs) => {
     var failedSpecsNumber = jasmineFailedSpecs.length
     if (failedSpecsNumber > 0) {
