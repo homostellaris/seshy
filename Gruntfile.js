@@ -55,7 +55,7 @@ module.exports = function(grunt) {
         src: 'output/test/**/*',
         dest: 'output/test.crx',
         options: {
-          privateKey: "seshy-development.pem"
+          privateKey: 'seshy-development.pem'
         }
       }
     }
