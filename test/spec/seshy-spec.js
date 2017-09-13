@@ -113,7 +113,8 @@ describe("Resuming sessions.", function() {
     });
 
     it("Adds a window ID to session folder ID mapping in local storage.", function(done) {
-      resumeSession(sessionFolderId, () => {
+      resumeSession(sessionFolderId, (newWindow) => {
+        windowId = newWindow.id;
         chrome.storage.local.get(null, assertWindowToSessionFolderMappingAdded)
       });
 
