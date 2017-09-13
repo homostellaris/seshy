@@ -52,8 +52,11 @@ module.exports = function(grunt) {
 
     crx: {
       createTestArtefact: {
-        src: 'output/test/*',
-        dest: 'output/test.crx'
+        src: 'output/test/**/*',
+        dest: 'output/test.crx',
+        options: {
+          privateKey: "seshy-development.pem"
+        }
       }
     }
 
