@@ -48,6 +48,13 @@ module.exports = function(grunt) {
         // Creates output/test.crx which can then be loaded by Chrome Driver for running the tests.
         cmd: 'google-chrome-stable --pack-extension=output/test/ --pack-extension-key=seshy-development.pem  --disable-gpu'
       }
+    },
+
+    crx: {
+      createTestArtefact: {
+        src: 'output/test/*',
+        dest: 'output/test.crx'
+      }
     }
 
   });
@@ -56,8 +63,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-exec');
+  grunt.loadNpmTasks('grunt-crx');
 
   grunt.registerTask('lint', ['eslint']);
-  grunt.registerTask('test', ['lint', 'clean:test', 'copy:test']);
+  grunt.registerTask('test', ['lint', 'clean:test', 'copy:test', 'crx:createTestArtefact', 'exec:test']);
   grunt.registerTask('run', ['clean:main', 'copy:main', 'exec:run']);
 };
