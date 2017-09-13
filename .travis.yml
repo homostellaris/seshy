@@ -9,8 +9,4 @@ before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
-script:
-  - npm test
-  - google-chrome-stable --pack-extension=output/test/ --pack-extension-key=seshy-development.pem  --disable-gpu
-  - ls output/test.crx
 # Default build script is `npm test`
