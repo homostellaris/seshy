@@ -38,8 +38,7 @@ function getFailures() {
     var failedSpecsNumber = jasmineFailedSpecs.length
     if (failedSpecsNumber > 0) {
       fail(failedSpecsNumber)
-    }
-    else {
+    } else {
       throw new Error(
         'Unexpected state. The jasmine-failures element is visible but no child divs ' +
         'were found which are meant to represent failed specs. This script is probably broken.'
@@ -49,13 +48,25 @@ function getFailures() {
 }
 
 function pass() {
-  return driver.close().then(() => {
+  if (process.env.TRAVIS) {
+    return driver.close().then(() => {
+      driver.quit()
+    })
+  } else {
     driver.quit()
-  })
+  }
 }
 
 function fail(failedSpecsNumber) {
-  return driver.close().then(() => {
-    throw new Error(failedSpecsNumber + ' failed specs.')
-  })
+  if (process.env.TRAVIS) {
+    return driver.close().then(() => {
+      throwFailedSpecsError(failedSpecsNumber)
+    })
+  } else {
+    throwFailedSpecsError(failedSpecsNumber)
+  }
+}
+
+function throwFailedSpecsError (failedSpecsNumber) {
+  throw new Error(failedSpecsNumber + ' failed specs.')
 }
