@@ -177,7 +177,6 @@ function getSession (windowToCheck, callback) {
       ' for window with ID ' + windowToCheck.id + '.')
     }
 
-    // TODO Properly identify if function.
     if (isFunction(callback)) callback(matchingSessionFolder)
   }
 
@@ -231,7 +230,7 @@ function getAllOpenWindows (callback) {
 function storeWindowToSessionFolderMapping (windowId, sessionFolderId, callback) {
   var windowToSessionFolderMapping = {}
   windowToSessionFolderMapping[windowId] = sessionFolderId
-  // TODO Properly identify if function.
+
   if (isFunction(callback)) {
     chrome.storage.local.set(windowToSessionFolderMapping, callback)
   } else {
@@ -245,7 +244,6 @@ function getWindowToSessionFolderMapping (windowId, callback) {
 
 function removeWindowToSessionFolderMapping (windowId, callback) {
   chrome.storage.local.remove(windowId.toString())
-  // TODO Properly identify if function.
   if (isFunction(callback)) callback()
 }
 
@@ -256,6 +254,8 @@ function tabEqualToBookmark (tab, bookmark) {
   return indexEqual && urlEqual
 }
 
+// TODO May be some weird edge cases where this returns true in undesirable circumstances.
+// https://stackoverflow.com/questions/5999998/how-can-i-check-if-a-javascript-variable-is-function-type
 function isFunction (variable) {
   return typeof variable === 'function'
 }

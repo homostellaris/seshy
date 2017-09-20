@@ -450,7 +450,6 @@ function createBookmarks(sessionBookmarksFolder, callback) {
   chrome.bookmarks.create(bookmarksInfo[1]);
   chrome.bookmarks.create(bookmarksInfo[2]);
 
-  // TODO Properly identify if function.
   if (isFunction(callback)) {
     chrome.bookmarks.create(bookmarksInfo[3], () => {
       callback(bookmarksInfo);
