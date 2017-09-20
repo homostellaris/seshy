@@ -178,9 +178,7 @@ function getSession (windowToCheck, callback) {
     }
 
     // TODO Properly identify if function.
-    if (typeof callback !== 'undefined') {
-      callback(matchingSessionFolder)
-    }
+    if (isFunction(callback)) callback(matchingSessionFolder)
   }
 
   function compareTabsToBookmarks (tabs, bookmarks) {
@@ -234,7 +232,7 @@ function storeWindowToSessionFolderMapping (windowId, sessionFolderId, callback)
   var windowToSessionFolderMapping = {}
   windowToSessionFolderMapping[windowId] = sessionFolderId
   // TODO Properly identify if function.
-  if (typeof callback !== 'undefined') {
+  if (isFunction(callback)) {
     chrome.storage.local.set(windowToSessionFolderMapping, callback)
   } else {
     chrome.storage.local.set(windowToSessionFolderMapping)
@@ -248,9 +246,7 @@ function getWindowToSessionFolderMapping (windowId, callback) {
 function removeWindowToSessionFolderMapping (windowId, callback) {
   chrome.storage.local.remove(windowId.toString())
   // TODO Properly identify if function.
-  if (typeof callback !== 'undefined') {
-    callback()
-  }
+  if (isFunction(callback)) callback()
 }
 
 // ---===~ Utility ~===-------------------------------------------------------------------------------------------------
@@ -258,4 +254,8 @@ function tabEqualToBookmark (tab, bookmark) {
   var indexEqual = tab.index === bookmark.index
   var urlEqual = tab.url === bookmark.url
   return indexEqual && urlEqual
+}
+
+function isFunction (variable) {
+  return typeof variable === 'function'
 }

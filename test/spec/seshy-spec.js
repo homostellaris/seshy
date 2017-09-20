@@ -347,7 +347,7 @@ describe("Deleting sessions.", function() {
 function createTabs(tabsInfo, callback) {
   chrome.tabs.create(tabsInfo[0]);
   chrome.tabs.create(tabsInfo[1]);
-  if (typeof callback != 'undefined') {
+  if (isFunction(callback)) {
     chrome.tabs.create(tabsInfo[2], callback);
   }
   else {
@@ -451,7 +451,7 @@ function createBookmarks(sessionBookmarksFolder, callback) {
   chrome.bookmarks.create(bookmarksInfo[2]);
 
   // TODO Properly identify if function.
-  if (typeof callback != 'undefined') {
+  if (isFunction(callback)) {
     chrome.bookmarks.create(bookmarksInfo[3], () => {
       callback(bookmarksInfo);
     });
