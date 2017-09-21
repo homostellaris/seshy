@@ -141,9 +141,7 @@ function deleteSession (sessionFolderId, callback) {
 
 function getSession (windowToCheck, callback) {
   console.log('Checking if tab set is a saved session.')
-
   var tabs
-
   getTabs(windowToCheck)
 
   function getTabs (windowToCheck) {

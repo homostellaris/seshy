@@ -6,7 +6,9 @@ module.exports = function(grunt) {
       target: [
         'main/js/init.js',
         'main/js/seshy-lib.js',
-        'main/js/session-manager.js'
+        'main/js/session-manager.js',
+        'test/*.js',
+        'test/spec/*.js'
       ]
     },
 

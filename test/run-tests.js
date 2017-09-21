@@ -1,8 +1,8 @@
 require('chromedriver')
-const webdriver = require('selenium-webdriver'),
-      chrome = require('selenium-webdriver/chrome'),
-      By = webdriver.By,
-      until = webdriver.until
+const webdriver = require('selenium-webdriver')
+const chrome = require('selenium-webdriver/chrome')
+const By = webdriver.By
+const until = webdriver.until
 
 var chromeOptions = new chrome.Options()
 chromeOptions.addExtensions('output/test.crx')
@@ -27,7 +27,7 @@ driver.findElement(By.className('jasmine-results')).then((jasmineResults) => {
   getFailures()
 })
 
-function getFailures() {
+function getFailures () {
   driver.findElement(By.className('jasmine-failures')).then((jasmineFailures) => {
     console.log(
       'The jasmine-failures element was located. Now expecting it to have child divs for the failed ' +
@@ -47,8 +47,9 @@ function getFailures() {
   })
 }
 
-function pass() {
+function pass () {
   if (process.env.TRAVIS) {
+    console.log('On Travis so closing Chrome instance.')
     return driver.close().then(() => {
       driver.quit()
     })
@@ -57,8 +58,9 @@ function pass() {
   }
 }
 
-function fail(failedSpecsNumber) {
+function fail (failedSpecsNumber) {
   if (process.env.TRAVIS) {
+    console.log('On Travis so closing Chrome instance.')
     return driver.close().then(() => {
       throwFailedSpecsError(failedSpecsNumber)
     })

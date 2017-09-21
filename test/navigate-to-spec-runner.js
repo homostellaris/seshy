@@ -1,14 +1,16 @@
-var seshyFolderId;
+/* global chrome */
 
-chrome.tabs.query({}, navigateToSpecRunner);
+var seshyFolderId
 
-function navigateToSpecRunner(tabs) {
-  tab = tabs[0];
-  var extensionId = chrome.runtime.id;
-  var specRunnerUrl = 'chrome-extension://' + extensionId + '/spec-runner.html';
+chrome.tabs.query({}, navigateToSpecRunner)
 
-  updateInfo = {
+function navigateToSpecRunner (tabs) {
+  var tab = tabs[0]
+  var extensionId = chrome.runtime.id
+  var specRunnerUrl = 'chrome-extension://' + extensionId + '/spec-runner.html'
+
+  var updateInfo = {
     'url': specRunnerUrl
   }
-  chrome.tabs.update(tab.id, updateInfo);
+  chrome.tabs.update(tab.id, updateInfo)
 }
