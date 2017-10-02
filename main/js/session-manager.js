@@ -11,11 +11,11 @@ function setUp () {
  */
 function createSessionElements () {
   getAllOpenWindows((windows) => {
-    console.log(windows)
     appendSessions(windows, 'currently-open-sessions', true)
   })
   getAllSessionFolders((sessionFolders) => {
     appendSessions(sessionFolders, 'saved-sessions')
+    addEventListeners()
   })
 }
 
@@ -40,13 +40,28 @@ function appendSessions (sessionFoldersOrWindows, listId, windows) {
     var sessionElement = document.createElement('li')
     sessionElement.setAttribute('class', 'session mdc-list-item mdc-theme--background mdc-elevation--z2')
     sessionElement.innerHTML = getSessionInnerHtml(title, tabs)
-
-    if (windows !== true) {
-      sessionElement.addEventListener('click', () => {
-        resumeSession(session.id)
-      })
-    }
     sessionList.appendChild(sessionElement)
+  }
+}
+
+function addEventListeners () {
+  var shelveButtons = document.getElementsByClassName('shelve')
+  console.log(shelveButtons.length + ' shelve buttons found.')
+  for (var i = 0; i < shelveButtons.length; i++) {
+    var shelveButton = shelveButtons[i]
+    shelveButton.addEventListener('click', () => {
+      alert('Saving!')
+      // resumeSession(session.id)
+    })
+  }
+
+  var sessionNameFields = document.getElementsByClassName('session-name')
+  for (var i = 0; i < sessionNameFields.length; i++) {
+    var sessionNameField = sessionNameFields[i]
+    sessionNameField.addEventListener('input', () => {
+      alert('Saving new name!')
+      // resumeSession(session.id)
+    })
   }
 }
 
@@ -54,11 +69,13 @@ function appendSessions (sessionFoldersOrWindows, listId, windows) {
  * Get the HTML for a single session.
  */
 function getSessionInnerHtml (title, tabs) {
-  var innerHtml = '<span class="mdc-list-item__start-detail">' +
+  var innerHtml = '<span class="mdc-list-item__start-detail shelve">' +
     '<i class="material-icons">backup</i>' +
     '</span>' +
-    '<span class="mdc-list-item__text" contenteditable="true">' +
+    '<span class="mdc-list-item__text">' +
+    '<span class="session-name" contenteditable="true">' +
     title +
+    '</span>' +
     '<span class="mdc-list-item__text__secondary">' +
     tabs.length + ' tabs' +
     '</span>' +

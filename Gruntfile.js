@@ -13,8 +13,7 @@ module.exports = function(grunt) {
     },
 
     clean: {
-      test: 'output/test',
-      main: 'output/main'
+      output: 'output/*'
     },
 
     copy: {
@@ -34,7 +33,28 @@ module.exports = function(grunt) {
       main: {
         files: [
           // Copy all implementation files.
-          {expand: true, src: ['main/**', 'node_modules/mousetrap/mousetrap.min.js'], dest: 'output/'}
+          {
+            expand: true,
+            src: ['main/**'],
+            dest: 'output/'
+          },
+          {
+            expand: true,
+            flatten: true,
+            src: [
+              'node_modules/mousetrap/mousetrap.min.js',
+              'node_modules/material-components-web/dist/material-components-web.js',
+            ],
+            dest: 'output/main/js/'
+          },
+          {
+            expand: true,
+            flatten: true,
+            src: [
+              'node_modules/material-components-web/dist/material-components-web.css',
+            ],
+            dest: 'output/main/css/'
+          },
         ]
       }
     },
@@ -44,7 +64,7 @@ module.exports = function(grunt) {
         cmd: 'node test/run-tests.js'
       },
       run: {
-        cmd: 'google-chrome-stable --load-extension="/home/dan/The Laboratory/Seshy/output/main/"'
+        cmd: 'google-chrome-unstable --load-extension="output/main/" --disable-gpu --auto-open-devtools-for-tabs'
       },
       createTestArtefact: {
         // Creates output/test.crx which can then be loaded by Chrome Driver for running the tests.
@@ -71,6 +91,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-crx');
 
   grunt.registerTask('lint', ['eslint']);
-  grunt.registerTask('test', ['lint', 'clean:test', 'copy:test', 'crx:createTestArtefact', 'exec:test']);
-  grunt.registerTask('run', ['clean:main', 'copy:main', 'exec:run']);
+  grunt.registerTask('test', ['lint', 'clean:output', 'copy:test', 'crx:createTestArtefact', 'exec:test']);
+  grunt.registerTask('run', ['clean:output', 'copy:main', 'exec:run']);
 };
