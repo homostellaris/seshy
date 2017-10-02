@@ -47,7 +47,7 @@ function appendSessions (sessionFoldersOrWindows, listId, windows) {
 function addEventListeners () {
   var shelveButtons = document.getElementsByClassName('shelve')
   console.log(shelveButtons.length + ' shelve buttons found.')
-  for (var i = 0; i < shelveButtons.length; i++) {
+  for (let i = 0; i < shelveButtons.length; i++) {
     var shelveButton = shelveButtons[i]
     shelveButton.addEventListener('click', () => {
       alert('Saving!')
@@ -56,7 +56,7 @@ function addEventListeners () {
   }
 
   var sessionNameFields = document.getElementsByClassName('session-name')
-  for (var i = 0; i < sessionNameFields.length; i++) {
+  for (let i = 0; i < sessionNameFields.length; i++) {
     var sessionNameField = sessionNameFields[i]
     sessionNameField.addEventListener('input', () => {
       alert('Saving new name!')
