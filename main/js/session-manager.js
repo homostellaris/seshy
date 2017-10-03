@@ -1,6 +1,5 @@
 /* global mdc getAllOpenWindows getAllSessionFolders resumeSession */
 setUp()
-mdc.autoInit()
 
 function setUp () {
   createSessionElements()
@@ -15,7 +14,8 @@ function createSessionElements () {
   })
   getAllSessionFolders((sessionFolders) => {
     appendSessions(sessionFolders, 'saved-sessions')
-    addEventListeners()
+    window.mdc.autoInit()
+    // addEventListeners()
   })
 }
 
@@ -25,6 +25,7 @@ function createSessionElements () {
 function appendSessions (sessionFoldersOrWindows, listId, windows) {
   for (var i = 0; i < sessionFoldersOrWindows.length; i++) {
     var session = sessionFoldersOrWindows[i]
+    var id = i
     var title
     var tabs
 
@@ -39,7 +40,7 @@ function appendSessions (sessionFoldersOrWindows, listId, windows) {
     var sessionList = document.getElementById(listId)
     var sessionElement = document.createElement('li')
     sessionElement.setAttribute('class', 'session mdc-list-item mdc-theme--background mdc-elevation--z2')
-    sessionElement.innerHTML = getSessionInnerHtml(title, tabs)
+    sessionElement.innerHTML = getSessionInnerHtml(id, title, tabs)
     sessionList.appendChild(sessionElement)
   }
 }
@@ -68,15 +69,16 @@ function addEventListeners () {
 /**
  * Get the HTML for a single session.
  */
-function getSessionInnerHtml (title, tabs) {
+function getSessionInnerHtml (id, title, tabs) {
   var innerHtml = `
     <span class="mdc-list-item__start-detail shelve">
       <i class="material-icons">backup</i>
     </span>
     <span class="mdc-list-item__text">
-      <span class="session-name" contenteditable="true">
-        ${title}
-      </span>
+      <div class="mdc-textfield" data-mdc-auto-init="MDCTextfield">
+        <input id="session-name-input-${id}" class="mdc-textfield__input" type="text">
+        <label class="mdc-textfield__label" for="session-name-input-${id}">Session Name</label>
+      </div>
       <span class="mdc-list-item__text__secondary">
         ${tabs.length} tabs
       </span>
