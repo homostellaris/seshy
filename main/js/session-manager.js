@@ -69,21 +69,23 @@ function addEventListeners () {
  * Get the HTML for a single session.
  */
 function getSessionInnerHtml (title, tabs) {
-  var innerHtml = '<span class="mdc-list-item__start-detail shelve">' +
-    '<i class="material-icons">backup</i>' +
-    '</span>' +
-    '<span class="mdc-list-item__text">' +
-    '<span class="session-name" contenteditable="true">' +
-    title +
-    '</span>' +
-    '<span class="mdc-list-item__text__secondary">' +
-    tabs.length + ' tabs' +
-    '</span>' +
-    '</span>' +
-    '<span class="mdc-list-item__end-detail">' +
-    '<button>' +
-    '<i class="material-icons">open_in_new</i>' +
-    '</button>' +
-    '</span>'
+  var innerHtml = `
+    <span class="mdc-list-item__start-detail shelve">
+      <i class="material-icons">backup</i>
+    </span>
+    <span class="mdc-list-item__text">
+      <span class="session-name" contenteditable="true">
+        ${title}
+      </span>
+      <span class="mdc-list-item__text__secondary">
+        ${tabs.length} tabs
+      </span>
+    </span>
+    <span class="mdc-list-item__end-detail">
+      <button>
+        <i class="material-icons">open_in_new</i>
+      </button>
+    </span>
+  `
   return innerHtml
 }
