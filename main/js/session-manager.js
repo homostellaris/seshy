@@ -14,8 +14,9 @@ function createSessionElements () {
   })
   getAllSessionFolders((sessionFolders) => {
     appendSessions(sessionFolders, 'saved-sessions')
+    focusFirstSessionCard()
+    addEventListeners()
     window.mdc.autoInit()
-    // addEventListeners()
   })
 }
 
@@ -25,7 +26,7 @@ function createSessionElements () {
 function appendSessions (sessionFoldersOrWindows, listId, windows) {
   for (var i = 0; i < sessionFoldersOrWindows.length; i++) {
     var session = sessionFoldersOrWindows[i]
-    var id = i
+    var id = i + 1
     var title
     var tabs
 
@@ -39,29 +40,43 @@ function appendSessions (sessionFoldersOrWindows, listId, windows) {
 
     var sessionList = document.getElementById(listId)
     var sessionElement = document.createElement('li')
-    sessionElement.setAttribute('class', 'session mdc-list-item mdc-theme--background mdc-elevation--z2')
+    sessionElement.setAttribute('class', 'session-card mdc-list-item mdc-theme--background mdc-elevation--z2')
     sessionElement.innerHTML = getSessionInnerHtml(id, title, tabs)
     sessionList.appendChild(sessionElement)
   }
 }
 
-function addEventListeners () {
-  var shelveButtons = document.getElementsByClassName('shelve')
-  console.log(shelveButtons.length + ' shelve buttons found.')
-  for (let i = 0; i < shelveButtons.length; i++) {
-    var shelveButton = shelveButtons[i]
-    shelveButton.addEventListener('click', () => {
-      alert('Saving!')
-      // resumeSession(session.id)
-    })
-  }
+function focusFirstSessionCard () {
+  var firstSessionCard = document.getElementById('session-name-input-1')
+  firstSessionCard.setAttribute('autofocus', '')
+}
 
-  var sessionNameFields = document.getElementsByClassName('session-name')
-  for (let i = 0; i < sessionNameFields.length; i++) {
-    var sessionNameField = sessionNameFields[i]
-    sessionNameField.addEventListener('input', () => {
-      alert('Saving new name!')
-      // resumeSession(session.id)
+function addEventListeners () {
+  // var shelveButtons = document.getElementsByClassName('shelve')
+  // console.log(shelveButtons.length + ' shelve buttons found.')
+  // for (let i = 0; i < shelveButtons.length; i++) {
+  //   var shelveButton = shelveButtons[i]
+  //   shelveButton.addEventListener('click', () => {
+  //     alert('Saving!')
+  //     resumeSession(session.id)
+  //   })
+  // }
+
+  var sessionNameInputs = document.getElementsByClassName('session-name-input')
+  for (let i = 0; i < sessionNameInputs.length; i++) {
+    var sessionNameInput = sessionNameInputs[i]
+    sessionNameInput.addEventListener('keydown', (event) => {
+      if (event.keyCode == 13) {
+        alert('Saving new name!')
+      }
+    })
+    sessionNameInput.addEventListener('focus', (event) => {
+      console.log('focused')
+      var firstSessionCard = document.getElementsByClassName('session-card')[0]
+      if (firstSessionCard) {
+        console.log('applying class')
+        firstSessionCard.classList.add('selected')
+      }
     })
   }
 }
@@ -75,9 +90,8 @@ function getSessionInnerHtml (id, title, tabs) {
       <i class="material-icons">backup</i>
     </span>
     <span class="mdc-list-item__text">
-      <div class="mdc-textfield" data-mdc-auto-init="MDCTextfield">
-        <input id="session-name-input-${id}" class="mdc-textfield__input" type="text">
-        <label class="mdc-textfield__label" for="session-name-input-${id}">Session Name</label>
+      <div class="mdc-textfield mdc-textfield--dense">
+        <input id="session-name-input-${id}" class="mdc-textfield__input session-name-input" type="text" placeholder="Unsaved Session">
       </div>
       <span class="mdc-list-item__text__secondary">
         ${tabs.length} tabs
