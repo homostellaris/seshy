@@ -66,7 +66,7 @@ function addEventListeners () {
   for (let i = 0; i < sessionNameInputs.length; i++) {
     var sessionNameInput = sessionNameInputs[i]
     sessionNameInput.addEventListener('keydown', (event) => {
-      if (event.keyCode == 13) {
+      if (event.keyCode === 13) {
         alert('Saving new name!')
       }
     })
