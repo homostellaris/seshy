@@ -1,5 +1,12 @@
 /* global chrome */
 
+/**
+ * This is the background page for the test extension.
+ * It ensures that as soon as the extension is loaded it navigates the open tab to the spec runner web page so that
+ * the tests run.
+ *
+ * Initially this was attempted using the Chrome Driver script but this resulted in an error.
+ */
 var seshyFolderId
 
 chrome.tabs.query({}, navigateToSpecRunner)
