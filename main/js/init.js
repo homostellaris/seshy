@@ -16,6 +16,6 @@ var seshyFolderId
 initialise()
 
 function initialise () {
-  console.log('Initialising')
+  console.log('Initialising.')
   checkIfSeshyFolderExists()
 }
