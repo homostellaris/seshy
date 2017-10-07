@@ -47,9 +47,7 @@ describe('Saving sessions.', function () {
   })
 
   afterEach(function (done) {
-    cleanUp()
-    // Necessary because it takes time to delete Seshy folder in cleanup of previous test.
-    setTimeout(done, 1000)
+    cleanUp(done)
   })
 
   function callTest (done) {
@@ -172,9 +170,7 @@ describe('Resuming sessions.', function () {
     })
 
     afterEach(function (done) {
-      cleanUp()
-      // Necessary because it takes time to delete Seshy folder in cleanup of previous test.
-      setTimeout(done, 1000)
+      cleanUp(done)
     })
   })
 
@@ -237,9 +233,7 @@ describe('Resuming sessions.', function () {
     })
 
     afterEach(function (done) {
-      cleanUp()
-      // Necessary because it takes time to delete Seshy folder in cleanup of previous test.
-      setTimeout(done, 1000)
+      cleanUp(done)
     })
 
     it('Should recognise when a set of opened tabs represents an existing session.', function () {
@@ -290,9 +284,7 @@ describe('Ending sessions.', function () {
   })
 
   afterEach(function (done) {
-    cleanUp()
-    // Necessary because it takes time to delete Seshy folder in cleanup of previous test.
-    setTimeout(done, 1000)
+    cleanUp(done)
   })
 })
 
@@ -339,8 +331,6 @@ describe('Deleting sessions.', function () {
   })
 
   afterEach(function (done) {
-    cleanUp()
-    // Necessary because it takes time to delete Seshy folder in cleanup of previous test.
-    setTimeout(done, 1000)
+    cleanUp(done)
   })
 })

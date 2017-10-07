@@ -121,8 +121,10 @@ function addWindowToSessionMapping (windowId, expectedSessionFolderId, callback)
   })
 }
 
-function cleanUp () {
+function cleanUp (done) {
   getSeshyFolder(removeBookmarksFolder)
+  // Necessary because it takes time to delete Seshy folder in cleanup of previous test.
+  setTimeout(done, 1000)
 }
 
 function getSeshyFolder (callback) {
