@@ -1,5 +1,25 @@
 /* global chrome saveSession resumeSession tabEqualToBookmark getSession
 removeWindowToSessionFolderMapping deleteSession isFunction initialise */
+function saveTestSession (windowId, callback) {
+  var expectedSessionFolderId
+
+  getSeshyFolder((seshyFolder) => {
+    createSessionBookmarksFolder(seshyFolder, createBookmarksThenSaveMapping)
+  })
+
+  function createBookmarksThenSaveMapping (sessionBookmarksFolder) {
+    expectedSessionFolderId = sessionBookmarksFolder.id
+
+    createBookmarks(sessionBookmarksFolder, () => {
+      addWindowToSessionMapping(windowId, expectedSessionFolderId, returnSessionFolderId)
+    })
+  }
+
+  function returnSessionFolderId () {
+    callback(expectedSessionFolderId)
+  }
+}
+
 function createTabs (tabsInfo, callback) {
   chrome.tabs.create(tabsInfo[0])
   chrome.tabs.create(tabsInfo[1])
@@ -64,26 +84,6 @@ function getTabsOrBookmarksInfo (windowOrParentId, asBookmarks, tabSetNumber) {
     }
   }
   return tabsInfo
-}
-
-function saveTestSession (windowId, callback) {
-  var expectedSessionFolderId
-
-  getSeshyFolder((seshyFolder) => {
-    createSessionBookmarksFolder(seshyFolder, createBookmarksThenSaveMapping)
-  })
-
-  function createBookmarksThenSaveMapping (sessionBookmarksFolder) {
-    expectedSessionFolderId = sessionBookmarksFolder.id
-
-    createBookmarks(sessionBookmarksFolder, () => {
-      addWindowToSessionMapping(windowId, expectedSessionFolderId, returnSessionFolderId)
-    })
-  }
-
-  function returnSessionFolderId () {
-    callback(expectedSessionFolderId)
-  }
 }
 
 function createSessionBookmarksFolder (bookmarkTreeNodes, callback) {
