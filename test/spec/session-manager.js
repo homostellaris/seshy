@@ -1,6 +1,13 @@
+// TODO Do something about all these.
+/* global chrome saveSession resumeSession tabEqualToBookmark getSession getTabsOrBookmarksInfo createTabs
+removeWindowToSessionFolderMapping deleteSession clearLocalStorageAndInitialise saveTestSession cleanUp getSeshyFolder
+createSessionBookmarksFolder getAllLocalStorage */
+
 describe('Session selection.', () => {
   xit('Creates a blue border around the currently selected session.', () => {
-    // Not implemented.
+    beforeEach((done) => {
+      clearLocalStorageAndInitialise()
+    })
   })
 
   xit('Creates an orange border around the currently open session.', () => {

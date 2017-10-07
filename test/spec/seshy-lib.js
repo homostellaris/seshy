@@ -9,15 +9,13 @@ describe('Saving sessions.', function () {
   var tabsInfo
 
   beforeEach(function (done) {
-    clearLocalStorageAndInitialise()
-    // Necessary because it takes time to create Seshy folder.
-    setTimeout(() => {
+    clearLocalStorageAndInitialise(() => {
       chrome.windows.create({}, (newWindow) => {
         windowId = newWindow.id
         tabsInfo = getTabsOrBookmarksInfo(newWindow.id, false)
         createTabs(tabsInfo, done)
       })
-    }, 1000)
+    })
   })
 
   it('Should be able to save a set of tabs as bookmarks in a folder.', function (done) {
@@ -90,15 +88,13 @@ describe('Resuming sessions.', function () {
     var bookmarksInfo
 
     beforeEach(function (done) {
-      clearLocalStorageAndInitialise()
-      // Necessary because it takes time to create Seshy folder.
-      setTimeout(() => {
+      clearLocalStorageAndInitialise(() => {
         chrome.windows.create({}, (newWindow) => {
           windowId = newWindow.id
           bookmarksInfo = getTabsOrBookmarksInfo(newWindow.id, false)
           createTabs(bookmarksInfo, saveTestSessionAndCaptureSessionFolderId)
         })
-      }, 1000)
+      })
 
       function saveTestSessionAndCaptureSessionFolderId () {
         saveTestSession(windowId, captureSessionFolderId)
@@ -182,11 +178,9 @@ describe('Resuming sessions.', function () {
     var actualSessionFolderId
 
     beforeEach(function (done) {
-      clearLocalStorageAndInitialise()
-      // Necessary because it takes time to create Seshy folder.
-      setTimeout(() => {
+      clearLocalStorageAndInitialise(() => {
         getSeshyFolder(createSessionBookmarksFolderThenBookmarks)
-      }, 1000)
+      })
 
       function createSessionBookmarksFolderThenBookmarks (bookmarkTreeNodes) {
         createSessionBookmarksFolder(bookmarkTreeNodes, createBookmarks)
@@ -246,11 +240,9 @@ describe('Ending sessions.', function () {
   var windowId
 
   beforeEach(function (done) {
-    clearLocalStorageAndInitialise()
-    // Necessary because it takes time to create Seshy folder.
-    setTimeout(() => {
+    clearLocalStorageAndInitialise(() => {
       chrome.windows.create({}, addWindowToSessionMapping)
-    }, 1000)
+    })
 
     function addWindowToSessionMapping (newWindow) {
       windowId = newWindow.id
@@ -293,15 +285,13 @@ describe('Deleting sessions.', function () {
   var expectedDeletedSessionFolderId
 
   beforeEach(function (done) {
-    clearLocalStorageAndInitialise()
-    // Necessary because it takes time to create Seshy folder.
-    setTimeout(() => {
+    clearLocalStorageAndInitialise(() => {
       chrome.windows.create({}, (newWindow) => {
         windowId = newWindow.id
         var tabsInfo = getTabsOrBookmarksInfo(newWindow.id, false)
         createTabs(tabsInfo, saveTestSessionAndCaptureSessionFolderId)
       })
-    }, 1000)
+    })
 
     function saveTestSessionAndCaptureSessionFolderId () {
       saveTestSession(windowId, captureSessionFolderId)

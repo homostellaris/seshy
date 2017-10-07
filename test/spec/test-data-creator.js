@@ -151,8 +151,16 @@ function removeWindows (windows) {
   }
 }
 
-function clearLocalStorageAndInitialise () {
+function clearLocalStorageAndInitialise (callback) {
   chrome.storage.local.clear(initialise)
+
+  var aFunction
+  if (isFunction(callback)) {
+    aFunction = callback
+  } else {
+    aFunction = () => {}
+  }
+  setTimeout(aFunction, 1000)
 }
 
 function getAllLocalStorage (callback) {
