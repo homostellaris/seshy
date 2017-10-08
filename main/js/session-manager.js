@@ -1,5 +1,4 @@
 /* global mdc getAllOpenWindows getAllSessionFolders resumeSession */
-setUp()
 
 function setUp () {
   createSessionElements()
