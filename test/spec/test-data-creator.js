@@ -1,4 +1,4 @@
-/* global chrome saveSession resumeSession tabEqualToBookmark getSession
+/* global chrome saveSession resumeSession tabEqualToBookmark getSession seshyFolderId
 removeWindowToSessionFolderMapping deleteSession isFunction initialise */
 
 function saveTestSession (windowId, callback) {
@@ -138,24 +138,29 @@ function addWindowToSessionMapping (windowId, expectedSessionFolderId, callback)
 }
 
 function cleanUp (done) {
-  getSeshyFolder(removeBookmarksFolder)
-  // Necessary because it takes time to delete Seshy folder in cleanup of previous test.
+  getSessionFolders(removeBookmarkFolders)
+  removeAllWindows()
+  chrome.storage.local.clear()
+  // Necessary because it takes time for above operations to complete.
   setTimeout(done, 1000)
 }
 
-function getSeshyFolder (callback) {
-  var query = {
-    'title': 'Seshy'
+function getSessionFolders (callback) {
+  if (isFunction(callback)) {
+    chrome.bookmarks.getChildren(seshyFolderId, callback)
+  } else {
+    chrome.bookmarks.getChildren(seshyFolderId)
   }
-  chrome.bookmarks.search(query, callback)
 }
 
-function removeBookmarksFolder (bookmarkTreeNodes) {
-  var bookmarksFolder = bookmarkTreeNodes[0]
-  chrome.bookmarks.removeTree(bookmarksFolder.id, getAllWindows)
+function removeBookmarkFolders (bookmarkTreeNodes) {
+  for (var i = 0; i < bookmarkTreeNodes.length; i++) {
+    var bookmarkTreeNode = bookmarkTreeNodes[i]
+    chrome.bookmarks.removeTree(bookmarkTreeNode.id)
+  }
 }
 
-function getAllWindows () {
+function removeAllWindows () {
   chrome.windows.getAll({}, removeWindows)
 }
 
@@ -167,18 +172,14 @@ function removeWindows (windows) {
   }
 }
 
-function clearLocalStorageAndInitialise (callback) {
-  chrome.storage.local.clear(initialise)
-
-  var aFunction
-  if (isFunction(callback)) {
-    aFunction = callback
-  } else {
-    aFunction = () => {}
+function getSeshyFolder (callback) {
+  var query = {
+    'title': 'Seshy'
   }
-  setTimeout(aFunction, 1000)
+  chrome.bookmarks.search(query, callback)
 }
 
+// ---===~ Local storage ~===-------------------------------------------------------------------------------------------
 function getAllLocalStorage (callback) {
   chrome.storage.local.get(null, callback)
 }

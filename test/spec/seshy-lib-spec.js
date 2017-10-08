@@ -1,6 +1,6 @@
 // TODO Do something about all these.
 /* global chrome saveSession resumeSession tabEqualToBookmark getSession getTabsOrBookmarksInfo createTabs
-removeWindowToSessionFolderMapping deleteSession clearLocalStorageAndInitialise saveTestSession cleanUp getSeshyFolder
+removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSeshyFolder
 createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession */
 
 describe('Saving sessions.', function () {
@@ -9,12 +9,10 @@ describe('Saving sessions.', function () {
   var tabsInfo
 
   beforeEach(function (done) {
-    clearLocalStorageAndInitialise(() => {
-      openUnsavedTestSession((newWindowId) => {
-        windowId = newWindowId
-        tabsInfo = getTabsOrBookmarksInfo(windowId)
-        done()
-      })
+    openUnsavedTestSession((newWindowId) => {
+      windowId = newWindowId
+      tabsInfo = getTabsOrBookmarksInfo(windowId)
+      done()
     })
   })
 
@@ -88,9 +86,7 @@ describe('Resuming sessions.', function () {
     var bookmarksInfo
 
     beforeEach(function (done) {
-      clearLocalStorageAndInitialise(() => {
-        openUnsavedTestSession(saveTestSessionAndCaptureSessionFolderId)
-      })
+      openUnsavedTestSession(saveTestSessionAndCaptureSessionFolderId)
 
       function saveTestSessionAndCaptureSessionFolderId (newWindowId) {
         windowId = newWindowId
@@ -176,9 +172,7 @@ describe('Resuming sessions.', function () {
     var actualSessionFolderId
 
     beforeEach(function (done) {
-      clearLocalStorageAndInitialise(() => {
-        getSeshyFolder(createSessionBookmarksFolderThenBookmarks)
-      })
+      getSeshyFolder(createSessionBookmarksFolderThenBookmarks)
 
       function createSessionBookmarksFolderThenBookmarks (bookmarkTreeNodes) {
         createSessionBookmarksFolder(bookmarkTreeNodes, createBookmarks)
@@ -238,9 +232,7 @@ describe('Ending sessions.', function () {
   var windowId
 
   beforeEach(function (done) {
-    clearLocalStorageAndInitialise(() => {
-      chrome.windows.create({}, addWindowToSessionMapping)
-    })
+    chrome.windows.create({}, addWindowToSessionMapping)
 
     function addWindowToSessionMapping (newWindow) {
       windowId = newWindow.id
@@ -283,9 +275,7 @@ describe('Deleting sessions.', function () {
   var expectedDeletedSessionFolderId
 
   beforeEach(function (done) {
-    clearLocalStorageAndInitialise(() => {
-      openUnsavedTestSession(saveTestSessionAndCaptureSessionFolderId)
-    })
+    openUnsavedTestSession(saveTestSessionAndCaptureSessionFolderId)
 
     function saveTestSessionAndCaptureSessionFolderId (newWindowId) {
       windowId = newWindowId
