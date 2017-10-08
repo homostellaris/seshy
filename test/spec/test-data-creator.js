@@ -1,5 +1,6 @@
 /* global chrome saveSession resumeSession tabEqualToBookmark getSession
 removeWindowToSessionFolderMapping deleteSession isFunction initialise */
+
 function saveTestSession (windowId, callback) {
   var expectedSessionFolderId
 
@@ -18,6 +19,21 @@ function saveTestSession (windowId, callback) {
   function returnSessionFolderId () {
     callback(expectedSessionFolderId)
   }
+}
+
+function openUnsavedTestSession (callback) {
+  chrome.windows.create({}, (newWindow) => {
+    var windowId = newWindow.id
+    var bookmarksInfo = getTabsOrBookmarksInfo(newWindow.id, false)
+
+    if (isFunction(callback)) {
+      createTabs(bookmarksInfo, () => {
+        callback(windowId)
+      })
+    } else {
+      createTabs(bookmarksInfo)
+    }
+  })
 }
 
 function createTabs (tabsInfo, callback) {

@@ -1,7 +1,7 @@
 // TODO Do something about all these.
 /* global chrome saveSession resumeSession tabEqualToBookmark getSession getTabsOrBookmarksInfo createTabs
 removeWindowToSessionFolderMapping deleteSession clearLocalStorageAndInitialise saveTestSession cleanUp getSeshyFolder
-createSessionBookmarksFolder getAllLocalStorage */
+createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession */
 
 describe('Saving sessions.', function () {
   var windowId
@@ -10,10 +10,10 @@ describe('Saving sessions.', function () {
 
   beforeEach(function (done) {
     clearLocalStorageAndInitialise(() => {
-      chrome.windows.create({}, (newWindow) => {
-        windowId = newWindow.id
-        tabsInfo = getTabsOrBookmarksInfo(newWindow.id, false)
-        createTabs(tabsInfo, done)
+      openUnsavedTestSession((newWindowId) => {
+        windowId = newWindowId
+        tabsInfo = getTabsOrBookmarksInfo(windowId)
+        done()
       })
     })
   })
@@ -89,15 +89,13 @@ describe('Resuming sessions.', function () {
 
     beforeEach(function (done) {
       clearLocalStorageAndInitialise(() => {
-        chrome.windows.create({}, (newWindow) => {
-          windowId = newWindow.id
-          bookmarksInfo = getTabsOrBookmarksInfo(newWindow.id, false)
-          createTabs(bookmarksInfo, saveTestSessionAndCaptureSessionFolderId)
-        })
+        openUnsavedTestSession(saveTestSessionAndCaptureSessionFolderId)
       })
 
-      function saveTestSessionAndCaptureSessionFolderId () {
-        saveTestSession(windowId, captureSessionFolderId)
+      function saveTestSessionAndCaptureSessionFolderId (newWindowId) {
+        windowId = newWindowId
+        bookmarksInfo = getTabsOrBookmarksInfo(windowId, false)
+        saveTestSession(newWindowId, captureSessionFolderId)
       }
 
       function captureSessionFolderId (newSessionFolderId) {
@@ -286,14 +284,11 @@ describe('Deleting sessions.', function () {
 
   beforeEach(function (done) {
     clearLocalStorageAndInitialise(() => {
-      chrome.windows.create({}, (newWindow) => {
-        windowId = newWindow.id
-        var tabsInfo = getTabsOrBookmarksInfo(newWindow.id, false)
-        createTabs(tabsInfo, saveTestSessionAndCaptureSessionFolderId)
-      })
+      openUnsavedTestSession(saveTestSessionAndCaptureSessionFolderId)
     })
 
-    function saveTestSessionAndCaptureSessionFolderId () {
+    function saveTestSessionAndCaptureSessionFolderId (newWindowId) {
+      windowId = newWindowId
       saveTestSession(windowId, captureSessionFolderId)
 
       function captureSessionFolderId (sessionFolderId) {
