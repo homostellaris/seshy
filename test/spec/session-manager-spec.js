@@ -6,7 +6,7 @@ createSessionBookmarksFolder getAllLocalStorage */
 describe('Session selection.', () => {
   xit('Creates a blue border around the currently selected session.', () => {
     beforeEach((done) => {
-      // Not implemented
+      // Not implemented.
     })
   })
 

@@ -4,25 +4,21 @@ removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSesh
 createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession */
 
 describe('Saving sessions.', function () {
-  var windowId
-  var bookmarks
-  var tabsInfo
-
   beforeEach(function (done) {
     openUnsavedTestSession((newWindowId) => {
-      windowId = newWindowId
-      tabsInfo = getTabsOrBookmarksInfo(windowId)
+      this.windowId = newWindowId
+      this.tabsInfo = getTabsOrBookmarksInfo(this.windowId)
       done()
     })
   })
 
   it('Should be able to save a set of tabs as bookmarks in a folder.', function (done) {
-    callTest(done)
+    callTest.call(this, done) // Rebinds `this` to Jasmine's context so that test variables can be passed around.
   })
 
   it('Should delete all the bookmarks in the session folder before saving an existing session.', function (done) {
-    saveTestSession(windowId, () => {
-      callTest(done)
+    saveTestSession(this.windowId, () => {
+      callTest.call(this, done)
     })
   })
 
@@ -47,26 +43,30 @@ describe('Saving sessions.', function () {
   })
 
   function callTest (done) {
-    saveSession(windowId) // Method under test.
-    setTimeout(getBookmarksFolder, 1000)
-
-    function getBookmarksFolder () {
+    // This 'function expression' is not hoisted and so must be declared before is it referenced.
+    // No hoisting is a bit sad but using a function expression allows us to use an arrow function which does not
+    // rebind `this` and instead inherits `this` from its bounding scope which is useful for passing Jasmine's context.
+    var getBookmarksFolder = () => {
       var query = {
         'title': 'Test Session'
       }
       chrome.bookmarks.search(query, getBookmarks)
     }
 
-    function getBookmarks (bookmarkSessionFolderSearchResults) {
+    var getBookmarks = (bookmarkSessionFolderSearchResults) => {
       // Only one bookmark session folder with the correct saved tabs ensures that the original bookmarks were deleted.
       expect(bookmarkSessionFolderSearchResults.length).toEqual(1)
 
-      chrome.bookmarks.getChildren(bookmarkSessionFolderSearchResults[0].id, function (bookmarkTreeNodes) {
-        bookmarks = bookmarkTreeNodes
-        assertSavedBookmarks(bookmarks, tabsInfo)
+      chrome.bookmarks.getChildren(bookmarkSessionFolderSearchResults[0].id, (bookmarkTreeNodes) => {
+        this.bookmarks = bookmarkTreeNodes
+        assertSavedBookmarks(this.bookmarks, this.tabsInfo)
       })
     }
 
+    saveSession(this.windowId) // Method under test.
+    setTimeout(getBookmarksFolder, 1000)
+
+    // This function does not access `this` and so can be a 'function declaration' and benefit from 'hoisting'.
     function assertSavedBookmarks (bookmarks, expectedTabsInfo) {
       for (var i = 0; i < bookmarks.length; i++) {
         var bookmark = bookmarks[i]
