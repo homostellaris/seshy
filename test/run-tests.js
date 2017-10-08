@@ -53,8 +53,6 @@ function pass () {
     return driver.close().then(() => {
       driver.quit()
     })
-  } else {
-    driver.quit()
   }
 }
 
