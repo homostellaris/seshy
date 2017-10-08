@@ -20,7 +20,7 @@ module.exports = function(grunt) {
           // Copy all test files.
           {expand: true, src: ['test/**'], dest: 'output/'},
           // Copy necessary implementation files.
-          {expand: true, flatten: true, src: ['main/js/*'], dest: 'output/test/'}
+          {expand: true, flatten: true, src: ['main/js/*', 'main/html/session-manager.html'], dest: 'output/test/'}
         ]
       },
       main: {

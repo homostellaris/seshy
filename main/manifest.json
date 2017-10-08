@@ -8,7 +8,7 @@
   "background": {
     "scripts": [
       "js/seshy-lib.js",
-      "js/init.js"
+      "js/seshy-lib-init.js"
     ],
     "persistent": false
   },

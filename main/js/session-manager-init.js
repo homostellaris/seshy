@@ -1,3 +1,3 @@
-/* global setup */
+/* global setUp */
 
-setup()
+setUp()
