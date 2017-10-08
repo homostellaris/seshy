@@ -81,34 +81,25 @@ describe('Saving sessions.', function () {
 
 describe('Resuming sessions.', function () {
   describe('User restores a session from the session manager.', function () {
-    var windowId
-    var sessionFolderId
-    var bookmarksInfo
-
     beforeEach(function (done) {
-      openUnsavedTestSession(saveTestSessionAndCaptureSessionFolderId)
-
-      function saveTestSessionAndCaptureSessionFolderId (newWindowId) {
-        windowId = newWindowId
-        bookmarksInfo = getTabsOrBookmarksInfo(windowId, false)
-        saveTestSession(newWindowId, captureSessionFolderId)
+      var saveTestSessionAndCaptureSessionFolderId = (newWindowId) => {
+        this.windowId = newWindowId
+        this.bookmarksInfo = getTabsOrBookmarksInfo(this.windowId, false)
+        saveTestSession(this.windowId, captureSessionFolderId)
       }
 
-      function captureSessionFolderId (newSessionFolderId) {
-        sessionFolderId = newSessionFolderId
-        chrome.windows.remove(windowId, () => {
+      var captureSessionFolderId = (newSessionFolderId) => {
+        this.sessionFolderId = newSessionFolderId
+        chrome.windows.remove(this.windowId, () => {
           done()
         })
       }
+
+      openUnsavedTestSession(saveTestSessionAndCaptureSessionFolderId)
     })
 
     it('Adds a window ID to session folder ID mapping in local storage.', function (done) {
-      resumeSession(sessionFolderId, (newWindow) => {
-        windowId = newWindow.id
-        chrome.storage.local.get(null, assertWindowToSessionFolderMappingAdded)
-      })
-
-      function assertWindowToSessionFolderMappingAdded (allLocalStorageObject) {
+      var assertWindowToSessionFolderMappingAdded = (allLocalStorageObject) => {
         var allLocalStorageKeys = Object.keys(allLocalStorageObject)
 
         var matchingLocalStorageKey
@@ -119,23 +110,24 @@ describe('Resuming sessions.', function () {
           // Local storage is always returned as a string but will be comparing to an integer.
           localStorageKey = parseInt(localStorageKey)
 
-          if (localStorageKey === windowId) {
+          if (localStorageKey === this.windowId) {
             matchingLocalStorageKey = localStorageKey
-            matchingLocalStorageKeyValue = allLocalStorageObject[windowId.toString()]
+            matchingLocalStorageKeyValue = allLocalStorageObject[this.windowId.toString()]
           }
         }
-        expect(matchingLocalStorageKey).toBe(windowId)
-        expect(matchingLocalStorageKeyValue).toBe(sessionFolderId)
+        expect(matchingLocalStorageKey).toBe(this.windowId)
+        expect(matchingLocalStorageKeyValue).toBe(this.sessionFolderId)
         done()
       }
+
+      resumeSession(this.sessionFolderId, (newWindow) => {
+        this.windowId = newWindow.id
+        chrome.storage.local.get(null, assertWindowToSessionFolderMappingAdded)
+      })
     })
 
     it('Opens a window with all the tabs as they were when the session was saved.', function (done) {
-      resumeSession(sessionFolderId, (newWindow) => {
-        assertSessionRestored(newWindow, bookmarksInfo)
-      })
-
-      function assertSessionRestored (newWindow, bookmarksInfo) {
+      var assertSessionRestored = (newWindow, bookmarksInfo) => {
         var tabs = newWindow.tabs
 
         var expectedTabsNumber = bookmarksInfo.length
@@ -152,6 +144,10 @@ describe('Resuming sessions.', function () {
         expect(allTabsEqualToBookmarks).toBe(true)
         done()
       }
+
+      resumeSession(this.sessionFolderId, (newWindow) => {
+        assertSessionRestored(newWindow, this.bookmarksInfo)
+      })
     })
 
     xit('Focuses the appropriate window if the session is already open.', function (done) {
@@ -165,37 +161,29 @@ describe('Resuming sessions.', function () {
   })
 
   describe('Identifying existing session and prompting to resume.', function () {
-    // TODO set variables on `this` instead.
-    var expectedSessionFolderId
-    var windowToCheck
-    var bookmarksInfo
-    var actualSessionFolderId
-
     beforeEach(function (done) {
-      getSeshyFolder(createSessionBookmarksFolderThenBookmarks)
-
-      function createSessionBookmarksFolderThenBookmarks (bookmarkTreeNodes) {
+      var createSessionBookmarksFolderThenBookmarks = (bookmarkTreeNodes) => {
         createSessionBookmarksFolder(bookmarkTreeNodes, createBookmarks)
       }
 
-      function createBookmarks (sessionBookmarksFolder) {
-        expectedSessionFolderId = sessionBookmarksFolder.id
+      var createBookmarks = (sessionBookmarksFolder) => {
+        this.expectedSessionFolderId = sessionBookmarksFolder.id
         var asBookmarks = true
-        bookmarksInfo = getTabsOrBookmarksInfo(expectedSessionFolderId, asBookmarks)
+        this.bookmarksInfo = getTabsOrBookmarksInfo(this.expectedSessionFolderId, asBookmarks)
 
-        chrome.bookmarks.create(bookmarksInfo[0])
-        chrome.bookmarks.create(bookmarksInfo[1])
-        chrome.bookmarks.create(bookmarksInfo[2])
-        chrome.bookmarks.create(bookmarksInfo[3], createWindow)
+        chrome.bookmarks.create(this.bookmarksInfo[0])
+        chrome.bookmarks.create(this.bookmarksInfo[1])
+        chrome.bookmarks.create(this.bookmarksInfo[2])
+        chrome.bookmarks.create(this.bookmarksInfo[3], createWindow)
       }
 
-      function createWindow (bookmarkTreeNode) {
+      var createWindow = (bookmarkTreeNode) => {
         chrome.windows.create({}, createTabs)
       }
 
-      function createTabs (newWindow) {
-        windowToCheck = newWindow
-        var tabsInfo = getTabsOrBookmarksInfo(windowToCheck.id)
+      var createTabs = (newWindow) => {
+        this.windowToCheck = newWindow
+        var tabsInfo = getTabsOrBookmarksInfo(this.windowToCheck.id)
 
         chrome.tabs.create(tabsInfo[0])
         chrome.tabs.create(tabsInfo[1])
@@ -203,19 +191,21 @@ describe('Resuming sessions.', function () {
         // Don't create new tab as the new window creates that for us.
       }
 
-      function getWindow () {
-        chrome.windows.get(windowToCheck.id, {'populate': true}, callTest)
+      var getWindow = () => {
+        chrome.windows.get(this.windowToCheck.id, {'populate': true}, callTest)
       }
 
-      function callTest (uptodateWindowToCheck) {
-        windowToCheck = uptodateWindowToCheck
-        getSession(windowToCheck, captureExistingSession) // Method under test.
+      var callTest = (uptodateWindowToCheck) => {
+        this.windowToCheck = uptodateWindowToCheck
+        getSession(this.windowToCheck, captureExistingSession) // Method under test.
       }
 
-      function captureExistingSession (actualSessionFolder) {
-        actualSessionFolderId = actualSessionFolder === null ? null : actualSessionFolder.id
+      var captureExistingSession = (actualSessionFolder) => {
+        this.actualSessionFolderId = actualSessionFolder === null ? null : actualSessionFolder.id
         done()
       }
+
+      getSeshyFolder(createSessionBookmarksFolderThenBookmarks)
     })
 
     afterEach(function (done) {
@@ -223,36 +213,30 @@ describe('Resuming sessions.', function () {
     })
 
     it('Should recognise when a set of opened tabs represents an existing session.', function () {
-      expect(expectedSessionFolderId).toEqual(actualSessionFolderId)
+      expect(this.expectedSessionFolderId).toEqual(this.actualSessionFolderId)
     })
   })
 })
 
 describe('Ending sessions.', function () {
-  var windowId
-
   beforeEach(function (done) {
-    chrome.windows.create({}, addWindowToSessionMapping)
-
-    function addWindowToSessionMapping (newWindow) {
-      windowId = newWindow.id
+    var addWindowToSessionMapping = (newWindow) => {
+      this.windowId = newWindow.id
       var fakeSessionFolderId = 1
       var items = {}
       items[newWindow.id.toString()] = fakeSessionFolderId
       chrome.storage.local.set(items, done)
     }
+
+    chrome.windows.create({}, addWindowToSessionMapping)
   })
 
   it('Removes any window to session folder mapping from local storage.', function (done) {
-    removeWindowToSessionFolderMapping(windowId, () => {
-      getAllLocalStorage(assertWindowToSessionFolderMappingRemoved)
-    })
-
-    function assertWindowToSessionFolderMappingRemoved (allLocalStorageObject) {
+    var assertWindowToSessionFolderMappingRemoved = (allLocalStorageObject) => {
       var allLocalStorageKeys = Object.keys(allLocalStorageObject)
 
       var matchingLocalStorageKey = false
-      var windowIdString = windowId.toString()
+      var windowIdString = this.windowId.toString()
 
       for (var i = 0; i < allLocalStorageKeys.length; i++) {
         var localStorageKey = allLocalStorageKeys[i]
@@ -263,6 +247,10 @@ describe('Ending sessions.', function () {
       expect(matchingLocalStorageKey).toBe(false)
       done()
     }
+
+    removeWindowToSessionFolderMapping(this.windowId, () => {
+      getAllLocalStorage(assertWindowToSessionFolderMappingRemoved)
+    }) // Method under test.
   })
 
   afterEach(function (done) {
@@ -271,38 +259,35 @@ describe('Ending sessions.', function () {
 })
 
 describe('Deleting sessions.', function () {
-  var windowId
-  var expectedDeletedSessionFolderId
-
   beforeEach(function (done) {
-    openUnsavedTestSession(saveTestSessionAndCaptureSessionFolderId)
-
-    function saveTestSessionAndCaptureSessionFolderId (newWindowId) {
-      windowId = newWindowId
-      saveTestSession(windowId, captureSessionFolderId)
-
-      function captureSessionFolderId (sessionFolderId) {
-        expectedDeletedSessionFolderId = sessionFolderId
-        done()
-      }
+    var saveTestSessionAndCaptureSessionFolderId = (newWindowId) => {
+      this.windowId = newWindowId
+      saveTestSession(this.windowId, captureSessionFolderId)
     }
+
+    var captureSessionFolderId = (sessionFolderId) => {
+      this.expectedDeletedSessionFolderId = sessionFolderId
+      done()
+    }
+
+    openUnsavedTestSession(saveTestSessionAndCaptureSessionFolderId)
   })
 
   it('Deletes the session folder.', function (done) {
-    deleteSession(expectedDeletedSessionFolderId, tryGetSessionFolder) // Method under test.
-
-    function tryGetSessionFolder (sessionFolderId) {
+    var tryGetSessionFolder = (sessionFolderId) => {
       chrome.bookmarks.get(sessionFolderId.toString(), assertSessionFolderDeleted)
-      var sessionFolderDeleted = false
-
-      function assertSessionFolderDeleted (sessionFolderId) {
-        if (chrome.runtime.lastError) {
-          sessionFolderDeleted = true
-        }
-        expect(sessionFolderDeleted).toBe(true)
-        done()
-      }
+      this.sessionFolderDeleted = false
     }
+
+    var assertSessionFolderDeleted = (sessionFolderId) => {
+      if (chrome.runtime.lastError) {
+        this.sessionFolderDeleted = true
+      }
+      expect(this.sessionFolderDeleted).toBe(true)
+      done()
+    }
+
+    deleteSession(this.expectedDeletedSessionFolderId, tryGetSessionFolder) // Method under test.
   })
 
   afterEach(function (done) {
