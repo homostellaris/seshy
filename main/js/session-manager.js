@@ -8,7 +8,6 @@ function Session (aWindow, bookmarkFolder) {
   this.tabs = aWindow ? aWindow.tabs : bookmarkFolder.children
 
   var listId = aWindow ? 'currently-open-sessions' : 'saved-sessions'
-  console.log(listId)
   var sessionList = document.getElementById(listId)
 
   var sessionElement = document.createElement('li')
@@ -54,7 +53,6 @@ Session.prototype.addEventListeners = function () {
     for (var i = 0; i < selectedSessions.length; i++) {
       selectedSessions[i].classList.remove('selected')
     }
-    console.log(this.element)
     this.element.classList.add('selected')
   })
 }

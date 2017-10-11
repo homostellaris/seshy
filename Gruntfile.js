@@ -20,7 +20,15 @@ module.exports = function(grunt) {
           // Copy all test files.
           {expand: true, src: ['test/**'], dest: 'output/'},
           // Copy necessary implementation files.
-          {expand: true, flatten: true, src: ['main/js/*', 'main/html/session-manager.html'], dest: 'output/test/'}
+          {expand: true, flatten: true, src: ['main/js/*', 'main/html/session-manager.html'], dest: 'output/test/'},
+          {
+            expand: true,
+            flatten: true,
+            src: [
+              'node_modules/material-components-web/dist/material-components-web.js',
+            ],
+            dest: 'output/test/'
+          }
         ]
       },
       main: {
@@ -62,7 +70,7 @@ module.exports = function(grunt) {
       createTestArtefact: {
         // Creates output/test.crx which can then be loaded by Chrome Driver for running the tests.
         cmd: 'google-chrome-stable --pack-extension=output/test/ --pack-extension-key=seshy-development.pem  --disable-gpu'
-      }
+      },
     },
 
     crx: {

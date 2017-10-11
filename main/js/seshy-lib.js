@@ -1,5 +1,7 @@
 /* global chrome seshyFolderId:true */
 
+// TODO See if using Chrome messages API to communicate with Seshy lib will utilise multiple threads and therefore
+// improve performance.
 // ---===~ Initialisation ~===------------------------------------------------------------------------------------------
 function checkIfSeshyFolderExists () {
   console.log('Checking for existing Seshy folder.')
