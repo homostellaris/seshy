@@ -8,6 +8,7 @@ function Session (aWindow, bookmarkFolder) {
   this.tabs = aWindow ? aWindow.tabs : bookmarkFolder.children
 
   var listId = aWindow ? 'currently-open-sessions' : 'saved-sessions'
+  console.log(listId)
   var sessionList = document.getElementById(listId)
 
   var sessionElement = document.createElement('li')
@@ -49,16 +50,16 @@ Session.prototype.addEventListeners = function () {
     }
   })
   sessionNameInput.addEventListener('focus', (event) => {
-    var currentlySelectedSession = document.getElementsByClassName('selected')
-    if (currentlySelectedSession.length > 0) {
-      currentlySelectedSession[0].classList.remove('selected')
+    var selectedSessions = document.getElementsByClassName('selected')
+    for (var i = 0; i < selectedSessions.length; i++) {
+      selectedSessions[i].classList.remove('selected')
     }
+    console.log(this.element)
     this.element.classList.add('selected')
   })
 }
 
 // ---===~ Functions ~===-----------------------------------------------------------------------------------------------
-
 function setUp () {
   createSessionElements()
 }
@@ -69,12 +70,16 @@ function setUp () {
 function createSessionElements () {
   getAllOpenWindows((windows) => {
     for (var i = 0; i < windows.length; i++) {
-      Session(windows[i], null)
+      /* eslint-disable no-new */
+      new Session(windows[i], null)
+      /* eslint-enable no-new */
     }
   })
   getAllSessionFolders((sessionFolders) => {
     for (var i = 0; i < sessionFolders.length; i++) {
-      Session(null, sessionFolders[i])
+      /* eslint-disable no-new */
+      new Session(null, sessionFolders[i])
+      /* eslint-enable no-new */
     }
     focusFirstSessionCard()
     window.mdc.autoInit()
