@@ -17,18 +17,7 @@ module.exports = function(grunt) {
     copy: {
       test: {
         files: [
-          // Copy all test files.
-          {expand: true, src: ['test/**'], dest: 'output/'},
-          // Copy necessary implementation files.
-          {expand: true, flatten: true, src: ['main/js/*', 'main/html/session-manager.html'], dest: 'output/test/'},
-          {
-            expand: true,
-            flatten: true,
-            src: [
-              'node_modules/material-components-web/dist/material-components-web.js',
-            ],
-            dest: 'output/test/'
-          }
+          {expand: true, src: ['test/**'], dest: 'output/'}
         ]
       },
       main: {
@@ -69,13 +58,13 @@ module.exports = function(grunt) {
       },
       createTestArtefact: {
         // Creates output/test.crx which can then be loaded by Chrome Driver for running the tests.
-        cmd: 'google-chrome-stable --pack-extension=output/test/ --pack-extension-key=seshy-development.pem  --disable-gpu'
+        cmd: 'google-chrome-stable --pack-extension=output/ --pack-extension-key=seshy-development.pem  --disable-gpu'
       },
     },
 
     crx: {
       createTestArtefact: {
-        src: 'output/test/**/*',
+        src: ['test/**/*', 'main/**/*', '!main/manifest.json'],
         dest: 'output/test.crx',
         options: {
           privateKey: 'seshy-development.pem'
@@ -92,6 +81,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-crx');
 
   grunt.registerTask('lint', ['eslint']);
-  grunt.registerTask('test', ['lint', 'clean:output', 'copy:test', 'crx:createTestArtefact', 'exec:test']);
+  // TODO Can selectively copy files into CRX so earlier copy and clean tasks may be unnecessary.
+  grunt.registerTask('test', ['lint', 'clean:output', 'copy:main', 'copy:test', 'crx:createTestArtefact', 'exec:test']);
   grunt.registerTask('run', ['clean:output', 'copy:main', 'exec:run']);
 };
