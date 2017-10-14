@@ -5,22 +5,16 @@ createSessionBookmarksFolder getAllLocalStorage isFunction */
 
 describe('Session selection.', function () {
   beforeEach(function (done) {
+    this.windowIds = []
+
     var createSessionManagerDom = (callback) => {
-      var container = document.getElementById('test-container')
-      container.innerHTML = `
+      this.container = document.getElementById('test-container')
+      this.container.innerHTML = `
         <ul id="currently-open-sessions">
-          <li class="session-card"></li>
-          <li class="session-card"></li>
-          <li class="session-card"></li>
         </ul>
         <ul id="saved-sessions">
-          <li class="session-card"></li>
-          <li class="session-card"></li>
-          <li class="session-card"></li>
         </ul>
       `
-      this.currentlyOpenSession = container.getElementsByClassName('session-card')[1]
-
       isFunction(callback) && callback()
     }
 
@@ -31,22 +25,23 @@ describe('Session selection.', function () {
           this.tabsInfo = getTabsOrBookmarksInfo(this.windowId)
         })
         if (i === 2) {
-          setUp()
-          setTimeout(done, 1000)
+          createSessionManagerDom(() => {
+            setUp(getCurrentlyOpenSessionAndCallDone)
+          })
         }
       }
     }
 
-    // TODO Get rid of this setTimeout to wait for Seshy bookmarks folder to be created when running this test by itself.
-    this.windowIds = []
-    setTimeout(() => {
-      createSessionManagerDom(openThreeUnsavedTestSessions)
-    }, 1000)
+    var getCurrentlyOpenSessionAndCallDone = () => {
+      this.currentlyOpenSession = this.container.getElementsByClassName('session-card')[2]
+      done()
+    }
 
     var fakeGetCurrentWindow = (getInfo, callback) => {
       var fakeWindow = {id: this.windowIds[1]}
       callback(fakeWindow)
     }
+
     var fakeGetAllOpenWindows = (callback) => {
       var fakeWindows = [
         {
@@ -65,8 +60,13 @@ describe('Session selection.', function () {
       callback(fakeWindows)
     }
 
-    spyOn(chrome.windows, 'getCurrent').and.callFake(fakeGetCurrentWindow)
+    // spyOn(chrome.windows, 'getCurrent').and.callFake(fakeGetCurrentWindow)
     // spyOn(window, 'getAllOpenWindows').and.callFake(fakeGetAllOpenWindows)
+
+    // TODO Get rid of this setTimeout to wait for Seshy bookmarks folder to be created when running this test by itself.
+    setTimeout(() => {
+      openThreeUnsavedTestSessions()
+    }, 1000)
   })
 
   afterEach(function (done) {

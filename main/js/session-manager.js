@@ -1,4 +1,4 @@
-/* global mdc getAllOpenWindows getAllSessionFolders resumeSession */
+/* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction */
 
 // ---===~ Classes ~===-------------------------------------------------------------------------------------------------
 function Session (aWindow, bookmarkFolder) {
@@ -58,14 +58,18 @@ Session.prototype.addEventListeners = function () {
 }
 
 // ---===~ Functions ~===-----------------------------------------------------------------------------------------------
-function setUp () {
-  createSessionElements()
+function setUp (callback) {
+  if (isFunction(callback)) {
+    createSessionElements(callback)
+  } else {
+    createSessionElements()
+  }
 }
 
 /**
  * Create all the HTML for sessions.
  */
-function createSessionElements () {
+function createSessionElements (callback) {
   getAllOpenWindows((windows) => {
     for (var i = 0; i < windows.length; i++) {
       /* eslint-disable no-new */
@@ -81,6 +85,8 @@ function createSessionElements () {
     }
     focusFirstSessionCard()
     window.mdc.autoInit()
+
+    if (isFunction(callback)) callback()
   })
 }
 
