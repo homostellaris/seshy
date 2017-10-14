@@ -64,7 +64,12 @@ module.exports = function(grunt) {
 
     crx: {
       createTestArtefact: {
-        src: ['test/**/*', 'main/**/*', '!main/manifest.json'],
+        src: [
+          'test/**/*',
+          'main/**/*',
+          '!main/manifest.json',
+          'node_modules/material-components-web/dist/material-components-web.js'
+        ],
         dest: 'output/test.crx',
         options: {
           privateKey: 'seshy-development.pem'

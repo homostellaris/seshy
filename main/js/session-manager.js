@@ -85,6 +85,7 @@ function createSessionElements () {
 }
 
 function focusFirstSessionCard () {
+  console.log('Focusing first session card.')
   var firstSessionNameInput = document.getElementsByClassName('session-name-input')[0]
   firstSessionNameInput.focus()
 }

@@ -1,13 +1,30 @@
 // TODO Do something about all these.
 /* global chrome saveSession resumeSession tabEqualToBookmark getSession getTabsOrBookmarksInfo createTabs setUp
 removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSeshyFolder openUnsavedTestSession
-createSessionBookmarksFolder getAllLocalStorage */
+createSessionBookmarksFolder getAllLocalStorage isFunction */
 
 describe('Session selection.', function () {
   beforeEach(function (done) {
-    // TODO Get rid of this setTimeout to wait for Seshy bookmarks folder to be created when running this test by itself.
-    this.windowIds = []
-    setTimeout(() => {
+    var createSessionManagerDom = (callback) => {
+      var container = document.getElementById('test-container')
+      container.innerHTML = `
+        <ul id="currently-open-sessions">
+          <li class="session-card"></li>
+          <li class="session-card"></li>
+          <li class="session-card"></li>
+        </ul>
+        <ul id="saved-sessions">
+          <li class="session-card"></li>
+          <li class="session-card"></li>
+          <li class="session-card"></li>
+        </ul>
+      `
+      this.currentlyOpenSession = container.getElementsByClassName('session-card')[1]
+
+      isFunction(callback) && callback()
+    }
+
+    var openThreeUnsavedTestSessions = () => {
       for (var i = 0; i < 3; i++) {
         openUnsavedTestSession((newWindowId) => {
           this.windowIds.push(newWindowId)
@@ -18,22 +35,13 @@ describe('Session selection.', function () {
           setTimeout(done, 1000)
         }
       }
-    }, 1000)
+    }
 
-    var container = document.getElementById('test-container')
-    container.innerHTML = `
-      <ul id="currently-open-sessions">
-        <li class="session-card"></li>
-        <li class="session-card"></li>
-        <li class="session-card"></li>
-      </ul>
-      <ul id="saved-sessions">
-        <li class="session-card"></li>
-        <li class="session-card"></li>
-        <li class="session-card"></li>
-      </ul>
-    `
-    this.currentlyOpenSession = container.getElementsByClassName('session-card')[1]
+    // TODO Get rid of this setTimeout to wait for Seshy bookmarks folder to be created when running this test by itself.
+    this.windowIds = []
+    setTimeout(() => {
+      createSessionManagerDom(openThreeUnsavedTestSessions)
+    }, 1000)
 
     var fakeGetCurrentWindow = (getInfo, callback) => {
       var fakeWindow = {id: this.windowIds[1]}
