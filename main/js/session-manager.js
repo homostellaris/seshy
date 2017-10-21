@@ -1,4 +1,4 @@
-/* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction */
+/* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction done */
 
 // ---===~ Classes ~===-------------------------------------------------------------------------------------------------
 function Session (aWindow, bookmarkFolder) {
@@ -32,38 +32,31 @@ Session.prototype.saved = function () {
 }
 
 Session.prototype.addEventListeners = function () {
-  // var shelveButtons = document.getElementsByClassName('shelve')
-  // console.log(shelveButtons.length + ' shelve buttons found.')
-  // for (let i = 0; i < shelveButtons.length; i++) {
-  //   var shelveButton = shelveButtons[i]
-  //   shelveButton.addEventListener('click', () => {
-  //     alert('Saving!')
-  //     resumeSession(session.id)
-  //   })
-  // }
-
   var sessionNameInput = this.element.getElementsByClassName('session-name-input')[0]
   sessionNameInput.addEventListener('keydown', (event) => {
     if (event.keyCode === 13) {
       alert('Saving new name!')
     }
   })
+
   sessionNameInput.addEventListener('focus', (event) => {
+    console.log('Focus event handler triggered. Removing selected class from existing elements.')
     var selectedSessions = document.getElementsByClassName('selected')
     for (var i = 0; i < selectedSessions.length; i++) {
       selectedSessions[i].classList.remove('selected')
     }
+    console.log('Adding selected class to focused element.')
     this.element.classList.add('selected')
   })
 }
 
 // ---===~ Functions ~===-----------------------------------------------------------------------------------------------
 function setUp (callback) {
-  if (isFunction(callback)) {
-    createSessionElements(callback)
-  } else {
-    createSessionElements()
+  var done = () => {
+    window.mdc.autoInit()
+    if (isFunction(callback)) callback()
   }
+  createSessionElements(done)
 }
 
 /**
@@ -75,6 +68,9 @@ function createSessionElements (callback) {
       /* eslint-disable no-new */
       new Session(windows[i], null)
       /* eslint-enable no-new */
+      if (i === windows.length - 1) {
+        focusCurrentlyOpenSession(callback)
+      }
     }
   })
   getAllSessionFolders((sessionFolders) => {
@@ -83,17 +79,14 @@ function createSessionElements (callback) {
       new Session(null, sessionFolders[i])
       /* eslint-enable no-new */
     }
-    focusFirstSessionCard()
-    window.mdc.autoInit()
-
-    if (isFunction(callback)) callback()
   })
 }
 
-function focusFirstSessionCard () {
-  console.log('Focusing first session card.')
+function focusCurrentlyOpenSession (callback) {
+  console.log('Focusing currently open session.')
   var firstSessionNameInput = document.getElementsByClassName('session-name-input')[0]
   firstSessionNameInput.focus()
+  if (isFunction(callback)) callback()
 }
 
 /**

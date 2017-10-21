@@ -3,8 +3,8 @@
 removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSeshyFolder openUnsavedTestSession
 createSessionBookmarksFolder getAllLocalStorage isFunction */
 
-describe('Session selection.', function () {
-  beforeEach(function (done) {
+xdescribe('Session selection.', function () {
+  beforeAll(function (done) {
     this.windowIds = []
 
     var createSessionManagerDom = (callback) => {
@@ -15,7 +15,7 @@ describe('Session selection.', function () {
         <ul id="saved-sessions">
         </ul>
       `
-      isFunction(callback) && callback()
+      if (isFunction(callback)) callback()
     }
 
     var openThreeUnsavedTestSessions = () => {
@@ -23,67 +23,44 @@ describe('Session selection.', function () {
         openUnsavedTestSession((newWindowId) => {
           this.windowIds.push(newWindowId)
           this.tabsInfo = getTabsOrBookmarksInfo(this.windowId)
+          if (this.windowIds.length === 3) {
+            createSessionManagerDom(() => {
+              setUp(() => {
+                setTimeout(done, 1000)
+              })
+            })
+          }
         })
-        if (i === 2) {
-          createSessionManagerDom(() => {
-            setUp(getCurrentlyOpenSessionAndCallDone)
-          })
-        }
       }
     }
 
-    var getCurrentlyOpenSessionAndCallDone = () => {
-      this.currentlyOpenSession = this.container.getElementsByClassName('session-card')[2]
-      done()
-    }
-
-    var fakeGetCurrentWindow = (getInfo, callback) => {
-      var fakeWindow = {id: this.windowIds[1]}
-      callback(fakeWindow)
-    }
-
-    var fakeGetAllOpenWindows = (callback) => {
-      var fakeWindows = [
-        {
-          id: 4,
-          tabs: getTabsOrBookmarksInfo(4)
-        },
-        {
-          id: 5,
-          tabs: getTabsOrBookmarksInfo(5)
-        },
-        {
-          id: 6,
-          tabs: getTabsOrBookmarksInfo(6)
-        }
-      ]
-      callback(fakeWindows)
-    }
-
-    // spyOn(chrome.windows, 'getCurrent').and.callFake(fakeGetCurrentWindow)
-    // spyOn(window, 'getAllOpenWindows').and.callFake(fakeGetAllOpenWindows)
-
     // TODO Get rid of this setTimeout to wait for Seshy bookmarks folder to be created when running this test by itself.
-    setTimeout(() => {
-      openThreeUnsavedTestSessions()
-    }, 1000)
+    openThreeUnsavedTestSessions()
   })
 
-  afterEach(function (done) {
+  afterAll(function (done) {
     cleanUp(done)
+    console.log('FINISHED!')
   })
 
-  it('Selects the currently open session when opened.', function (done) {
-    expect(this.currentlyOpenSession.classList.contains('selected')).toBe(true)
-    done()
+  it('Focuses the currently open session when opened.', function () {
+    console.log('Asserting focused.')
+    // Currently open session will be the last opened window and therefore the last one in the list.
+    let currentlyOpenSession = this.container.getElementsByClassName('session-card')[3]
+    let currentlyOpenSessionNameInput = currentlyOpenSession.getElementsByClassName('session-name-input')[0]
+    expect(currentlyOpenSessionNameInput).toBe(document.activeElement)
   })
 
-  xit('Assigns \'selected\' class to session with focus.', function () {
-    expect(this.savedSessions.classList.contains('selected')).toBe(true)
+  it('Assigns \'selected\' class to session with focus.', function () {
+    console.log('Asserting selected.')
+    // Currently open session will be the last opened window and therefore the last one in the list.
+    let currentlyOpenSession = this.container.getElementsByClassName('session-card')[3]
+    expect(currentlyOpenSession.classList.contains('selected')).toBe(true)
   })
 
-  xit('Only ever assigns one session card the \'selected\' class.', function () {
-    // Not implemented.
+  it('Only ever assigns one session card the \'selected\' class.', function () {
+    let currentlyOpenSession = this.container.getElementsByClassName('selected')
+    expect(currentlyOpenSession.length).toBe(1)
   })
 
   xit('Creates an orange border around the currently open session.', () => {
