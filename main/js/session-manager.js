@@ -33,11 +33,11 @@ Session.prototype.saved = function () {
 
 Session.prototype.addEventListeners = function () {
   var sessionNameInput = this.element.getElementsByClassName('session-name-input')[0]
-  sessionNameInput.addEventListener('keydown', (event) => {
-    if (event.keyCode === 13) {
-      alert('Saving new name!')
-    }
-  })
+  // sessionNameInput.addEventListener('keydown', (event) => {
+  //   if (event.keyCode === 13) {
+  //     alert('Saving new name!')
+  //   }
+  // })
 
   sessionNameInput.addEventListener('focus', (event) => {
     console.log('Focus event handler triggered. Removing selected class from existing elements.')
@@ -53,6 +53,7 @@ Session.prototype.addEventListeners = function () {
 // ---===~ Functions ~===-----------------------------------------------------------------------------------------------
 function setUp (callback) {
   var done = () => {
+    addKeyboardShortcuts()
     window.mdc.autoInit()
     if (isFunction(callback)) callback()
   }
@@ -99,7 +100,7 @@ function getSessionInnerHtml (title, tabs) {
     </span>
     <span class="mdc-list-item__text">
       <div class="mdc-textfield mdc-textfield--dense">
-        <input class="mdc-textfield__input session-name-input" type="text" placeholder="Unsaved Session">
+        <input class="mdc-textfield__input session-name-input" type="text" placeholder="${title}">
       </div>
       <span class="mdc-list-item__text__secondary">
         ${tabs.length} tabs
@@ -112,4 +113,122 @@ function getSessionInnerHtml (title, tabs) {
     </span>
   `
   return innerHtml
+}
+
+function addKeyboardShortcuts () {
+  document.addEventListener('keydown', (event) => {
+    console.log('Keydown event triggered.')
+    switch(event.keyCode) {
+        case 37: // Left arrow key.
+          selectLastSessionInPreviousSessionList()
+        break;
+
+        case 38: // Up arrow key.
+          selectPreviousSession()
+        break;
+
+        case 39: // Right arrow key.
+          selectFirstSessionInNextSessionList()
+        break;
+
+        case 40: // Down arrow key.
+          selectNextSession()
+        break;
+
+        default: return; // exit this handler for other keys
+    }
+    event.preventDefault(); // prevent the default action (scroll / move caret)
+  })
+}
+
+function selectNextSession () {
+  var session = getNextSession()
+  if (session === null) {
+    selectFirstSessionInNextSessionList()
+  } else {
+    var sessionNameInput = getSessionNameInput(session)
+    sessionNameInput.focus()
+  }
+}
+
+function selectPreviousSession () {
+  var session = getPreviousSession()
+  if (session === null) {
+    selectLastSessionInPreviousSessionList()
+  } else {
+    var sessionNameInput = getSessionNameInput(session)
+    sessionNameInput.focus()
+  }
+}
+
+function selectFirstSessionInNextSessionList () {
+  var nextSessionList = getNextSessionList()
+  var firstSessionInNextSessionList = getSessionsFromSessionList(nextSessionList)[0]
+  var sessionNameInput = getSessionNameInput(firstSessionInNextSessionList)
+  sessionNameInput.focus()
+}
+
+function selectLastSessionInPreviousSessionList () {
+  var previousSessionList = getPreviousSessionList()
+  var sessions = getSessionsFromSessionList(previousSessionList)
+  var lastSessionInPreviousSessionList = sessions[sessions.length - 1]
+  var sessionNameInput = getSessionNameInput(lastSessionInPreviousSessionList)
+  sessionNameInput.focus()
+}
+
+function getSelectedSession () {
+  return document.getElementsByClassName('selected')[0]
+}
+
+function getSessionNameInput (session) {
+  return session.getElementsByClassName('session-name-input')[0]
+}
+
+function getNextSession () {
+  var session = getSelectedSession()
+  return session.nextElementSibling
+}
+
+function getPreviousSession () {
+  var session = getSelectedSession()
+  return session.previousElementSibling
+}
+
+function getNextSessionList () {
+  var currentlySelectedSession = getSelectedSession()
+  var currentSessionList = currentlySelectedSession.parentElement
+  var sessionLists = getSessionLists()
+
+  for (var i = 0; i < sessionLists.length; i++) {
+    var sessionList = sessionLists[i]
+    if (sessionList === currentSessionList) {
+      var nextSessionListIndex = ++i % sessionLists.length
+    }
+  }
+
+  return sessionLists[nextSessionListIndex]
+}
+
+function getPreviousSessionList () {
+  var currentlySelectedSession = getSelectedSession()
+  var currentSessionList = currentlySelectedSession.parentElement
+  var sessionLists = getSessionLists()
+
+  for (var i = 0; i < sessionLists.length; i++) {
+    var sessionList = sessionLists[i]
+    if (sessionList === currentSessionList) {
+      var previousSessionListIndex = (sessionLists.length + --i) % sessionLists.length
+      break // Otherwise infinite loop.
+    }
+  }
+
+  return sessionLists[previousSessionListIndex]
+}
+
+function getSessionLists () {
+  return document.getElementsByClassName('session-list')
+}
+
+function getSessionsFromSessionList(sessionList) {
+  return sessionList.getElementsByClassName('session-card')
 }
