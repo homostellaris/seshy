@@ -36,7 +36,7 @@ function createSeshyFolder () {
 
 // ---===~ Session Management ~===--------------------------------------------------------------------------------------
 // Public methods
-function saveSession (windowId) {
+function saveSession (windowId, callback) {
   var sessionWindow
   var tabs
   var sessionFolderId
@@ -109,7 +109,11 @@ function saveSession (windowId) {
   }
 
   function callStoreWindowToSessionFolderMapping (bookmarkTreeNode) {
-    storeWindowToSessionFolderMapping(sessionWindow.id, sessionFolderId)
+    if (isFunction(callback)) {
+      storeWindowToSessionFolderMapping(sessionWindow.id, sessionFolderId, callback)
+    } else {
+      storeWindowToSessionFolderMapping(sessionWindow.id, sessionFolderId)
+    }
   }
 }
 

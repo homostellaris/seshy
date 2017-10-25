@@ -1,4 +1,4 @@
-/* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction done */
+/* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction done chrome saveSession */
 
 // ---===~ Classes ~===-------------------------------------------------------------------------------------------------
 function Session (aWindow, bookmarkFolder) {
@@ -33,11 +33,6 @@ Session.prototype.saved = function () {
 
 Session.prototype.addEventListeners = function () {
   var sessionNameInput = this.element.getElementsByClassName('session-name-input')[0]
-  // sessionNameInput.addEventListener('keydown', (event) => {
-  //   if (event.keyCode === 13) {
-  //     alert('Saving new name!')
-  //   }
-  // })
 
   sessionNameInput.addEventListener('focus', (event) => {
     console.log('Focus event handler triggered. Removing selected class from existing elements.')
@@ -85,9 +80,23 @@ function createSessionElements (callback) {
 
 function focusCurrentlyOpenSession (callback) {
   console.log('Focusing currently open session.')
-  var firstSessionNameInput = document.getElementsByClassName('session-name-input')[0]
-  firstSessionNameInput.focus()
-  if (isFunction(callback)) callback()
+  var focusSessionNameInput = (currentlyOpenWindow) => {
+    var currentlyOpenSessionList = getSessionLists()[0]
+    var sessions = getSessionsFromSessionList(currentlyOpenSessionList)
+
+    for (var i = 0; i < sessions.length; i++) {
+      var session = sessions[i]
+
+      if (currentlyOpenWindow === session.window) {
+        var currentlyOpenSessionNameInput = getSessionNameInput(session)
+        currentlyOpenSessionNameInput.focus()
+        currentlyOpenSessionNameInput.select()
+        if (isFunction(callback)) callback()
+      }
+    }
+  }
+
+  chrome.windows.getCurrent(null, focusSessionNameInput)
 }
 
 /**
@@ -100,7 +109,7 @@ function getSessionInnerHtml (title, tabs) {
     </span>
     <span class="mdc-list-item__text">
       <div class="mdc-textfield mdc-textfield--dense">
-        <input class="mdc-textfield__input session-name-input" type="text" placeholder="${title}">
+        <input class="mdc-textfield__input session-name-input" type="text" value="${title}">
       </div>
       <span class="mdc-list-item__text__secondary">
         ${tabs.length} tabs
@@ -118,26 +127,30 @@ function getSessionInnerHtml (title, tabs) {
 function addKeyboardShortcuts () {
   document.addEventListener('keydown', (event) => {
     console.log('Keydown event triggered.')
-    switch(event.keyCode) {
-        case 37: // Left arrow key.
-          selectLastSessionInPreviousSessionList()
-        break;
+    switch (event.keyCode) {
+      case 37: // `LEFT` arrow key.
+        selectLastSessionInPreviousSessionList()
+        break
 
-        case 38: // Up arrow key.
-          selectPreviousSession()
-        break;
+      case 38: // `UP` arrow key.
+        selectPreviousSession()
+        break
 
-        case 39: // Right arrow key.
-          selectFirstSessionInNextSessionList()
-        break;
+      case 39: // `RIGHT` arrow key.
+        selectFirstSessionInNextSessionList()
+        break
 
-        case 40: // Down arrow key.
-          selectNextSession()
-        break;
+      case 40: // `DOWN` arrow key.
+        selectNextSession()
+        break
 
-        default: return; // exit this handler for other keys
+      case 83: // `s` key.
+        saveSession()
+        break
+
+      default: return // exit this handler for other keys
     }
-    event.preventDefault(); // prevent the default action (scroll / move caret)
+    event.preventDefault() // prevent the default action (scroll / move caret)
   })
 }
 
@@ -182,6 +195,12 @@ function getSelectedSession () {
 
 function getSessionNameInput (session) {
   return session.getElementsByClassName('session-name-input')[0]
+}
+
+function getSelectedSessionNameInput () {
+  var selectedSession = getSelectedSession()
+  var selectedSessionNameInput = getSessionNameInput(selectedSession)
+  return selectedSessionNameInput
 }
 
 function getNextSession () {
@@ -229,6 +248,6 @@ function getSessionLists () {
   return document.getElementsByClassName('session-list')
 }
 
-function getSessionsFromSessionList(sessionList) {
+function getSessionsFromSessionList (sessionList) {
   return sessionList.getElementsByClassName('session-card')
 }
