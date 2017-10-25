@@ -67,7 +67,7 @@ xdescribe('Session selection.', function () {
     // Not implemented.
   })
 
-  xdescribe('Hotkeys.', () => {
+  xdescribe('Keyboard shortcuts.', () => {
     xit('Selects the session above the currently selected one when the `UP` arrow key is pressed.', () => {
       // Not implemented.
     })
