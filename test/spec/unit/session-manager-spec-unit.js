@@ -1,22 +1,5 @@
-describe('Session selection.', function () {
-  xit('Focuses the currently open session when opened.', function () {
-    // Not implemented.
-  })
-
-  xit('Assigns \'selected\' class to session with focus.', function () {
-    // Not implemented.
-  })
-
-  xit('Only ever assigns one session card the \'selected\' class.', function () {
-    let currentlyOpenSession = this.container.getElementsByClassName('selected')
-    expect(currentlyOpenSession.length).toBe(1)
-  })
-
-  xit('Creates an orange border around the currently open session.', () => {
-    // Not implemented.
-  })
-
-  describe('Keyboard shortcuts.', () => {
+describe('Session manager.', function () {
+  describe('Keyboard shortcuts.', function () {
     describe('Selects the session above the currently selected one when the `UP` arrow key is pressed.', () => {
       xit('The `UP` arrow key calls `selectPreviousSession()`.', () => {
         // Not implemented.
@@ -146,5 +129,15 @@ describe('Session selection.', function () {
         })
       })
     })
+
+    describe('Renames the session when the `r` key is pressed.', function () {
+      describe('Saves the session when the `ENTER` key is pressed during renaming.', function () {
+        console.log('Unimplemented test.')
+      })
+    })
+  })
+
+  describe('Fills the save icon blue when it a session is saved.', function () {
+    console.log('Unimplemented test.')
   })
 })

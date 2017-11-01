@@ -61,3 +61,7 @@ button {
 .selected {
   border: 1px solid blue;
 }
+
+.shelved {
+  color: blue;
+}

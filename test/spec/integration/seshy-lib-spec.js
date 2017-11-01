@@ -4,80 +4,128 @@ removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSesh
 createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession */
 
 describe('Seshy lib', function () {
-  describe('Saving sessions.', function () {
+  describe('Creating sessions.', function () {
     beforeEach(function (done) {
-      openUnsavedTestSession((newWindowId) => {
-        this.windowId = newWindowId
-        this.tabsInfo = getTabsOrBookmarksInfo(this.windowId)
+      spyOn(chrome.storage.local, 'remove')
+      openUnsavedTestSession((windowId) => {
+        this.windowId = windowId
         done()
       })
     })
 
-    it('Should be able to save a set of tabs as bookmarks in a folder.', function (done) {
-      callTest.call(this, done) // Rebinds `this` to Jasmine's context so that test variables can be passed around.
-    })
-
-    it('Should delete all the bookmarks in the session folder before saving an existing session.', function (done) {
-      saveTestSession(this.windowId, () => {
-        callTest.call(this, done)
-      })
-    })
-
-    xit('Saves a session if it is given a name and it is not already saved.', function (done) {
-      console.log('Unimplemented test.')
+    it('Removes window to session mappings that have the same window ID as the newly opened window.', function (done) {
+      // There is an event listener on removal of windows that removes session mappings but unfortunately this does
+      // not work on the last window. Chrome closes before the cleanup can be done. Must therefore check on window
+      // creation too.
+      expect(chrome.storage.local.remove.calls.count()).toEqual(1)
+      expect(chrome.storage.local.remove.calls.argsFor(0)).toEqual([this.windowId.toString()])
       done()
     })
+  })
 
-    xit('Puts the text field for the current session\'s name into edit mode ready to be saved when the session manager ' +
-    'is opened and the current session is not already saved.', function (done) {
-      console.log('Unimplemented test.')
-      done()
+  describe('Saving sessions.', function () {
+    beforeEach(function (done) {
+      // TODO Extract this common setup into a test-data-creator function.
+      var saveTestSessionAndCaptureSessionFolder = (newWindowId) => {
+        this.windowId = newWindowId
+        saveTestSession(this.windowId, (sessionFolderId) => {
+          this.sessionFolderId = sessionFolderId
+          getSessionFolderBookmarks(sessionFolderId, captureSessionFolderBookmarks)
+        })
+      }
+
+      var captureSessionFolderBookmarks = (sessionFolderBookmarks) => {
+        this.sessionFolderBookmarks = sessionFolderBookmarks
+        done()
+      }
+
+      openUnsavedTestSession(saveTestSessionAndCaptureSessionFolder)
     })
 
-    xit('Only saves sessions the user has flagged to be saved.', function (done) {
+    var assertBookmarks = (expectedTabSetNumber, sessionFolderBookmarks) => {
+      var expectedTabsInfo = getTabsOrBookmarksInfo(null, true, expectedTabSetNumber)
+      for (var i = 0; i < sessionFolderBookmarks.length; i++) {
+        var bookmark = sessionFolderBookmarks[i]
+        var expectedTabInfo = expectedTabsInfo[i]
+        expect(bookmark.index).toEqual(expectedTabInfo.index)
+        expect(bookmark.url).toEqual(expectedTabInfo.url)
+      }
+    }
+
+    it('Should be able to save a set of tabs as bookmarks in a folder.', function () {
+      assertBookmarks(1, this.sessionFolderBookmarks)
+    })
+
+    it('Should save an already saved session to the same session folder as before.', function (done) {
+      var assertOneSessionFolder = (callback) => {
+        getAllSessionFolders((sessionFolders) => {
+          expect(sessionFolders.length).toBe(1)
+          callback()
+        })
+      }
+
+      var saveSessionAgain = () => {
+        saveSession(this.windowId, getSessionFolderBookmarksAndAssert)
+      }
+
+      var getSessionFolderBookmarksAndAssert = (sessionFolderId) => {
+        assertOneSessionFolder(done)
+      }
+
+      assertOneSessionFolder(saveSessionAgain)
+    })
+
+    it('Should overwrite the bookmarks in a folder when an already saved session is saved again.', function (done) {
+      var getTestWindow = () => {
+        chrome.windows.get(this.windowId, {'populate': true}, (testWindow) => {
+          this.testWindow = testWindow
+          expect(testWindow.id).toBe(this.windowId)
+          changeOpenTabs()
+        })
+      }
+
+      var changeOpenTabs = () => {
+        var tabs = this.testWindow.tabs
+        this.expectedTabsInfo = getTabsOrBookmarksInfo(null, false, 2)
+        for (var i = 0; i < tabs.length; i++) {
+          var tabId = tabs[i].id
+          // if (i === tabs.length - 1) {
+          //   chrome.tabs.update(tabId, {'url': this.expectedTabsInfo[i]['url']}, (tab) => {
+          //     saveSession(this.testWindow.id, getSessionFolderBookmarksAndAssert)
+          //   })
+          // } else {
+          //   chrome.tabs.update(tabId, {'url': this.expectedTabsInfo[i]['url']})
+          // }
+          chrome.tabs.update(tabId, {'url': this.expectedTabsInfo[i]['url']})
+        }
+        setTimeout(() => {
+          saveSession(this.testWindow.id, getSessionFolderBookmarksAndAssert)
+        }, 2000)
+      }
+
+      var getSessionFolderBookmarksAndAssert = () => {
+        getSessionFolderBookmarks(this.sessionFolderId, captureSessionFolderBookmarksAndAssert)
+      }
+
+      var captureSessionFolderBookmarksAndAssert = (sessionFolderBookmarks) => {
+        assertBookmarks(2, sessionFolderBookmarks)
+        done()
+      }
+
+      getTestWindow()
+    })
+
+    xit('Saves shelved sessions when their window is closed.', function (done) {
       console.log('Unimplemented test.')
-      done()
+    })
+
+    xit('Adds a window ID to session folder ID mapping in local storage.', function (done) {
+      console.log('Unimplemented test.')
     })
 
     afterEach(function (done) {
       cleanUp(done)
     })
-
-    function callTest (done) {
-      // This 'function expression' is not hoisted and so must be declared before is it referenced.
-      // No hoisting is a bit sad but using a function expression allows us to use an arrow function which does not
-      // rebind `this` and instead inherits `this` from its bounding scope which is useful for passing Jasmine's context.
-      var getBookmarksFolder = () => {
-        var query = {
-          'title': 'Test Session'
-        }
-        chrome.bookmarks.search(query, getBookmarks)
-      }
-
-      var getBookmarks = (bookmarkSessionFolderSearchResults) => {
-        // Only one bookmark session folder with the correct saved tabs ensures that the original bookmarks were deleted.
-        expect(bookmarkSessionFolderSearchResults.length).toEqual(1)
-
-        chrome.bookmarks.getChildren(bookmarkSessionFolderSearchResults[0].id, (bookmarkTreeNodes) => {
-          this.bookmarks = bookmarkTreeNodes
-          assertSavedBookmarks(this.bookmarks, this.tabsInfo)
-        })
-      }
-
-      saveSession(this.windowId) // Method under test.
-      setTimeout(getBookmarksFolder, 1000)
-
-      // This function does not access `this` and so can be a 'function declaration' and benefit from 'hoisting'.
-      function assertSavedBookmarks (bookmarks, expectedTabsInfo) {
-        for (var i = 0; i < bookmarks.length; i++) {
-          var bookmark = bookmarks[i]
-          var expectedTabInfo = expectedTabsInfo[i]
-          expect(bookmark.index).toEqual(expectedTabInfo.index)
-          expect(bookmark.url).toEqual(expectedTabInfo.url)
-        }
-        done()
-      }
-    }
   })
 
   describe('Resuming sessions.', function () {

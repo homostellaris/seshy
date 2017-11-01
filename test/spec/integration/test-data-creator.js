@@ -21,17 +21,17 @@ function saveTestSession (windowId, callback) {
   }
 }
 
-function openUnsavedTestSession (callback) {
+function openUnsavedTestSession (callback, tabSetNumber) {
   chrome.windows.create({}, (newWindow) => {
     var windowId = newWindow.id
-    var bookmarksInfo = getTabsOrBookmarksInfo(newWindow.id, false)
+    var tabsInfo = getTabsOrBookmarksInfo(newWindow.id, false, tabSetNumber)
 
     if (isFunction(callback)) {
-      createTabs(bookmarksInfo, () => {
+      createTabs(tabsInfo, () => {
         callback(windowId)
       })
     } else {
-      createTabs(bookmarksInfo)
+      createTabs(tabsInfo)
     }
   })
 }
@@ -91,12 +91,14 @@ function getTabsOrBookmarksInfo (windowOrParentId, asBookmarks, tabSetNumber) {
     tabsInfo = tabsInfo1
   }
 
-  for (var i = 0; i < tabsInfo.length; i++) {
-    var tabInfo = tabsInfo[i]
-    if (asBookmarks === true) {
-      tabInfo.parentId = windowOrParentId
-    } else {
-      tabInfo.windowId = windowOrParentId
+  if (windowOrParentId) {
+    for (var i = 0; i < tabsInfo.length; i++) {
+      var tabInfo = tabsInfo[i]
+      if (asBookmarks === true) {
+        tabInfo.parentId = windowOrParentId
+      } else {
+        tabInfo.windowId = windowOrParentId
+      }
     }
   }
   return tabsInfo
@@ -114,7 +116,7 @@ function createSessionBookmarksFolder (bookmarkTreeNodes, callback) {
 function createBookmarks (sessionBookmarksFolder, callback) {
   var asBookmarks = true
   var sessionFolderId = sessionBookmarksFolder.id
-  var bookmarksInfo = getTabsOrBookmarksInfo(sessionFolderId, asBookmarks, 2)
+  var bookmarksInfo = getTabsOrBookmarksInfo(sessionFolderId, asBookmarks)
 
   chrome.bookmarks.create(bookmarksInfo[0])
   chrome.bookmarks.create(bookmarksInfo[1])
@@ -151,6 +153,19 @@ function getSessionFolders (callback) {
   } else {
     chrome.bookmarks.getChildren(seshyFolderId)
   }
+}
+
+function getSessionFolderBookmarks(sessionFolderId, callback) {
+  var getSessionFolderChildren = (bookmarkTreeNodes) => {
+    var sessionFolder = bookmarkTreeNodes[0]
+    chrome.bookmarks.getChildren(sessionFolder.id, returnChildren)
+  }
+
+  var returnChildren = (bookmarkTreeNodes) => {
+    callback(bookmarkTreeNodes)
+  }
+
+  chrome.bookmarks.getSubTree(sessionFolderId, getSessionFolderChildren)
 }
 
 function removeBookmarkFolders (bookmarkTreeNodes) {

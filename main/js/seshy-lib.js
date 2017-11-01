@@ -36,19 +36,18 @@ function createSeshyFolder () {
 
 // ---===~ Session Management ~===--------------------------------------------------------------------------------------
 // Public methods
+// TODO Refactor to consume session objects instead of windows.
 function saveSession (windowId, callback) {
   var sessionWindow
   var tabs
   var sessionFolderId
 
   console.log('Saving tab set into bookmarks folder.')
-  chrome.windows.get(windowId, {populate: true}, checkIfExistingSavedSessionThenGetSessionFolder)
-
-  function checkIfExistingSavedSessionThenGetSessionFolder (windowToCheck) {
+  chrome.windows.get(windowId, {populate: true}, (windowToCheck) => {
     sessionWindow = windowToCheck
-    tabs = sessionWindow.tabs
-    getWindowToSessionFolderMapping(windowId, getSessionFolder)
-  }
+    tabs = windowToCheck.tabs
+    checkIfShelvedSession(windowToCheck, getSessionFolder)
+  })
 
   function getSessionFolder (existingSavedSessionMapping) {
     if (typeof existingSavedSessionMapping[sessionWindow.id] !== 'undefined') {
@@ -63,7 +62,7 @@ function saveSession (windowId, callback) {
 
     var bookmarkInfo = {
       'parentId': seshyFolderId,
-      'title': 'Test Session'
+      'title': 'sessionWindow'
     }
     chrome.bookmarks.create(bookmarkInfo, callSaveTabsAsBookmarksWithId)
 
@@ -146,9 +145,13 @@ function deleteSession (sessionFolderId, callback) {
 }
 
 function getSession (windowToCheck, callback) {
-  console.log('Checking if tab set is a saved session.')
   var tabs
-  getTabs(windowToCheck)
+
+  console.log('Clearing any left over window to session folder mapping.')
+  removeWindowToSessionFolderMapping(windowToCheck.id, () => {
+    console.log('Checking if tab set is a saved session.')
+    getTabs(windowToCheck)
+  })
 
   function getTabs (windowToCheck) {
     if (windowToCheck.tabs) {
@@ -230,8 +233,13 @@ function getAllOpenWindows (callback) {
   chrome.windows.getAll({'populate': true}, callback)
 }
 
+function checkIfShelvedSession (windowToCheck, callback) {
+  getWindowToSessionFolderMapping(windowToCheck.id, callback)
+}
+
 // ---===~ Storage ~===-------------------------------------------------------------------------------------------------
 function storeWindowToSessionFolderMapping (windowId, sessionFolderId, callback) {
+  console.log('Storing window to session folder mapping.')
   var windowToSessionFolderMapping = {}
   windowToSessionFolderMapping[windowId] = sessionFolderId
 

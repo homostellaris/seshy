@@ -42,6 +42,7 @@ Session.prototype.addEventListeners = function () {
     }
     console.log('Adding selected class to focused element.')
     this.element.classList.add('selected')
+    sessionNameInput.select()
   })
 }
 
@@ -86,11 +87,9 @@ function focusCurrentlyOpenSession (callback) {
 
     for (var i = 0; i < sessions.length; i++) {
       var session = sessions[i]
-
-      if (currentlyOpenWindow === session.window) {
+      if (currentlyOpenWindow.id === session.seshySession.window.id) {
         var currentlyOpenSessionNameInput = getSessionNameInput(session)
         currentlyOpenSessionNameInput.focus()
-        currentlyOpenSessionNameInput.select()
         if (isFunction(callback)) callback()
       }
     }
@@ -105,7 +104,7 @@ function focusCurrentlyOpenSession (callback) {
 function getSessionInnerHtml (title, tabs) {
   var innerHtml = `
     <span class="mdc-list-item__start-detail shelve">
-      <i class="material-icons">backup</i>
+      <i class="saved-state-icon material-icons">backup</i>
     </span>
     <span class="mdc-list-item__text">
       <div class="mdc-textfield mdc-textfield--dense">
@@ -117,7 +116,7 @@ function getSessionInnerHtml (title, tabs) {
     </span>
     <span class="mdc-list-item__end-detail">
       <button>
-        <i class="material-icons">open_in_new</i>
+        <i class="unshelve-icon material-icons">open_in_new</i>
       </button>
     </span>
   `
@@ -128,6 +127,17 @@ function addKeyboardShortcuts () {
   document.addEventListener('keydown', (event) => {
     console.log('Keydown event triggered.')
     switch (event.keyCode) {
+      case 13: // `ENTER` key.
+        var callSaveSession = () => {
+          var selectedSession = getSelectedSession()
+          var selectedSessionWindowId = selectedSession.seshySession.window.id
+          saveSession(selectedSessionWindowId, () => {
+            alert('SAVED!')
+          })
+        }
+        callSaveSession()
+        break
+
       case 37: // `LEFT` arrow key.
         selectLastSessionInPreviousSessionList()
         break
@@ -142,10 +152,6 @@ function addKeyboardShortcuts () {
 
       case 40: // `DOWN` arrow key.
         selectNextSession()
-        break
-
-      case 83: // `s` key.
-        saveSession()
         break
 
       default: return // exit this handler for other keys
