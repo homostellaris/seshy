@@ -15,11 +15,6 @@ module.exports = function(grunt) {
     },
 
     copy: {
-      test: {
-        files: [
-          {expand: true, src: ['test/**'], dest: 'output/'}
-        ]
-      },
       main: {
         files: [
           // Copy all implementation files.
@@ -55,11 +50,7 @@ module.exports = function(grunt) {
       },
       run: {
         cmd: 'google-chrome-unstable --load-extension="output/main/" --disable-gpu --auto-open-devtools-for-tabs'
-      },
-      createTestArtefact: {
-        // Creates output/test.crx which can then be loaded by Chrome Driver for running the tests.
-        cmd: 'google-chrome-stable --pack-extension=output/ --pack-extension-key=seshy-development.pem  --disable-gpu'
-      },
+      }
     },
 
     crx: {
@@ -86,7 +77,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-crx');
 
   grunt.registerTask('lint', ['eslint']);
+  grunt.registerTask('test', ['lint', 'crx:createTestArtefact', 'exec:test']);
   // TODO Can selectively copy files into CRX so earlier copy and clean tasks may be unnecessary.
-  grunt.registerTask('test', ['lint', 'clean:output', 'copy:main', 'copy:test', 'crx:createTestArtefact', 'exec:test']);
   grunt.registerTask('run', ['clean:output', 'copy:main', 'exec:run']);
 };
