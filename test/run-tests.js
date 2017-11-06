@@ -6,6 +6,7 @@ const until = webdriver.until
 
 var chromeOptions = new chrome.Options()
 chromeOptions.addExtensions('output/test.crx')
+chromeOptions.addArguments('start-maximized')
 
 var driver = new webdriver.Builder()
   .forBrowser('chrome')
