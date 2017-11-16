@@ -1,39 +1,43 @@
 /* global chrome saveSession resumeSession tabEqualToBookmark getSession seshyFolderId
 removeWindowToSessionFolderMapping deleteSession isFunction initialise */
 
-function saveTestSession (windowId, callback) {
+function saveTestSession (session, callback) {
   var expectedSessionFolderId
+
+  var createBookmarksThenSaveMapping = (sessionBookmarksFolder) => {
+    session.bookmarkFolder = sessionBookmarksFolder
+    expectedSessionFolderId = sessionBookmarksFolder.id
+
+    createBookmarks(sessionBookmarksFolder, () => {
+      addWindowToSessionMapping(session.window.id, expectedSessionFolderId, returnSessionFolderId)
+    })
+  }
+
+  var returnSessionFolderId = () => {
+    callback(expectedSessionFolderId)
+  }
 
   getSeshyFolder((seshyFolder) => {
     createSessionBookmarksFolder(seshyFolder, createBookmarksThenSaveMapping)
   })
-
-  function createBookmarksThenSaveMapping (sessionBookmarksFolder) {
-    expectedSessionFolderId = sessionBookmarksFolder.id
-
-    createBookmarks(sessionBookmarksFolder, () => {
-      addWindowToSessionMapping(windowId, expectedSessionFolderId, returnSessionFolderId)
-    })
-  }
-
-  function returnSessionFolderId () {
-    callback(expectedSessionFolderId)
-  }
 }
 
 function openUnsavedTestSession (callback, tabSetNumber) {
-  chrome.windows.create({}, (newWindow) => {
-    var windowId = newWindow.id
-    var tabsInfo = getTabsOrBookmarksInfo(newWindow.id, false, tabSetNumber)
+  tabSetNumber = tabSetNumber || 1
+  var createSession = (testWindow) => {
+    var session = new Session(testWindow)
+    if (isFunction(callback)) callback(session)
+  }
 
-    if (isFunction(callback)) {
-      createTabs(tabsInfo, () => {
-        callback(windowId)
-      })
-    } else {
-      createTabs(tabsInfo)
-    }
-  })
+  // chrome.windows.create({}, (testWindow) => {
+  //   var tabsInfo = getTabsOrBookmarksInfo(testWindow.id, false, tabSetNumber)
+  //   createTabs(tabsInfo, createSession)
+  // })
+  var tabUrls = getTabsOrBookmarksInfo(null, false, tabSetNumber, true)
+  var createData = {
+    url: tabUrls
+  }
+  chrome.windows.create(createData, createSession)
 }
 
 function createTabs (tabsInfo, callback) {
@@ -46,61 +50,42 @@ function createTabs (tabsInfo, callback) {
   }
 }
 
-function getTabsOrBookmarksInfo (windowOrParentId, asBookmarks, tabSetNumber) {
-  var tabsInfo1 = [
-    {
-      'index': 0,
-      'url': 'chrome://extensions/'
-    },
-    {
-      'index': 1,
-      'url': 'chrome://settings/'
-    },
-    {
-      'index': 2,
-      'url': 'chrome://about/'
-    },
-    {
-      'index': 3,
-      'url': 'chrome://newtab/'
-    }
-  ]
-  var tabsInfo2 = [
-    {
-      'index': 0,
-      'url': 'chrome://apps/'
-    },
-    {
-      'index': 1,
-      'url': 'chrome://downloads/'
-    },
-    {
-      'index': 2,
-      'url': 'chrome://history/'
-    },
-    {
-      'index': 3,
-      'url': 'chrome://newtab/'
-    }
-  ]
+function getTabsOrBookmarksInfo (windowOrParentId, asBookmarks, tabSetNumber, urlsOnly) {
+  var tabSetNumber = tabSetNumber || 1
+  var tabSetIndex = tabSetNumber - 1
 
-  var tabsInfo
-  if (tabSetNumber === 2) {
-    tabsInfo = tabsInfo2
-  } else {
-    tabsInfo = tabsInfo1
-  }
+  var tabUrls1 = [
+    'chrome://extensions/',
+    'chrome://settings/',
+    'chrome://about/',
+    'chrome://newtab/'
+  ]
+  var tabUrls2 = [
+    'chrome://apps/',
+    'chrome://downloads/',
+    'chrome://history/',
+    'chrome://newtab/'
+  ]
+  var tabUrls = [tabUrls1, tabUrls2]
 
-  if (windowOrParentId) {
-    for (var i = 0; i < tabsInfo.length; i++) {
-      var tabInfo = tabsInfo[i]
+  if (urlsOnly) return tabUrls[tabSetIndex]
+
+  var tabsInfo = []
+  for (var i = 0; i < 4; i++) {
+    var tabInfo = {
+      index: i,
+      url: tabUrls[tabSetIndex][i]
+    }
+    if (windowOrParentId) {
       if (asBookmarks === true) {
         tabInfo.parentId = windowOrParentId
       } else {
         tabInfo.windowId = windowOrParentId
       }
     }
+    tabsInfo[i] = tabInfo
   }
+
   return tabsInfo
 }
 
@@ -155,7 +140,7 @@ function getSessionFolders (callback) {
   }
 }
 
-function getSessionFolderBookmarks(sessionFolderId, callback) {
+function getSessionFolderBookmarks(bookmarkFolder, callback) {
   var getSessionFolderChildren = (bookmarkTreeNodes) => {
     var sessionFolder = bookmarkTreeNodes[0]
     chrome.bookmarks.getChildren(sessionFolder.id, returnChildren)
@@ -165,7 +150,7 @@ function getSessionFolderBookmarks(sessionFolderId, callback) {
     callback(bookmarkTreeNodes)
   }
 
-  chrome.bookmarks.getSubTree(sessionFolderId, getSessionFolderChildren)
+  chrome.bookmarks.getSubTree(bookmarkFolder.id, getSessionFolderChildren)
 }
 
 function removeBookmarkFolders (bookmarkTreeNodes) {

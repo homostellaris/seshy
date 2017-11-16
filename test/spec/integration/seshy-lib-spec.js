@@ -7,8 +7,8 @@ describe('Seshy lib', function () {
   describe('Creating sessions.', function () {
     beforeEach(function (done) {
       spyOn(chrome.storage.local, 'remove')
-      openUnsavedTestSession((windowId) => {
-        this.windowId = windowId
+      openUnsavedTestSession((session) => {
+        this.session = session
         done()
       })
     })
@@ -18,7 +18,7 @@ describe('Seshy lib', function () {
       // not work on the last window. Chrome closes before the cleanup can be done. Must therefore check on window
       // creation too.
       expect(chrome.storage.local.remove.calls.count()).toEqual(1)
-      expect(chrome.storage.local.remove.calls.argsFor(0)).toEqual([this.windowId.toString()])
+      expect(chrome.storage.local.remove.calls.argsFor(0)).toEqual([this.session.window.id.toString()])
       done()
     })
   })
@@ -26,17 +26,9 @@ describe('Seshy lib', function () {
   describe('Saving sessions.', function () {
     beforeEach(function (done) {
       // TODO Extract this common setup into a test-data-creator function.
-      var saveTestSessionAndCaptureSessionFolder = (newWindowId) => {
-        this.windowId = newWindowId
-        saveTestSession(this.windowId, (sessionFolderId) => {
-          this.sessionFolderId = sessionFolderId
-          getSessionFolderBookmarks(sessionFolderId, captureSessionFolderBookmarks)
-        })
-      }
-
-      var captureSessionFolderBookmarks = (sessionFolderBookmarks) => {
-        this.sessionFolderBookmarks = sessionFolderBookmarks
-        done()
+      var saveTestSessionAndCaptureSessionFolder = (session) => {
+        this.session = session
+        saveSession(session, done)
       }
 
       openUnsavedTestSession(saveTestSessionAndCaptureSessionFolder)
@@ -52,11 +44,13 @@ describe('Seshy lib', function () {
       }
     }
 
-    it('Should be able to save a set of tabs as bookmarks in a folder.', function () {
-      assertBookmarks(1, this.sessionFolderBookmarks)
+    it('Saves a set of tabs as bookmarks in a folder.', function () {
+      this.session.updateBookmarkFolder((updatedBookmarkFolder) => {
+        assertBookmarks(1, this.session.bookmarkFolder.children)
+      })
     })
 
-    it('Should save an already saved session to the same session folder as before.', function (done) {
+    it('Saves an already saved session to the same session folder as before.', function (done) {
       var assertOneSessionFolder = (callback) => {
         getAllSessionFolders((sessionFolders) => {
           expect(sessionFolders.length).toBe(1)
@@ -65,21 +59,23 @@ describe('Seshy lib', function () {
       }
 
       var saveSessionAgain = () => {
-        saveSession(this.windowId, getSessionFolderBookmarksAndAssert)
+        saveSession(this.session, getSessionFolderBookmarksAndAssert)
       }
 
-      var getSessionFolderBookmarksAndAssert = (sessionFolderId) => {
+      var getSessionFolderBookmarksAndAssert = () => {
         assertOneSessionFolder(done)
+        // TODO Assert is actually the same session folder.
       }
 
       assertOneSessionFolder(saveSessionAgain)
     })
 
-    it('Should overwrite the bookmarks in a folder when an already saved session is saved again.', function (done) {
+    it('Overwrites the bookmarks in a folder when an already saved session is saved again.', function (done) {
+      // TODO This is probably redundant as the window is a property of the session anyway.
       var getTestWindow = () => {
-        chrome.windows.get(this.windowId, {'populate': true}, (testWindow) => {
+        chrome.windows.get(this.session.window.id, {'populate': true}, (testWindow) => {
           this.testWindow = testWindow
-          expect(testWindow.id).toBe(this.windowId)
+          expect(testWindow.id).toBe(this.session.window.id)
           changeOpenTabs()
         })
       }
@@ -99,12 +95,12 @@ describe('Seshy lib', function () {
           chrome.tabs.update(tabId, {'url': this.expectedTabsInfo[i]['url']})
         }
         setTimeout(() => {
-          saveSession(this.testWindow.id, getSessionFolderBookmarksAndAssert)
+          saveSession(this.session, getSessionFolderBookmarksAndAssert)
         }, 2000)
       }
 
       var getSessionFolderBookmarksAndAssert = () => {
-        getSessionFolderBookmarks(this.sessionFolderId, captureSessionFolderBookmarksAndAssert)
+        getSessionFolderBookmarks(this.session.bookmarkFolder, captureSessionFolderBookmarksAndAssert)
       }
 
       var captureSessionFolderBookmarksAndAssert = (sessionFolderBookmarks) => {
@@ -131,15 +127,15 @@ describe('Seshy lib', function () {
   describe('Resuming sessions.', function () {
     describe('User restores a session from the session manager.', function () {
       beforeEach(function (done) {
-        var saveTestSessionAndCaptureSessionFolderId = (newWindowId) => {
-          this.windowId = newWindowId
-          this.bookmarksInfo = getTabsOrBookmarksInfo(this.windowId, false)
-          saveTestSession(this.windowId, captureSessionFolderId)
+        var saveTestSessionAndCaptureSessionFolderId = (session) => {
+          this.session = session
+          this.bookmarksInfo = getTabsOrBookmarksInfo(this.session.window.id, false)
+          saveTestSession(this.session, captureSessionFolderId)
         }
 
         var captureSessionFolderId = (newSessionFolderId) => {
           this.sessionFolderId = newSessionFolderId
-          chrome.windows.remove(this.windowId, () => {
+          chrome.windows.remove(this.session.window.id, () => {
             done()
           })
         }
@@ -215,10 +211,10 @@ describe('Seshy lib', function () {
           createSessionBookmarksFolder(bookmarkTreeNodes, createBookmarks)
         }
 
-        var createBookmarks = (sessionBookmarksFolder) => {
-          this.expectedSessionFolderId = sessionBookmarksFolder.id
+        var createBookmarks = (bookmarksFolder) => {
+          this.expectedBookmarkFolderId = bookmarksFolder.id
           var asBookmarks = true
-          this.bookmarksInfo = getTabsOrBookmarksInfo(this.expectedSessionFolderId, asBookmarks)
+          this.bookmarksInfo = getTabsOrBookmarksInfo(this.expectedBookmarkFolderId, asBookmarks)
 
           chrome.bookmarks.create(this.bookmarksInfo[0])
           chrome.bookmarks.create(this.bookmarksInfo[1])
@@ -227,30 +223,18 @@ describe('Seshy lib', function () {
         }
 
         var createWindow = (bookmarkTreeNode) => {
-          chrome.windows.create({}, createTabs)
+          var tabUrls = getTabsOrBookmarksInfo(null, false, 1, true)
+          var createData = {url: tabUrls}
+          chrome.windows.create(createData, callTest)
         }
 
-        var createTabs = (newWindow) => {
-          this.windowToCheck = newWindow
-          var tabsInfo = getTabsOrBookmarksInfo(this.windowToCheck.id)
-
-          chrome.tabs.create(tabsInfo[0])
-          chrome.tabs.create(tabsInfo[1])
-          chrome.tabs.create(tabsInfo[2], getWindow)
-          // Don't create new tab as the new window creates that for us.
+        var callTest = (testWindow) => {
+          this.window = testWindow
+          getSession(this.window, captureExistingSession) // Method under test.
         }
 
-        var getWindow = () => {
-          chrome.windows.get(this.windowToCheck.id, {'populate': true}, callTest)
-        }
-
-        var callTest = (uptodateWindowToCheck) => {
-          this.windowToCheck = uptodateWindowToCheck
-          getSession(this.windowToCheck, captureExistingSession) // Method under test.
-        }
-
-        var captureExistingSession = (actualSessionFolder) => {
-          this.actualSessionFolderId = actualSessionFolder === null ? null : actualSessionFolder.id
+        var captureExistingSession = (actualBookmarkFolder) => {
+          this.actualBookmarkFolderId = actualBookmarkFolder === null ? null : actualBookmarkFolder.id
           done()
         }
 
@@ -262,7 +246,7 @@ describe('Seshy lib', function () {
       })
 
       it('Should recognise when a set of opened tabs represents an existing session.', function () {
-        expect(this.expectedSessionFolderId).toEqual(this.actualSessionFolderId)
+        expect(this.expectedBookmarkFolderId).toEqual(this.actualBookmarkFolderId)
       })
     })
   })

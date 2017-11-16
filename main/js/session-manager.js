@@ -2,10 +2,14 @@
 
 // ---===~ Classes ~===-------------------------------------------------------------------------------------------------
 function Session (aWindow, bookmarkFolder) {
+  if (!aWindow && !bookmarkFolder) {
+    throw Error('A session must have either a window or a bookmarks folder.')
+  }
+
   this.name = bookmarkFolder ? bookmarkFolder.title : 'Unsaved Session'
   this.window = aWindow || null
   this.bookmarkFolder = bookmarkFolder || null
-  this.tabs = aWindow ? aWindow.tabs : bookmarkFolder.children
+  // this.tabs = aWindow ? aWindow.tabs : bookmarkFolder.children
 
   var listId = aWindow ? 'currently-open-sessions' : 'saved-sessions'
   var sessionList = document.getElementById(listId)
@@ -24,11 +28,29 @@ function Session (aWindow, bookmarkFolder) {
 }
 
 Session.prototype.currentlyOpen = function () {
-  return Boolean(this.windowId)
+  return Boolean(this.window)
 }
 
 Session.prototype.saved = function () {
-  return Boolean(this.bookmarkFolderId)
+  return Boolean(this.bookmarkFolder)
+}
+
+Session.prototype.updateWindow = function (callback) {
+  function setWindowAndCallback (updatedWindow) {
+    this.window = updatedWindow
+    callback(updatedWindow)
+  }
+
+  chrome.windows.get(this.window.id, {populate: true}, setWindowAndCallback)
+}
+
+Session.prototype.updateBookmarkFolder = function (callback) {
+  function setBookmarkFolderAndCallback (bookmarkTreeNodes) {
+    this.bookmarkFolder = bookmarkTreeNodes[0]
+    callback(this.bookmarkFolder)
+  }
+
+  chrome.bookmarks.getSubTree(this.bookmarkFolder.id, setBookmarkFolderAndCallback)
 }
 
 Session.prototype.addEventListeners = function () {
@@ -102,6 +124,8 @@ function focusCurrentlyOpenSession (callback) {
  * Get the HTML for a single session.
  */
 function getSessionInnerHtml (title, tabs) {
+  var numberOfTabs = 0
+  if (tabs) numberOfTabs = tabs.length
   var innerHtml = `
     <span class="mdc-list-item__start-detail shelve">
       <i class="saved-state-icon material-icons">backup</i>
@@ -111,7 +135,7 @@ function getSessionInnerHtml (title, tabs) {
         <input class="mdc-textfield__input session-name-input" type="text" value="${title}">
       </div>
       <span class="mdc-list-item__text__secondary">
-        ${tabs.length} tabs
+        ${numberOfTabs} tabs
       </span>
     </span>
     <span class="mdc-list-item__end-detail">

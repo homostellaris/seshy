@@ -37,83 +37,63 @@ function createSeshyFolder () {
 // ---===~ Session Management ~===--------------------------------------------------------------------------------------
 // Public methods
 // TODO Refactor to consume session objects instead of windows.
-function saveSession (windowId, callback) {
-  var sessionWindow
-  var tabs
-  var sessionFolderId
-
+/**
+ * Save a session. Sessions can be in multiple states when they are saved.
+ *
+ * The session may be an unsaved one (which means they must be currently open) in which case a new session folder will
+ * be created.
+ *
+ * The session may be saved and shelved, or saved and unshelved (currently open). In either case the existing session
+ * folder will be looked up and overwritten.
+ */
+function saveSession (session, callback) {
   console.log('Saving tab set into bookmarks folder.')
-  chrome.windows.get(windowId, {populate: true}, (windowToCheck) => {
-    sessionWindow = windowToCheck
-    tabs = windowToCheck.tabs
-    checkIfShelvedSession(windowToCheck, getSessionFolder)
-  })
 
-  function getSessionFolder (existingSavedSessionMapping) {
-    if (typeof existingSavedSessionMapping[sessionWindow.id] !== 'undefined') {
-      removeBookmarksInFolder(existingSavedSessionMapping[sessionWindow.id])
+  var checkIfSavedSession = (session) => {
+    if (session.saved()) {
+      getBookmarksInFolder(session.bookmarkFolder.id)
     } else {
-      createSessionFolder(sessionWindow)
+      createSessionFolder(session, (bookmarkTreeNode) => {
+        session.bookmarkFolder = bookmarkTreeNode
+        saveOpenSessionTabs(session, callStoreWindowToSessionFolderMapping)
+      })
     }
   }
 
-  function createSessionFolder (sessionWindow) {
-    console.log('Creating session folder for window with ID ' + sessionWindow.id + '.')
-
-    var bookmarkInfo = {
-      'parentId': seshyFolderId,
-      'title': 'sessionWindow'
-    }
-    chrome.bookmarks.create(bookmarkInfo, callSaveTabsAsBookmarksWithId)
-
-    function callSaveTabsAsBookmarksWithId (sessionFolder) {
-      saveTabsAsBookmarks(sessionFolder.id)
-    }
+  var setBookmarkFolderOnSession = (bookmarkFolderId, callback) => {
+    chrome.bookmarks.getSubTree(bookmarkFolderId, (bookmarkTreeNodes) => {
+      session.bookmarkFolder = bookmarkTreeNodes
+      callback(bookmarkFolderId)
+    })
   }
 
-  function removeBookmarksInFolder (bookmarkFolderId) {
-    sessionFolderId = bookmarkFolderId
-    chrome.bookmarks.getChildren(bookmarkFolderId, removeBookmarks)
+  var getBookmarksInFolder = (bookmarkFolderId) => {
+    chrome.bookmarks.getChildren(bookmarkFolderId, removeBookmarksInFolder)
   }
 
-  function removeBookmarks (bookmarkTreeNodes) {
-    for (var i = 0; i < bookmarkTreeNodes.length; i++) {
-      var bookmarkTreeNode = bookmarkTreeNodes[i]
-      chrome.bookmarks.remove(bookmarkTreeNode.id)
-
-      if (i === bookmarkTreeNodes.length - 1) {
-        saveTabsAsBookmarks(sessionFolderId)
-      }
-    }
+  var removeBookmarksInFolder = (bookmarkTreeNodes) => {
+    removeBookmarks(bookmarkTreeNodes, callSaveTabsAsBookmarks)
   }
 
-  function saveTabsAsBookmarks (newSessionFolderId) {
-    sessionFolderId = newSessionFolderId
-    for (var i = 0; i < tabs.length; i++) {
-      var tab = tabs[i]
-
-      var createProperties = {
-        'parentId': sessionFolderId,
-        'title': 'Tab ' + i,
-        'index': tab.index,
-        'url': tab.url
-      }
-
-      if (i === tabs.length - 1) {
-        chrome.bookmarks.create(createProperties, callStoreWindowToSessionFolderMapping)
-      } else {
-        chrome.bookmarks.create(createProperties)
-      }
+  var callSaveTabsAsBookmarks = () => {
+    if (session.currentlyOpen()) {
+      saveOpenSessionTabs(session, callStoreWindowToSessionFolderMapping)
+    } else {
+      saveOpenSessionTabs(session, callback)
     }
   }
 
   function callStoreWindowToSessionFolderMapping (bookmarkTreeNode) {
     if (isFunction(callback)) {
-      storeWindowToSessionFolderMapping(sessionWindow.id, sessionFolderId, callback)
+      storeWindowToSessionFolderMapping(session.window.id, session.bookmarkFolder.id, callback)
     } else {
-      storeWindowToSessionFolderMapping(sessionWindow.id, sessionFolderId)
+      storeWindowToSessionFolderMapping(session.window.id, session.bookmarkFolder.id)
     }
   }
+
+  session.updateWindow(() => {
+    checkIfSavedSession(session)
+  })
 }
 
 function resumeSession (sessionFolderId, callback) {
@@ -233,11 +213,62 @@ function getAllOpenWindows (callback) {
   chrome.windows.getAll({'populate': true}, callback)
 }
 
-function checkIfShelvedSession (windowToCheck, callback) {
+function checkIfSavedSession (windowToCheck, callback) {
   getWindowToSessionFolderMapping(windowToCheck.id, callback)
 }
 
+function createSessionFolder (session, callback) {
+  console.log(`Creating session folder for session named '${session.name}'.`)
+  var bookmarkInfo = {
+    'parentId': seshyFolderId,
+    'title': session.name
+  }
+  chrome.bookmarks.create(bookmarkInfo, (bookmarkTreeNode) => {
+    callback(bookmarkTreeNode)
+  })
+}
+
+// TODO No need for sessionFolderId anymore.
+function saveOpenSessionTabs (session, callback) {
+  session.updateWindow((updatedWindow) => {
+    saveTabsAsBookmarks(updatedWindow.tabs, session.bookmarkFolder.id, callback)
+  })
+}
+
+function saveTabsAsBookmarks (tabs, bookmarkFolderId, callback) {
+  for (var i = 0; i < tabs.length; i++) {
+    var tab = tabs[i]
+
+    var createProperties = {
+      'parentId': bookmarkFolderId,
+      'title': 'Tab ' + i,
+      'index': tab.index,
+      'url': tab.url
+    }
+
+    if (i === tabs.length - 1) {
+      chrome.bookmarks.create(createProperties, callback)
+    } else {
+      chrome.bookmarks.create(createProperties)
+    }
+  }
+}
+
+function removeBookmarks (bookmarkTreeNodes, callback) {
+  for (var i = 0; i < bookmarkTreeNodes.length; i++) {
+    var bookmarkTreeNode = bookmarkTreeNodes[i]
+    chrome.bookmarks.remove(bookmarkTreeNode.id)
+
+    if (i === bookmarkTreeNodes.length - 1 && isFunction(callback)) {
+      callback()
+    }
+  }
+}
+
 // ---===~ Storage ~===-------------------------------------------------------------------------------------------------
+/**
+ * Callback has no args.
+ */
 function storeWindowToSessionFolderMapping (windowId, sessionFolderId, callback) {
   console.log('Storing window to session folder mapping.')
   var windowToSessionFolderMapping = {}

@@ -1,4 +1,11 @@
 describe('Session manager.', function () {
+  describe('Session object.', function () {
+    it('Throws an exception if an argument is not provided.', function () {
+      console.log('Unimplemented test.')
+      expect(1).toBe(1)
+    })
+  })
+
   describe('Keyboard shortcuts.', function () {
     describe('Selects the session above the currently selected one when the `UP` arrow key is pressed.', () => {
       xit('The `UP` arrow key calls `selectPreviousSession()`.', () => {
