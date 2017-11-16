@@ -85,13 +85,6 @@ describe('Seshy lib', function () {
         this.expectedTabsInfo = getTabsOrBookmarksInfo(null, false, 2)
         for (var i = 0; i < tabs.length; i++) {
           var tabId = tabs[i].id
-          // if (i === tabs.length - 1) {
-          //   chrome.tabs.update(tabId, {'url': this.expectedTabsInfo[i]['url']}, (tab) => {
-          //     saveSession(this.testWindow.id, getSessionFolderBookmarksAndAssert)
-          //   })
-          // } else {
-          //   chrome.tabs.update(tabId, {'url': this.expectedTabsInfo[i]['url']})
-          // }
           chrome.tabs.update(tabId, {'url': this.expectedTabsInfo[i]['url']})
         }
         setTimeout(() => {
