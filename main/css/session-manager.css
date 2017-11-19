@@ -27,39 +27,12 @@ button {
   margin-bottom: 1em;
 }
 
-/*#currently-open-sessions {
-  min-height: 50px;
-  width: 50%;
-  float: left;
-}
-
-#recently-closed-sessions {
-  min-height: 50px;
-  width: 50%;
-  float: left;
-  clear: left;
-}
-
-#saved-sessions {
-  width: 50%;
-  float: left;
-}
-
-#unsaved-sessions {
-  width: 50%;
-  float: left;
-}*/
-
 .mdc-list--dense .mdc-list-item__start-detail {
   margin-left: 16px;
 }
 
 .mdc-textfield--dense {
   margin: 0;
-}
-
-.selected {
-  border: 1px solid blue;
 }
 
 .shelved {

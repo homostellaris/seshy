@@ -14,14 +14,12 @@ describe('Session manager.', function () {
 
       describe('The `selectPreviousSession` function.', () => {
         it('Calls `focus` on the previous session if it is not null.', () => {
-          var fakeSession = jasmine.createSpy('fakeSession')
+          var fakeSession = jasmine.createSpyObj('fakeSession', ['focus'])
           spyOn(window, 'getPreviousSession').and.returnValue(fakeSession)
-          var fakeSessionNameInput = jasmine.createSpyObj('fakeSessionNameInput', ['focus'])
-          spyOn(window, 'getSessionNameInput').and.returnValue(fakeSessionNameInput)
 
           selectPreviousSession()
 
-          expect(fakeSessionNameInput.focus).toHaveBeenCalled()
+          expect(fakeSession.focus).toHaveBeenCalled()
         })
 
         it('Calls `selectLastSessionInPreviousSessionList` if the previous session is null.', () => {
@@ -42,14 +40,12 @@ describe('Session manager.', function () {
 
       describe('The `selectNextSession` function.', () => {
         it('Calls `focus` on the next session if it is not null.', () => {
-          var fakeSession = jasmine.createSpy('fakeSession')
+          var fakeSession = jasmine.createSpyObj('fakeSession', ['focus'])
           spyOn(window, 'getNextSession').and.returnValue(fakeSession)
-          var fakeSessionNameInput = jasmine.createSpyObj('fakeSessionNameInput', ['focus'])
-          spyOn(window, 'getSessionNameInput').and.returnValue(fakeSessionNameInput)
 
           selectNextSession()
 
-          expect(fakeSessionNameInput.focus).toHaveBeenCalled()
+          expect(fakeSession.focus).toHaveBeenCalled()
         })
 
         it('Calls `selectFirstSessionInNextSessionList` if the previous session is null.', () => {
@@ -69,33 +65,20 @@ describe('Session manager.', function () {
       })
 
       describe('The `selectLastSessionInPreviousSessionList` function.', () => {
-        it('Calls `focus` on the name input returned from `getSessionNameInput`.', () => {
+        it('Calls `focus` on the last session returned from `getSessionsFromSessionList`.', () => {
           var fakePreviousSessionList = jasmine.createSpy('fakePreviousSessionList')
           spyOn(window, 'getPreviousSessionList').and.returnValue(fakePreviousSessionList)
-          var fakeSessions = jasmine.createSpy('fakeSessions')
+          var lastFakeSessionInList = jasmine.createSpyObj('lastFakeSessionInList', ['focus'])
+          var fakeSessions = [
+            jasmine.createSpy('firstFakeSessionInList'),
+            jasmine.createSpy('middleFakeSessionInList'),
+            lastFakeSessionInList
+          ]
           spyOn(window, 'getSessionsFromSessionList').and.returnValue(fakeSessions)
-          var fakeSessionNameInput = jasmine.createSpyObj('fakeSessionNameInput', ['focus'])
-          spyOn(window, 'getSessionNameInput').and.returnValue(fakeSessionNameInput)
 
           selectLastSessionInPreviousSessionList()
 
-          expect(fakeSessionNameInput.focus).toHaveBeenCalled()
-        })
-
-        it('Calls `focus` on the name input of the last session in the previous session list.', () => {
-          var fakePreviousSessionList = jasmine.createSpy('fakePreviousSessionList')
-          spyOn(window, 'getPreviousSessionList').and.returnValue(fakePreviousSessionList)
-          var fakeSessionOne = jasmine.createSpy('fakeSession')
-          var fakeSessionTwo = jasmine.createSpy('fakeSession')
-          var fakeSessionToBeFocused = jasmine.createSpy('fakeSessionToBeFocused')
-          var fakeSessions = [fakeSessionOne, fakeSessionTwo, fakeSessionToBeFocused]
-          spyOn(window, 'getSessionsFromSessionList').and.returnValue(fakeSessions)
-          var fakeSessionNameInput = jasmine.createSpyObj('fakeSessionNameInput', ['focus'])
-          spyOn(window, 'getSessionNameInput').and.returnValue(fakeSessionNameInput)
-
-          selectLastSessionInPreviousSessionList()
-
-          expect(window.getSessionNameInput.calls.allArgs()).toEqual([[fakeSessionToBeFocused]])
+          expect(lastFakeSessionInList.focus).toHaveBeenCalled()
         })
       })
     })
@@ -106,45 +89,36 @@ describe('Session manager.', function () {
       })
 
       describe('The `selectFirstSessionInNextSessionList` function.', () => {
-        it('Calls `focus` on the name input returned from `getSessionNameInput`.', () => {
+        it('Calls `focus` on the first session returned from `getSessionsFromSessionList`.', () => {
           var fakeNextSessionList = jasmine.createSpy('fakeNextSessionList')
           spyOn(window, 'getNextSessionList').and.returnValue(fakeNextSessionList)
-          var fakeSessions = jasmine.createSpy('fakeSessions')
+          var firstFakeSessionInList = jasmine.createSpyObj('firstFakeSessionInList', ['focus'])
+          var fakeSessions = [
+            firstFakeSessionInList,
+            jasmine.createSpy('firstFakeSessionInList'),
+            jasmine.createSpy('firstFakeSessionInList')
+          ]
           spyOn(window, 'getSessionsFromSessionList').and.returnValue(fakeSessions)
-          var fakeSessionNameInput = jasmine.createSpyObj('fakeSessionNameInput', ['focus'])
-          spyOn(window, 'getSessionNameInput').and.returnValue(fakeSessionNameInput)
 
           selectFirstSessionInNextSessionList()
 
-          expect(fakeSessionNameInput.focus).toHaveBeenCalled()
-        })
-
-        it('Calls `focus` on the name input of the first session in the next session list.', () => {
-          var fakeNextSessionList = jasmine.createSpy('fakeNextSessionList')
-          spyOn(window, 'getNextSessionList').and.returnValue(fakeNextSessionList)
-          var fakeSessionTwo = jasmine.createSpy('fakeSession')
-          var fakeSessionThree = jasmine.createSpy('fakeSession')
-          var fakeSessionToBeFocused = jasmine.createSpy('fakeSessionToBeFocused')
-          var fakeSessions = [fakeSessionToBeFocused, fakeSessionTwo, fakeSessionThree]
-          spyOn(window, 'getSessionsFromSessionList').and.returnValue(fakeSessions)
-          var fakeSessionNameInput = jasmine.createSpyObj('fakeSessionNameInput', ['focus'])
-          spyOn(window, 'getSessionNameInput').and.returnValue(fakeSessionNameInput)
-
-          selectFirstSessionInNextSessionList()
-
-          expect(window.getSessionNameInput.calls.allArgs()).toEqual([[fakeSessionToBeFocused]])
+          expect(firstFakeSessionInList.focus).toHaveBeenCalled()
         })
       })
     })
 
     describe('Renames the session when the `r` key is pressed.', function () {
+      describe('The `focusSessionNameInput` function.', function () {
+        console.log('Unimplemented test.')
+      })
+
       describe('Saves the session when the `ENTER` key is pressed during renaming.', function () {
         console.log('Unimplemented test.')
       })
     })
   })
 
-  describe('Fills the save icon blue when it a session is saved.', function () {
+  describe('Fills the save icon blue when a session is saved.', function () {
     console.log('Unimplemented test.')
   })
 })

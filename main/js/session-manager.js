@@ -16,6 +16,7 @@ function Session (aWindow, bookmarkFolder) {
 
   var sessionElement = document.createElement('li')
   sessionElement.setAttribute('class', 'session-card mdc-list-item mdc-theme--background mdc-elevation--z2')
+  sessionElement.setAttribute('tabindex', '0') // Make `li` element focusable.
   sessionElement.innerHTML = getSessionInnerHtml(this.name, this.tabs)
   sessionList.appendChild(sessionElement)
 
@@ -54,9 +55,7 @@ Session.prototype.updateBookmarkFolder = function (callback) {
 }
 
 Session.prototype.addEventListeners = function () {
-  var sessionNameInput = this.element.getElementsByClassName('session-name-input')[0]
-
-  sessionNameInput.addEventListener('focus', (event) => {
+  this.element.addEventListener('focus', (event) => {
     console.log('Focus event handler triggered. Removing selected class from existing elements.')
     var selectedSessions = document.getElementsByClassName('selected')
     for (var i = 0; i < selectedSessions.length; i++) {
@@ -64,7 +63,6 @@ Session.prototype.addEventListeners = function () {
     }
     console.log('Adding selected class to focused element.')
     this.element.classList.add('selected')
-    sessionNameInput.select()
   })
 }
 
@@ -105,13 +103,14 @@ function focusCurrentlyOpenSession (callback) {
   console.log('Focusing currently open session.')
   var focusSessionNameInput = (currentlyOpenWindow) => {
     var currentlyOpenSessionList = getSessionLists()[0]
-    var sessions = getSessionsFromSessionList(currentlyOpenSessionList)
+    var sessionElements = getSessionsFromSessionList(currentlyOpenSessionList)
 
-    for (var i = 0; i < sessions.length; i++) {
-      var session = sessions[i]
-      if (currentlyOpenWindow.id === session.seshySession.window.id) {
-        var currentlyOpenSessionNameInput = getSessionNameInput(session)
-        currentlyOpenSessionNameInput.focus()
+    for (var i = 0; i < sessionElements.length; i++) {
+      var sessionElement = sessionElements[i]
+      if (currentlyOpenWindow.id === sessionElement.seshySession.window.id) {
+        // var currentlyOpenSessionNameInput = getSessionNameInput(session)
+        // currentlyOpenSessionNameInput.focus()
+        sessionElement.focus()
         if (isFunction(callback)) callback()
       }
     }
@@ -178,6 +177,10 @@ function addKeyboardShortcuts () {
         selectNextSession()
         break
 
+      case 82: // `r` key.
+        focusSessionNameInput(event)
+        break
+
       default: return // exit this handler for other keys
     }
     event.preventDefault() // prevent the default action (scroll / move caret)
@@ -185,46 +188,42 @@ function addKeyboardShortcuts () {
 }
 
 function selectNextSession () {
-  var session = getNextSession()
-  if (session === null) {
+  var sessionElement = getNextSession()
+  if (sessionElement === null) {
     selectFirstSessionInNextSessionList()
   } else {
-    var sessionNameInput = getSessionNameInput(session)
-    sessionNameInput.focus()
+    sessionElement.focus()
   }
 }
 
 function selectPreviousSession () {
-  var session = getPreviousSession()
-  if (session === null) {
+  var sessionElement = getPreviousSession()
+  if (sessionElement === null) {
     selectLastSessionInPreviousSessionList()
   } else {
-    var sessionNameInput = getSessionNameInput(session)
-    sessionNameInput.focus()
+    sessionElement.focus()
   }
 }
 
 function selectFirstSessionInNextSessionList () {
   var nextSessionList = getNextSessionList()
   var firstSessionInNextSessionList = getSessionsFromSessionList(nextSessionList)[0]
-  var sessionNameInput = getSessionNameInput(firstSessionInNextSessionList)
-  sessionNameInput.focus()
+  firstSessionInNextSessionList.focus()
 }
 
 function selectLastSessionInPreviousSessionList () {
   var previousSessionList = getPreviousSessionList()
   var sessions = getSessionsFromSessionList(previousSessionList)
   var lastSessionInPreviousSessionList = sessions[sessions.length - 1]
-  var sessionNameInput = getSessionNameInput(lastSessionInPreviousSessionList)
-  sessionNameInput.focus()
+  lastSessionInPreviousSessionList.focus()
 }
 
 function getSelectedSession () {
   return document.getElementsByClassName('selected')[0]
 }
 
-function getSessionNameInput (session) {
-  return session.getElementsByClassName('session-name-input')[0]
+function getSessionNameInput (sessionElement) {
+  return sessionElement.getElementsByClassName('session-name-input')[0]
 }
 
 function getSelectedSessionNameInput () {
@@ -234,13 +233,13 @@ function getSelectedSessionNameInput () {
 }
 
 function getNextSession () {
-  var session = getSelectedSession()
-  return session.nextElementSibling
+  var sessionElement = getSelectedSession()
+  return sessionElement.nextElementSibling
 }
 
 function getPreviousSession () {
-  var session = getSelectedSession()
-  return session.previousElementSibling
+  var sessionElement = getSelectedSession()
+  return sessionElement.previousElementSibling
 }
 
 function getNextSessionList () {
@@ -280,4 +279,10 @@ function getSessionLists () {
 
 function getSessionsFromSessionList (sessionList) {
   return sessionList.getElementsByClassName('session-card')
+}
+
+function focusSessionNameInput (event) {
+  var sessionElement = event.srcElement
+  var sessionNameInput = getSessionNameInput(sessionElement)
+  sessionNameInput.select()
 }
