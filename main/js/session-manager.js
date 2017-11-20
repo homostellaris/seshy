@@ -151,14 +151,7 @@ function addKeyboardShortcuts () {
     console.log('Keydown event triggered.')
     switch (event.keyCode) {
       case 13: // `ENTER` key.
-        var callSaveSession = () => {
-          var selectedSession = getSelectedSession()
-          var selectedSessionWindowId = selectedSession.seshySession.window.id
-          saveSession(selectedSessionWindowId, () => {
-            alert('SAVED!')
-          })
-        }
-        callSaveSession()
+        saveSelectedSession()
         break
 
       case 37: // `LEFT` arrow key.
@@ -285,4 +278,21 @@ function focusSessionNameInput (event) {
   var sessionElement = event.srcElement
   var sessionNameInput = getSessionNameInput(sessionElement)
   sessionNameInput.select()
+}
+
+function saveSelectedSession () {
+  var selectedSessionElement = getSelectedSession()
+  var sessionNameInput = getSessionNameInput(selectedSessionElement)
+  var session = selectedSessionElement.seshySession
+
+  session.name = sessionNameInput.value // Session instance was created before name input text changed so must update.
+
+  saveSession(session, () => {
+    setSavedIconToSavedState(selectedSessionElement)
+  })
+}
+
+function setSavedIconToSavedState (sessionElement) {
+  var savedStateIcon = sessionElement.getElementsByClassName('saved-state-icon')[0]
+  savedStateIcon.style.color = 'royalblue'
 }

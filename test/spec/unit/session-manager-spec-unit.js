@@ -109,10 +109,34 @@ describe('Session manager.', function () {
 
     describe('Renames the session when the `r` key is pressed.', function () {
       describe('The `focusSessionNameInput` function.', function () {
-        console.log('Unimplemented test.')
+        it('Calls select on the session name input.', function () {
+          fakeSessionNameInput = jasmine.createSpyObj('fakeSessionNameInput', ['select'])
+          spyOn(window, 'getSessionNameInput').and.returnValue(fakeSessionNameInput)
+
+          fakeEvent = jasmine.createSpy('fakeEvent')
+          focusSessionNameInput(fakeEvent)
+
+          expect(fakeSessionNameInput.select).toHaveBeenCalled()
+        })
       })
 
       describe('Saves the session when the `ENTER` key is pressed during renaming.', function () {
+        describe('The `saveSelectedSession` function.', function () {
+          it('Calls `getSelectedSession` function.', function () {
+            fakeSessionElement = jasmine.createSpyObj('fakeSessionElement', ['seshySession'])
+            spyOn(window, 'getSelectedSession').and.returnValue(fakeSessionElement)
+            fakeSessionNameInput = jasmine.createSpy('fakeSessionNameInput')
+            spyOn(window, 'getSessionNameInput').and.returnValue(fakeSessionNameInput)
+            spyOn(window, 'saveSession')
+
+            saveSelectedSession()
+
+            expect(window.getSelectedSession).toHaveBeenCalled()
+          })
+        })
+      })
+
+      describe('Arrow key navigation still works and cancels renaming.', function () {
         console.log('Unimplemented test.')
       })
     })
