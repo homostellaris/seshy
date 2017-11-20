@@ -141,8 +141,4 @@ describe('Session manager.', function () {
       })
     })
   })
-
-  describe('Fills the save icon blue when a session is saved.', function () {
-    console.log('Unimplemented test.')
-  })
 })
