@@ -294,5 +294,5 @@ function saveSelectedSession () {
 
 function setSavedIconToSavedState (sessionElement) {
   var savedStateIcon = sessionElement.getElementsByClassName('saved-state-icon')[0]
-  savedStateIcon.style.color = 'royalblue'
+  savedStateIcon.classList.add('saved')
 }
