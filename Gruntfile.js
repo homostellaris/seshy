@@ -59,7 +59,8 @@ module.exports = function(grunt) {
           'test/**/*',
           'main/**/*',
           '!main/manifest.json',
-          'node_modules/material-components-web/dist/material-components-web.js'
+          'node_modules/material-components-web/dist/material-components-web.js',
+          'node_modules/material-components-web/dist/material-components-web.css'
         ],
         dest: 'output/test.crx',
         options: {
