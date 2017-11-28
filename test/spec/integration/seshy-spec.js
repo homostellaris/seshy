@@ -43,9 +43,10 @@ describe('Saving sessions.', function () {
     }
   }
 
-  it('Saves a set of tabs as bookmarks in a folder.', function () {
+  it('Saves a set of tabs as bookmarks in a folder.', function (done) {
     this.session.updateBookmarkFolder((updatedBookmarkFolder) => {
       assertBookmarks(1, this.session.bookmarkFolder.children)
+      done()
     })
   })
 
@@ -111,15 +112,14 @@ describe('Saving sessions.', function () {
     console.log('Unimplemented test.')
   })
 
-  xdescribe('Representation of saved state.', function () {
+  describe('Representation of saved state.', function () {
     beforeEach(function (done) {
-      // TODO Extract this common setup into a test-data-creator function.
-      var saveTestSessionAndCaptureSessionFolder = (session) => {
+      var saveTestSessionAndCaptureSession = (session) => {
         this.session = session
-        saveSelectedSession(done) // TODO Add callback to this method.
+        done()
       }
 
-      openUnsavedTestSession(saveTestSessionAndCaptureSessionFolder)
+      openUnsavedTestSession(saveTestSessionAndCaptureSession)
     })
 
     it('Fills the save icon blue when a session is saved.', function (done) {

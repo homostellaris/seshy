@@ -46,7 +46,7 @@ Session.prototype.updateWindow = function (callback) {
 }
 
 Session.prototype.updateBookmarkFolder = function (callback) {
-  function setBookmarkFolderAndCallback (bookmarkTreeNodes) {
+  var setBookmarkFolderAndCallback = (bookmarkTreeNodes) => {
     this.bookmarkFolder = bookmarkTreeNodes[0]
     callback(this.bookmarkFolder)
   }
@@ -64,6 +64,17 @@ Session.prototype.addEventListeners = function () {
     console.log('Adding selected class to focused element.')
     this.element.classList.add('selected')
   })
+}
+
+/**
+ * Pass a truthy value to set saved state icon to 'saved' or a falsey value to set it to 'unsaved'.
+ */
+Session.prototype.setSavedIconState = function (savedBoolean) {
+  if (savedBoolean) {
+    this.element.classList.add('saved')
+  } else {
+    this.element.classList.remove('saved')
+  }
 }
 
 // ---===~ Functions ~===-----------------------------------------------------------------------------------------------
@@ -287,12 +298,5 @@ function saveSelectedSession () {
 
   session.name = sessionNameInput.value // Session instance was created before name input text changed so must update.
 
-  saveSession(session, () => {
-    setSavedIconToSavedState(selectedSessionElement)
-  })
-}
-
-function setSavedIconToSavedState (sessionElement) {
-  var savedStateIcon = sessionElement.getElementsByClassName('saved-state-icon')[0]
-  savedStateIcon.classList.add('saved')
+  saveSession(session)
 }

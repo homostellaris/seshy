@@ -77,18 +77,25 @@ function saveSession (session, callback) {
 
   var callSaveTabsAsBookmarks = () => {
     if (session.currentlyOpen()) {
-      saveOpenSessionTabs(session, callStoreWindowToSessionFolderMapping)
+      saveOpenSessionTabs(session, updateBookmarkFolderThenStoreWindowToSessionFolderMapping)
     } else {
       saveOpenSessionTabs(session, callback)
     }
   }
 
-  function callStoreWindowToSessionFolderMapping (bookmarkTreeNode) {
-    if (isFunction(callback)) {
-      storeWindowToSessionFolderMapping(session.window.id, session.bookmarkFolder.id, callback)
-    } else {
-      storeWindowToSessionFolderMapping(session.window.id, session.bookmarkFolder.id)
-    }
+  var updateBookmarkFolderThenStoreWindowToSessionFolderMapping = () => {
+    session.updateBookmarkFolder((bookmarkFolder) => {
+      callStoreWindowToSessionFolderMapping(setSavedStateIconToSaved)
+    })
+  }
+
+  var callStoreWindowToSessionFolderMapping = () => {
+    storeWindowToSessionFolderMapping(session.window.id, session.bookmarkFolder.id, setSavedStateIconToSaved)
+  }
+
+  var setSavedStateIconToSaved = () => {
+    session.setSavedIconState(true)
+    callback()
   }
 
   session.updateWindow(() => {
