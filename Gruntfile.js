@@ -60,7 +60,8 @@ module.exports = function(grunt) {
           'main/**/*',
           '!main/manifest.json',
           'node_modules/material-components-web/dist/material-components-web.js',
-          'node_modules/material-components-web/dist/material-components-web.css'
+          'node_modules/material-components-web/dist/material-components-web.css',
+          'main/css/session-manager.css'
         ],
         dest: 'output/test.crx',
         options: {

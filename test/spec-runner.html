@@ -8,16 +8,18 @@
   <link rel="stylesheet" href="lib/jasmine-2.7.0/jasmine.css">
   <link rel="stylesheet" href="node_modules/material-components-web/dist/material-components-web.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  
+  <link rel="stylesheet" href="main/css/session-manager.css">
+
   <script src="lib/jasmine-2.7.0/jasmine.js"></script>
   <script src="lib/jasmine-2.7.0/jasmine-html.js"></script>
   <script src="lib/jasmine-2.7.0/boot.js"></script>
 
   <script src="node_modules/material-components-web/dist/material-components-web.js"></script>
 
-  <div>
-    <ul id="currently-open-sessions"></ul>
-    <ul id="saved-sessions"></ul>
+  <!-- Test container. -->
+  <div id="test-container">
+    <ul id="currently-open-sessions" class="session-list"></ul>
+    <ul id="saved-sessions" class="session-list"></ul>
   </div>
 
   <!-- Source files. -->

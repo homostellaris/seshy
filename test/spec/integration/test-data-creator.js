@@ -22,6 +22,24 @@ function saveTestSession (session, callback) {
   })
 }
 
+var createSessionBookmarksFolderThenBookmarks = (callback) => {
+  var createBookmarks = (bookmarksFolder) => {
+    var asBookmarks = true
+    var bookmarksInfo = getTabsOrBookmarksInfo(bookmarksFolder.id, asBookmarks)
+
+    chrome.bookmarks.create(bookmarksInfo[0])
+    chrome.bookmarks.create(bookmarksInfo[1])
+    chrome.bookmarks.create(bookmarksInfo[2])
+    chrome.bookmarks.create(bookmarksInfo[3], () => {
+      callback()
+    })
+  }
+
+  getSeshyFolder((bookmarkTreeNodes) => {
+    createSessionBookmarksFolder(bookmarkTreeNodes, createBookmarks)
+  })
+}
+
 function openUnsavedTestSession (callback, tabSetNumber) {
   tabSetNumber = tabSetNumber || 1
   var createSession = (testWindow) => {
@@ -128,6 +146,12 @@ function cleanUp (done) {
   getSessionFolders(removeBookmarkFolders)
   removeAllWindows()
   chrome.storage.local.clear()
+
+  var currentlyOpenSessions = document.getElementById('currently-open-sessions')
+  var savedSessions = document.getElementById('saved-sessions')
+  currentlyOpenSessions.innerHTML = ''
+  savedSessions.innerHTML = ''
+  
   // Necessary because it takes time for above operations to complete.
   setTimeout(done, 1000)
 }

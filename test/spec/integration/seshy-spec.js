@@ -89,7 +89,7 @@ describe('Saving sessions.', function () {
       }
       setTimeout(() => {
         saveSession(this.session, getSessionFolderBookmarksAndAssert)
-      }, 2000)
+      }, 1000)
     }
 
     var getSessionFolderBookmarksAndAssert = () => {
@@ -344,7 +344,37 @@ describe('Deleting sessions.', function () {
   })
 })
 
-xdescribe('Selecting session.', function () {
+describe('Browsing sessions.', function () {
+  beforeEach(function (done) {
+    createSessionBookmarksFolderThenBookmarks(() => {
+      setUp(done)
+    })
+  })
+
+  it('Shows all sessions in the \'Shelved Sessions\' list with a blue saved state icon ' +
+     '(because all \'shelved\' sessions are by definition also \'saved\' sessions.)', function (done) {
+       var expectedRgbColorValue = 'rgb(65, 105, 225)'
+       var assertSavedStateIconColor = () => {
+         var shelvedSessionsList = document.getElementById('saved-sessions')
+         var shelvedSessions = shelvedSessionsList.getElementsByClassName('session-card')
+         expect(shelvedSessions.length).toBe(1)
+         var shelvedSession = shelvedSessions[0]
+         var savedStateIcon = shelvedSession.getElementsByClassName('saved-state-icon')[0]
+         var savedStateIconColor = window.getComputedStyle(savedStateIcon, null).getPropertyValue('color')
+
+         expect(savedStateIconColor).toEqual(expectedRgbColorValue)
+         done()
+       }
+       // TODO Find out why a setTimeout is necessary here. Style should be applied before `setUp` callsback.
+       setTimeout(assertSavedStateIconColor, 500)
+  })
+
+  afterEach(function (done) {
+    cleanUp(done)
+  })
+})
+
+xdescribe('Selecting sessions.', function () {
   beforeAll(function (done) {
     this.windowIds = []
 

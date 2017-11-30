@@ -1,7 +1,7 @@
 /* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction done chrome saveSession */
 
 // ---===~ Classes ~===-------------------------------------------------------------------------------------------------
-function Session (aWindow, bookmarkFolder) {
+function Session (aWindow, bookmarkFolder, saved) {
   if (!aWindow && !bookmarkFolder) {
     throw Error('A session must have either a window or a bookmarks folder.')
   }
@@ -26,6 +26,7 @@ function Session (aWindow, bookmarkFolder) {
   Session.prototype.addEventListeners.call(this)
   // TODO Find out why this doesn't work. Throws syntax error because is not a function.
   // this.addEventListeners()
+  if (saved === true) Session.prototype.setSavedIconState.call(this, true)
 }
 
 Session.prototype.currentlyOpen = function () {
@@ -104,7 +105,7 @@ function createSessionElements (callback) {
   getAllSessionFolders((sessionFolders) => {
     for (var i = 0; i < sessionFolders.length; i++) {
       /* eslint-disable no-new */
-      new Session(null, sessionFolders[i])
+      new Session(null, sessionFolders[i], true)
       /* eslint-enable no-new */
     }
   })
