@@ -369,6 +369,20 @@ describe('Browsing sessions.', function () {
        setTimeout(assertSavedStateIconColor, 500)
   })
 
+  it('Shows the number of tabs in the session.', function () {
+    var assertNumberOfTabsShown = () => {
+      var expectedText = '4 tabs'
+      var shelvedSessionsList = document.getElementById('saved-sessions')
+      var shelvedSessions = shelvedSessionsList.getElementsByClassName('session-card')
+      expect(shelvedSessions.length).toBe(1)
+      var shelvedSession = shelvedSessions[0]
+      var numberOfTabsSpan = shelvedSession.getElementsByClassName('tabs-number')[0]
+      var actualText = numberOfTabsSpan.textContent.trim()
+      expect(actualText).toEqual(expectedText)
+    }
+    setTimeout(assertNumberOfTabsShown, 500)
+  })
+
   afterEach(function (done) {
     cleanUp(done)
   })

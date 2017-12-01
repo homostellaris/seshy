@@ -17,7 +17,9 @@ function Session (aWindow, bookmarkFolder, saved) {
   var sessionElement = document.createElement('li')
   sessionElement.setAttribute('class', 'session-card mdc-list-item mdc-theme--background mdc-elevation--z2')
   sessionElement.setAttribute('tabindex', '0') // Make `li` element focusable.
-  sessionElement.innerHTML = getSessionInnerHtml(this.name, this.tabs)
+
+  var tabsNumber = aWindow ? aWindow.tabs.length : bookmarkFolder.children.length
+  sessionElement.innerHTML = getSessionInnerHtml(this.name, tabsNumber)
   sessionList.appendChild(sessionElement)
 
   sessionElement.seshySession = this // So this created instance is always easily accessible.
@@ -134,19 +136,17 @@ function focusCurrentlyOpenSession (callback) {
 /**
  * Get the HTML for a single session.
  */
-function getSessionInnerHtml (title, tabs) {
-  var numberOfTabs = 0
-  if (tabs) numberOfTabs = tabs.length
+function getSessionInnerHtml (title, tabsNumber) {
   var innerHtml = `
-    <span class="mdc-list-item__start-detail shelve">
+    <span class="mdc-list-item__start-detail">
       <i class="saved-state-icon material-icons">backup</i>
     </span>
     <span class="mdc-list-item__text">
       <div class="mdc-textfield mdc-textfield--dense">
-        <input class="mdc-textfield__input session-name-input" type="text" value="${title}">
+        <input class="session-name-input mdc-textfield__input" type="text" value="${title}">
       </div>
-      <span class="mdc-list-item__text__secondary">
-        ${numberOfTabs} tabs
+      <span class="tabs-number mdc-list-item__text__secondary">
+        ${tabsNumber} tabs
       </span>
     </span>
     <span class="mdc-list-item__end-detail">
