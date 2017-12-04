@@ -1,7 +1,7 @@
 /* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction done chrome saveSession */
 
 // ---===~ Classes ~===-------------------------------------------------------------------------------------------------
-function Session (aWindow, bookmarkFolder, saved) {
+function Session (aWindow, bookmarkFolder) {
   if (!aWindow && !bookmarkFolder) {
     throw Error('A session must have either a window or a bookmarks folder.')
   }
@@ -28,7 +28,7 @@ function Session (aWindow, bookmarkFolder, saved) {
   Session.prototype.addEventListeners.call(this)
   // TODO Find out why this doesn't work. Throws syntax error because is not a function.
   // this.addEventListeners()
-  if (saved === true) Session.prototype.setSavedIconState.call(this, true)
+  if (Session.prototype.saved.call(this)) Session.prototype.setSavedIconState.call(this, true)
 }
 
 Session.prototype.currentlyOpen = function () {
@@ -94,23 +94,71 @@ function setUp (callback) {
  * Create all the HTML for sessions.
  */
 function createSessionElements (callback) {
-  getAllOpenWindows((windows) => {
-    for (var i = 0; i < windows.length; i++) {
-      /* eslint-disable no-new */
-      new Session(windows[i], null)
-      /* eslint-enable no-new */
-      if (i === windows.length - 1) {
-        focusCurrentlyOpenSession(callback)
+  var createCurrentlyOpenSessions = (storageObject) => {
+    getAllOpenWindows((windows) => {
+      createSessionsFromWindows(windows, storageObject)
+    })
+  }
+
+  var createSessionsFromWindows = (windows, storageObject) => {
+    var createSession = (sessionWindow, callback) => {
+      var bookmarkFolderId = storageObject[sessionWindow.id.toString()]
+      var bookmarkFolder = null
+
+      if (typeof bookmarkFolderId === 'undefined') {
+        createSessionObjectThenCallback(sessionWindow, bookmarkFolder, callback)
+      } else {
+        chrome.bookmarks.getSubTree(bookmarkFolderId, (bookmarkFolder) => {
+          createSessionObjectThenCallback(sessionWindow, bookmarkFolder, callback)
+        })
       }
     }
-  })
-  getAllSessionFolders((sessionFolders) => {
-    for (var i = 0; i < sessionFolders.length; i++) {
-      /* eslint-disable no-new */
-      new Session(null, sessionFolders[i], true)
-      /* eslint-enable no-new */
+
+    asyncLoop(windows, createSession, () => {
+      createShelvedSessions(storageObject)
+    })
+  }
+
+  var createSessionObjectThenCallback = (sessionWindow, bookmarkFolder, callback) => {
+    /* eslint-disable no-new */
+    new Session(sessionWindow, bookmarkFolder)
+    /* eslint-enable no-new */
+    callback()
+  }
+
+  var createShelvedSessions = (storageObject) => {
+    getAllSessionFolders((bookmarkFolders) => {
+      var shelvedSessionBookmarkFolderIds = Object.values(storageObject)
+
+      var createShelvedSession = (bookmarkFolder, callback) => {
+        // If the bookmarkFolderId is in the winow to bookmark folder mapping then it is a currently open session and
+        // we do not want to duplicate it.
+        if (!shelvedSessionBookmarkFolderIds.includes(bookmarkFolder.id)) {
+          /* eslint-disable no-new */
+          new Session(null, bookmarkFolder)
+          /* eslint-enable no-new */
+        }
+        callback()
+      }
+      asyncLoop(bookmarkFolders, createShelvedSession, callback)
+    })
+  }
+
+  chrome.storage.local.get(null, createCurrentlyOpenSessions)
+}
+
+function asyncLoop (iterable, iterateFunction, callback) {
+  var i = iterable.length
+  var returnIfFinished = () => {
+    i--
+    if (i === 0) {
+      callback()
     }
-  })
+  }
+  var iterate = (element) => {
+    iterateFunction(element, returnIfFinished)
+  }
+  iterable.forEach(iterate)
 }
 
 function focusCurrentlyOpenSession (callback) {

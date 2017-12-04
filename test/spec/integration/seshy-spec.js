@@ -346,8 +346,11 @@ describe('Deleting sessions.', function () {
 
 describe('Browsing sessions.', function () {
   beforeEach(function (done) {
-    createSessionBookmarksFolderThenBookmarks(() => {
+    var callSetupThenDone = () => {
       setUp(done)
+    }
+    createAndSaveTestSession((session) => {
+      removeTestWindowThenClearStorage(session.window, callSetupThenDone)
     })
   })
 
@@ -369,7 +372,7 @@ describe('Browsing sessions.', function () {
        setTimeout(assertSavedStateIconColor, 500)
   })
 
-  it('Shows the number of tabs in the session.', function () {
+  it('Shows the number of tabs in the session.', function (done) {
     var assertNumberOfTabsShown = () => {
       var expectedText = '4 tabs'
       var shelvedSessionsList = document.getElementById('saved-sessions')
@@ -379,6 +382,7 @@ describe('Browsing sessions.', function () {
       var numberOfTabsSpan = shelvedSession.getElementsByClassName('tabs-number')[0]
       var actualText = numberOfTabsSpan.textContent.trim()
       expect(actualText).toEqual(expectedText)
+      done()
     }
     setTimeout(assertNumberOfTabsShown, 500)
   })

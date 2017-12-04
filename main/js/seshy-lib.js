@@ -131,6 +131,9 @@ function deleteSession (sessionFolderId, callback) {
   })
 }
 
+/**
+ * Check if the passed window is a saved session and if so callback with its bookmark folder.
+ */
 function getSession (windowToCheck, callback) {
   var tabs
 

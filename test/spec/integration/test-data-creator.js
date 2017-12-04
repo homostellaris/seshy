@@ -1,6 +1,24 @@
 /* global chrome saveSession resumeSession tabEqualToBookmark getSession seshyFolderId
 removeWindowToSessionFolderMapping deleteSession isFunction initialise */
 
+/**
+ * Create a test session (which will create a window with some tabs) and save it (which will create a bookmark folder).
+ */
+function createAndSaveTestSession (callback) {
+  var testSession = null;
+  var captureBookmarkFolderThenCallback = (bookmarkFolder) => {
+    callback(testSession)
+  }
+  var captureTestSessionThenSave = (session) => {
+    testSession = session
+    saveTestSession(session, captureBookmarkFolderThenCallback)
+  }
+  openUnsavedTestSession(captureTestSessionThenSave)
+}
+
+/**
+ * Save passed session and callback with bookmark folder ID.
+ */
 function saveTestSession (session, callback) {
   var expectedSessionFolderId
 
@@ -151,9 +169,15 @@ function cleanUp (done) {
   var savedSessions = document.getElementById('saved-sessions')
   currentlyOpenSessions.innerHTML = ''
   savedSessions.innerHTML = ''
-  
+
   // Necessary because it takes time for above operations to complete.
   setTimeout(done, 1000)
+}
+
+function removeTestWindowThenClearStorage(testWindow, callback) {
+  chrome.windows.remove(testWindow.id, () => {
+    chrome.storage.local.clear(callback)
+  })
 }
 
 function getSessionFolders (callback) {
