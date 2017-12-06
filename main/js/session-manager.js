@@ -1,4 +1,4 @@
-/* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction done chrome saveSession */
+/* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction done chrome saveSession asyncLoop */
 
 // ---===~ Classes ~===-------------------------------------------------------------------------------------------------
 function Session (aWindow, bookmarkFolder) {
@@ -145,20 +145,6 @@ function createSessionElements (callback) {
   }
 
   chrome.storage.local.get(null, createCurrentlyOpenSessions)
-}
-
-function asyncLoop (iterable, iterateFunction, callback) {
-  var i = iterable.length
-  var returnIfFinished = () => {
-    i--
-    if (i === 0) {
-      callback()
-    }
-  }
-  var iterate = (element) => {
-    iterateFunction(element, returnIfFinished)
-  }
-  iterable.forEach(iterate)
 }
 
 function focusCurrentlyOpenSession (callback) {

@@ -160,24 +160,27 @@ function addWindowToSessionMapping (windowId, expectedSessionFolderId, callback)
   })
 }
 
-function cleanUp (done) {
-  getSessionFolders(removeBookmarkFolders)
-  removeAllWindows()
-  chrome.storage.local.clear()
+function cleanUp (callback) {
+  removeTestWindowClearStorageAndResetTestContainer(() => {
+    getSessionFolders((bookmarkFolders) => {
+      removeBookmarkFolders(bookmarkFolders, callback)
+    })
+  })
+}
 
+function removeTestWindowClearStorageAndResetTestContainer (callback) {
+  var clearStorage = () => {
+    resetTestContainer()
+    chrome.storage.local.clear(callback)
+  }
+  removeAllWindows(clearStorage)
+}
+
+function resetTestContainer () {
   var currentlyOpenSessions = document.getElementById('currently-open-sessions')
   var savedSessions = document.getElementById('saved-sessions')
   currentlyOpenSessions.innerHTML = ''
   savedSessions.innerHTML = ''
-
-  // Necessary because it takes time for above operations to complete.
-  setTimeout(done, 1000)
-}
-
-function removeTestWindowThenClearStorage(testWindow, callback) {
-  chrome.windows.remove(testWindow.id, () => {
-    chrome.storage.local.clear(callback)
-  })
 }
 
 function getSessionFolders (callback) {
@@ -201,23 +204,25 @@ function getSessionFolderBookmarks(bookmarkFolder, callback) {
   chrome.bookmarks.getSubTree(bookmarkFolder.id, getSessionFolderChildren)
 }
 
-function removeBookmarkFolders (bookmarkTreeNodes) {
-  for (var i = 0; i < bookmarkTreeNodes.length; i++) {
-    var bookmarkTreeNode = bookmarkTreeNodes[i]
-    chrome.bookmarks.removeTree(bookmarkTreeNode.id)
+function removeBookmarkFolders (bookmarkTreeNodes, callback) {
+  var removeBookmarkFolder = (bookmarkFolder, callback) => {
+    chrome.bookmarks.removeTree(bookmarkFolder.id, callback)
   }
+  asyncLoop(bookmarkTreeNodes, removeBookmarkFolder, callback)
 }
 
-function removeAllWindows () {
-  chrome.windows.getAll({}, removeWindows)
+function removeAllWindows (callback) {
+  chrome.windows.getAll({}, (windows) => {
+    removeWindows(windows, callback)
+  })
 }
 
-function removeWindows (windows) {
-  // Don't remove first window because it will have Jasmine test results.
-  for (var i = 1; i < windows.length; i++) {
-    var window = windows[i]
-    chrome.windows.remove(window.id)
+function removeWindows (windows, callback) {
+  windows.splice(0, 1)  // Remove the first window because it is the spec runner.
+  var removeWindow = (sessionWindow, callback) => {
+    chrome.windows.remove(sessionWindow.id, callback)
   }
+  asyncLoop(windows, removeWindow, callback)
 }
 
 function getSeshyFolder (callback) {
