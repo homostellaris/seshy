@@ -87,11 +87,13 @@ function setUp (callback) {
     window.mdc.autoInit()
     if (isFunction(callback)) callback()
   }
-  createSessionElements(done)
+  createSessionElements(() => {
+    focusCurrentlyOpenSession(done)
+  })
 }
 
 /**
- * Create all the HTML for sessions.
+ * Create session cards to populate session lists.
  */
 function createSessionElements (callback) {
   var createCurrentlyOpenSessions = (storageObject) => {

@@ -6,6 +6,20 @@ describe('Session manager.', function () {
     })
   })
 
+  describe('The `setUp` method.', function () {
+    it('Calls the `focusCurrentlyOpenSession` method.', function (done) {
+      // spyOn(window, 'addKeyboardShortcuts')
+      // spyOn(window 'mdc')
+      var assertCalled = () => {
+        expect(window.focusCurrentlyOpenSession).toHaveBeenCalled()
+        done()
+      }
+      spyOn(window, 'focusCurrentlyOpenSession').and.callThrough()
+
+      setUp(assertCalled)
+    })
+  })
+
   describe('Keyboard shortcuts.', function () {
     describe('Selects the session above the currently selected one when the `UP` arrow key is pressed.', () => {
       xit('The `UP` arrow key calls `selectPreviousSession()`.', () => {
