@@ -345,80 +345,99 @@ describe('Deleting sessions.', function () {
 })
 
 describe('Browsing sessions.', function () {
-  beforeEach(function (done) {
-    var callSetupThenDone = () => {
-      setUp(done)
-    }
-    createAndSaveTestSession((session) => {
-      removeTestWindowClearStorageAndResetTestContainer(callSetupThenDone)
+  describe('Currently open sessions.', function () {
+    beforeEach(function (done) {
+      var callSetupThenDone = () => {
+        setUp(done)
+      }
+      createAndSaveTestSession((session) => {
+        resetTestContainer()
+        callSetupThenDone()
+      })
+    })
+
+    it('Shows the name of currently open saved sessions.', function (done) {
+      var assertSessionNameShown = () => {
+        var expectedText = 'Test Session'
+        var currentlyOpenSessionList = document.getElementById('currently-open-sessions')
+        var currentlyOpenSessions = currentlyOpenSessionList.getElementsByClassName('session-card')
+        expect(currentlyOpenSessions.length).toBe(2)  // Includes spec runner window.
+        var testSession = currentlyOpenSessions[1]
+        var sessionNameInput = testSession.getElementsByClassName('session-name-input')[0]
+        var actualText = sessionNameInput.value
+        expect(actualText).toEqual(expectedText)
+        done()
+      }
+      setTimeout(assertSessionNameShown, 500)
+    })
+
+    afterEach(function (done) {
+      cleanUp(done)
     })
   })
 
-  it('Shows the number of tabs in the session.', function (done) {
-    var assertNumberOfTabsShown = () => {
-      var expectedText = '4 tabs'
-      var shelvedSessionsList = document.getElementById('saved-sessions')
-      var shelvedSessions = shelvedSessionsList.getElementsByClassName('session-card')
-      expect(shelvedSessions.length).toBe(1)
-      var shelvedSession = shelvedSessions[0]
-      var numberOfTabsSpan = shelvedSession.getElementsByClassName('tabs-number')[0]
-      var actualText = numberOfTabsSpan.textContent.trim()
-      expect(actualText).toEqual(expectedText)
-      done()
-    }
-    setTimeout(assertNumberOfTabsShown, 500)
-  })
+  describe('Shelved sessions.', function () {
+    beforeEach(function (done) {
+      var callSetupThenDone = () => {
+        setUp(done)
+      }
+      createAndSaveTestSession((session) => {
+        resetTestContainer()
+        chrome.storage.local.remove(session.window.id.toString(), callSetupThenDone)
+      })
+    })
 
-  it('Shows all sessions in the \'Shelved Sessions\' list with a blue saved state icon ' +
-     '(because all \'shelved\' sessions are by definition also \'saved\' sessions.)', function (done) {
-       var expectedRgbColorValue = 'rgb(65, 105, 225)'
-       var assertSavedStateIconColor = () => {
-         var shelvedSessionsList = document.getElementById('saved-sessions')
-         var shelvedSessions = shelvedSessionsList.getElementsByClassName('session-card')
-         expect(shelvedSessions.length).toBe(1)
-         var shelvedSession = shelvedSessions[0]
-         var savedStateIcon = shelvedSession.getElementsByClassName('saved-state-icon')[0]
-         var savedStateIconColor = window.getComputedStyle(savedStateIcon, null).getPropertyValue('color')
+    it('Shows the number of tabs in the session.', function (done) {
+      var assertNumberOfTabsShown = () => {
+        var expectedText = '4 tabs'
+        var shelvedSessionsList = document.getElementById('saved-sessions')
+        var shelvedSessions = shelvedSessionsList.getElementsByClassName('session-card')
+        expect(shelvedSessions.length).toBe(1)
+        var shelvedSession = shelvedSessions[0]
+        var numberOfTabsSpan = shelvedSession.getElementsByClassName('tabs-number')[0]
+        var actualText = numberOfTabsSpan.textContent.trim()
+        expect(actualText).toEqual(expectedText)
+        done()
+      }
+      setTimeout(assertNumberOfTabsShown, 500)
+    })
 
-         expect(savedStateIconColor).toEqual(expectedRgbColorValue)
-         done()
-       }
-       // TODO Find out why a setTimeout is necessary here. Style should be applied before `setUp` callsback.
-       setTimeout(assertSavedStateIconColor, 500)
-  })
+    it('Shows all sessions in the \'Shelved Sessions\' list with a blue saved state icon ' +
+       '(because all \'shelved\' sessions are by definition also \'saved\' sessions.)', function (done) {
+         var expectedRgbColorValue = 'rgb(65, 105, 225)'
+         var assertSavedStateIconColor = () => {
+           var shelvedSessionsList = document.getElementById('saved-sessions')
+           var shelvedSessions = shelvedSessionsList.getElementsByClassName('session-card')
+           expect(shelvedSessions.length).toBe(1)
+           var shelvedSession = shelvedSessions[0]
+           var savedStateIcon = shelvedSession.getElementsByClassName('saved-state-icon')[0]
+           var savedStateIconColor = window.getComputedStyle(savedStateIcon, null).getPropertyValue('color')
 
-  it('Shows the name of shelved sessions.', function (done) {
-    var assertSessionNameShown = () => {
-      var expectedText = 'Test Session'
-      var shelvedSessionList = document.getElementById('saved-sessions')
-      var shelvedSessions = shelvedSessionList.getElementsByClassName('session-card')
-      expect(shelvedSessions.length).toBe(1)
-      var shelvedSession = shelvedSessions[0]
-      var sessionNameInput = shelvedSession.getElementsByClassName('session-name-input')[0]
-      var actualText = sessionNameInput.value
-      expect(actualText).toEqual(expectedText)
-      done()
-    }
-    setTimeout(assertSessionNameShown, 500)
-  })
+           expect(savedStateIconColor).toEqual(expectedRgbColorValue)
+           done()
+         }
+         // TODO Find out why a setTimeout is necessary here. Style should be applied before `setUp` callsback.
+         setTimeout(assertSavedStateIconColor, 500)
+    })
 
-  xit('Shows the name of currently open saved sessions.', function (done) {
-    var assertSessionNameShown = () => {
-      var expectedText = 'Test Session'
-      var currentlyOpenSessionList = document.getElementById('currently-open-sessions')
-      var currentlyOpenSessions = currentlyOpenSessionList.getElementsByClassName('session-card')
-      expect(currentlyOpenSessions.length).toBe(1)
-      var testSession = currentlyOpenSessions[0]
-      var sessionNameInput = testSession.getElementsByClassName('session-name-input')[0]
-      var actualText = sessionNameInput.value
-      expect(actualText).toEqual(expectedText)
-      done()
-    }
-    setTimeout(assertSessionNameShown, 500)
-  })
+    it('Shows the name of shelved sessions.', function (done) {
+      var assertSessionNameShown = () => {
+        var expectedText = 'Test Session'
+        var shelvedSessionList = document.getElementById('saved-sessions')
+        var shelvedSessions = shelvedSessionList.getElementsByClassName('session-card')
+        expect(shelvedSessions.length).toBe(1)
+        var shelvedSession = shelvedSessions[0]
+        var sessionNameInput = shelvedSession.getElementsByClassName('session-name-input')[0]
+        var actualText = sessionNameInput.value
+        expect(actualText).toEqual(expectedText)
+        done()
+      }
+      setTimeout(assertSessionNameShown, 500)
+    })
 
-  afterEach(function (done) {
-    cleanUp(done)
+    afterEach(function (done) {
+      cleanUp(done)
+    })
   })
 })
 

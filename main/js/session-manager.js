@@ -110,7 +110,8 @@ function createSessionElements (callback) {
       if (typeof bookmarkFolderId === 'undefined') {
         createSessionObjectThenCallback(sessionWindow, bookmarkFolder, callback)
       } else {
-        chrome.bookmarks.getSubTree(bookmarkFolderId, (bookmarkFolder) => {
+        chrome.bookmarks.getSubTree(bookmarkFolderId, (bookmarkFolders) => {
+          var bookmarkFolder = bookmarkFolders[0]
           createSessionObjectThenCallback(sessionWindow, bookmarkFolder, callback)
         })
       }

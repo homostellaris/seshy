@@ -161,19 +161,16 @@ function addWindowToSessionMapping (windowId, expectedSessionFolderId, callback)
 }
 
 function cleanUp (callback) {
-  removeTestWindowClearStorageAndResetTestContainer(() => {
+  var callGetSessionFolders = () => {
     getSessionFolders((bookmarkFolders) => {
       removeBookmarkFolders(bookmarkFolders, callback)
     })
-  })
-}
-
-function removeTestWindowClearStorageAndResetTestContainer (callback) {
-  var clearStorage = () => {
-    resetTestContainer()
-    chrome.storage.local.clear(callback)
   }
-  removeAllWindows(clearStorage)
+
+  removeAllWindows(() => {
+    resetTestContainer()
+    chrome.storage.local.clear(callGetSessionFolders)
+  })
 }
 
 function resetTestContainer () {
