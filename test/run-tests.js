@@ -20,7 +20,7 @@ driver.findElement(By.className('jasmine-results')).then((jasmineResults) => {
   return driver.findElement(By.className('jasmine-summary'))
 }).then((jasmineSummary) => {
   console.log('Waiting for jasmine-summary element to become visible.')
-  return driver.wait(until.elementIsVisible(jasmineSummary), 1000)
+  return driver.wait(until.elementIsVisible(jasmineSummary), 2000)
 }).then(() => {
   console.log('The jasmine-summary element became visible so there should be no failures.')
   pass()
