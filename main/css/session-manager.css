@@ -11,7 +11,7 @@ body {
 
 button {
   padding: 0;
-  margin: 0;
+  margin: 0 8px;
   border: none;
   background-color: transparent;
   cursor: pointer;
@@ -29,6 +29,14 @@ button {
 
 .mdc-list--dense .mdc-list-item__start-detail {
   margin-left: 16px;
+}
+
+.mdc-list--dense .mdc-list-item__end-detail {
+  width: auto;
+  height: auto;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: flex-end;
 }
 
 .mdc-textfield--dense {

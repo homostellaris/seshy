@@ -1,4 +1,4 @@
-/* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction done chrome saveSession asyncLoop */
+/* global mdc getAllOpenWindows getAllSessionFolders goToSession isFunction done chrome saveSession asyncLoop */
 
 // ---===~ Classes ~===-------------------------------------------------------------------------------------------------
 function Session (aWindow, bookmarkFolder) {
@@ -180,7 +180,7 @@ function getSessionInnerHtml (title, tabsNumber) {
     </span>
     <span class="mdc-list-item__text">
       <div class="mdc-textfield mdc-textfield--dense">
-        <input class="session-name-input mdc-textfield__input" type="text" value="${title}">
+        <input class="session-name-input mdc-text-field__input" type="text" value="${title}">
       </div>
       <span class="tabs-number mdc-list-item__text__secondary">
         ${tabsNumber} tabs
@@ -189,6 +189,9 @@ function getSessionInnerHtml (title, tabsNumber) {
     <span class="mdc-list-item__end-detail">
       <button>
         <i class="unshelve-icon material-icons">open_in_new</i>
+      </button>
+      <button>
+        <i class="unshelve-icon material-icons">delete</i>
       </button>
     </span>
   `
@@ -200,7 +203,11 @@ function addKeyboardShortcuts () {
     console.log('Keydown event triggered.')
     switch (event.keyCode) {
       case 13: // `ENTER` key.
-        saveSelectedSession()
+        if (elementIsBeingRenamed()) {
+          saveSelectedSession()
+        } else {
+          goToSelectedSession()
+        }
         break
 
       case 37: // `LEFT` arrow key.
@@ -337,4 +344,13 @@ function saveSelectedSession () {
   session.name = sessionNameInput.value // Session instance was created before name input text changed so must update.
 
   saveSession(session)
+}
+
+function goToSelectedSession () {
+  var selectedSessionElement = getSelectedSession()
+  goToSession(selectedSessionElement.seshySession)
+}
+
+function elementIsBeingRenamed () {
+  return Boolean(document.activeElement.tagName === 'input')
 }

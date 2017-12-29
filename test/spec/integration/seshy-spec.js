@@ -1,5 +1,5 @@
 // TODO Do something about all these.
-/* global chrome saveSession resumeSession tabEqualToBookmark getSession getTabsOrBookmarksInfo createTabs
+/* global chrome saveSession goToSession tabEqualToBookmark getSession getTabsOrBookmarksInfo createTabs
 removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSeshyFolder
 createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession */
 
@@ -140,80 +140,65 @@ describe('Saving sessions.', function () {
   })
 })
 
-describe('Resuming sessions.', function () {
-  describe('User restores a session from the session manager.', function () {
-    beforeEach(function (done) {
-      var saveTestSessionAndCaptureSessionFolderId = (session) => {
-        this.session = session
-        this.bookmarksInfo = getTabsOrBookmarksInfo(this.session.window.id, false)
-        saveTestSession(this.session, captureSessionFolderId)
-      }
+describe('Going to sessions.', function () {
+  var assertSessionWindowFocused = (sessionWindow) => {
+    expect(chrome.windows.update.calls.count()).toBe(1)
+    actualArgs = chrome.windows.update.calls.argsFor(0)
+    expect(actualArgs).toContain(sessionWindow.id)
+    expect(actualArgs).toContain({'focused': true})
+  }
 
-      var captureSessionFolderId = (newSessionFolderId) => {
-        this.sessionFolderId = newSessionFolderId
-        chrome.windows.remove(this.session.window.id, () => {
-          done()
+  var assertGoneToSession = (session, callback) => {
+    assertSessionWindowFocused(session.window)
+    expectedTabs = getTabsOrBookmarksInfo(session.window.id)
+    assertSessionWindowTabs(session.window, expectedTabs)
+    callback()
+  }
+
+  beforeEach(function () {
+    // The spy is needed to verify that the window is focused.
+    // For some reason the testing of focusing other windows does not work in the spec runner.
+    // The window gains focus but the spec runner gains focus before the next line in the spec file can assert that
+    // the window is focused.
+    // Happy to settle for verification that the chrome API is called in this instance.
+    spyOn(chrome.windows, 'update').and.callThrough()
+  })
+
+  describe('User goes to a session from the session manager.', function () {
+    beforeEach(function (done) {
+      createAndSaveTestSession((session) => {
+        this.session = session
+        done()
+      })
+    })
+
+    it('Goes to an unshelved session that is already focused by exiting the session manager.', function (done) {
+      goToSession(this.session, () => {
+        assertGoneToSession(this.session, done)
+      })
+    })
+
+    it('Goes to an unshelved session that is not already focused by focusing it.', function (done) {
+      createAndSaveTestSession((session) => {
+        this.sessionTwo = session
+        goToSession(this.session, () => {
+          assertGoneToSession(this.session, done)
+        })
+      })
+    })
+
+    it('Goes to a shelved session by creating a window with session\'s tabs and focusing it.', function (done) {
+      var goToSessionThenAssert = () => {
+        goToSession(this.session, () => {
+          assertGoneToSession(this.session, done)
         })
       }
 
-      openUnsavedTestSession(saveTestSessionAndCaptureSessionFolderId)
-    })
-
-    it('Adds a window ID to session folder ID mapping in local storage.', function (done) {
-      var assertWindowToSessionFolderMappingAdded = (allLocalStorageObject) => {
-        var allLocalStorageKeys = Object.keys(allLocalStorageObject)
-
-        var matchingLocalStorageKey
-        var matchingLocalStorageKeyValue
-
-        for (var i = 0; i < allLocalStorageKeys.length; i++) {
-          var localStorageKey = allLocalStorageKeys[i]
-          // Local storage is always returned as a string but will be comparing to an integer.
-          localStorageKey = parseInt(localStorageKey)
-
-          if (localStorageKey === this.windowId) {
-            matchingLocalStorageKey = localStorageKey
-            matchingLocalStorageKeyValue = allLocalStorageObject[this.windowId.toString()]
-          }
-        }
-        expect(matchingLocalStorageKey).toBe(this.windowId)
-        expect(matchingLocalStorageKeyValue).toBe(this.sessionFolderId)
-        done()
+      var removeWindowThenGoToSession = () => {
+        chrome.windows.remove(this.session.window.id, goToSessionThenAssert)
       }
 
-      resumeSession(this.sessionFolderId, (newWindow) => {
-        this.windowId = newWindow.id
-        chrome.storage.local.get(null, assertWindowToSessionFolderMappingAdded)
-      })
-    })
-
-    it('Opens a window with all the tabs as they were when the session was saved.', function (done) {
-      var assertSessionRestored = (newWindow, bookmarksInfo) => {
-        var tabs = newWindow.tabs
-
-        var expectedTabsNumber = bookmarksInfo.length
-        expect(tabs.length).toBe(expectedTabsNumber)
-
-        var allTabsEqualToBookmarks = true
-        for (var i = 0; i++; i < tabs.length) {
-          var tab = tabs[i]
-          var bookmark = bookmarksInfo[i]
-          if (tabEqualToBookmark(tab, bookmark)) {
-            var allTabsEqualBookmarks = false
-          }
-        }
-        expect(allTabsEqualToBookmarks).toBe(true)
-        done()
-      }
-
-      resumeSession(this.sessionFolderId, (newWindow) => {
-        assertSessionRestored(newWindow, this.bookmarksInfo)
-      })
-    })
-
-    xit('Focuses the appropriate window if the session is already open.', function (done) {
-      console.log('Unimplemented test.')
-      done()
+      createAndSaveTestSession(goToSessionThenAssert)
     })
 
     afterEach(function (done) {

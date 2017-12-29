@@ -1,4 +1,4 @@
-/* global chrome seshyFolderId:true */
+/* global chrome seshyFolderId:true isFunction */
 
 // TODO See if using Chrome messages API to communicate with Seshy lib will utilise multiple threads and therefore
 // improve performance.
@@ -103,11 +103,9 @@ function saveSession (session, callback) {
   })
 }
 
-function resumeSession (sessionFolderId, callback) {
-  chrome.bookmarks.getSubTree(sessionFolderId, extractUrlsFromBookmarks)
-
-  function extractUrlsFromBookmarks (bookmarkTreeNodeResults) {
-    var sessionFolder = bookmarkTreeNodeResults[0]
+function goToSession (session, callback) {
+  function extractUrlsFromBookmarks (session) {
+    var sessionFolder = session.bookmarkFolder
     var bookmarks = sessionFolder.children
     var urls = bookmarks.map((bookmark) => { return bookmark.url })
     createWindowForSession(urls)
@@ -118,10 +116,22 @@ function resumeSession (sessionFolderId, callback) {
       'url': urls
     }
     chrome.windows.create(createData, (newWindow) => {
-      storeWindowToSessionFolderMapping(newWindow.id, sessionFolderId, () => {
+      storeWindowToSessionFolderMapping(newWindow.id, session.bookmarkFolder.id, () => {
         callback(newWindow)
       })
     })
+  }
+
+  if (session.window && session.window.focused) {
+    window.close()
+    callback()
+  } else if (session.currentlyOpen()) {
+    var updateInfo = {'focused': true}
+    chrome.windows.update(session.window.id, updateInfo, () => {
+      session.updateWindow(callback)
+    })
+  } else {
+    extractUrlsFromBookmarks(session)
   }
 }
 
@@ -298,17 +308,4 @@ function getWindowToSessionFolderMapping (windowId, callback) {
 function removeWindowToSessionFolderMapping (windowId, callback) {
   chrome.storage.local.remove(windowId.toString())
   if (isFunction(callback)) callback()
-}
-
-// ---===~ Utility ~===-------------------------------------------------------------------------------------------------
-function tabEqualToBookmark (tab, bookmark) {
-  var indexEqual = tab.index === bookmark.index
-  var urlEqual = tab.url === bookmark.url
-  return indexEqual && urlEqual
-}
-
-// TODO May be some weird edge cases where this returns true in undesirable circumstances.
-// https://stackoverflow.com/questions/5999998/how-can-i-check-if-a-javascript-variable-is-function-type
-function isFunction (variable) {
-  return typeof variable === 'function'
 }

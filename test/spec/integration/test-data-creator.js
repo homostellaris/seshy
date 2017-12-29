@@ -1,4 +1,4 @@
-/* global chrome saveSession resumeSession tabEqualToBookmark getSession seshyFolderId
+/* global chrome saveSession goToSession tabEqualToBookmark getSession seshyFolderId
 removeWindowToSessionFolderMapping deleteSession isFunction initialise */
 
 /**
@@ -6,12 +6,12 @@ removeWindowToSessionFolderMapping deleteSession isFunction initialise */
  */
 function createAndSaveTestSession (callback) {
   var testSession = null;
-  var captureBookmarkFolderThenCallback = (bookmarkFolder) => {
-    callback(testSession)
-  }
   var captureTestSessionThenSave = (session) => {
     testSession = session
     saveTestSession(session, captureBookmarkFolderThenCallback)
+  }
+  var captureBookmarkFolderThenCallback = (bookmarkFolder) => {
+    callback(testSession)
   }
   openUnsavedTestSession(captureTestSessionThenSave)
 }

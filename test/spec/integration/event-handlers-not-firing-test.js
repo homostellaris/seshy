@@ -1,4 +1,4 @@
-/* global chrome saveSession resumeSession tabEqualToBookmark getSession getTabsOrBookmarksInfo createTabs setUp
+/* global chrome saveSession goToSession tabEqualToBookmark getSession getTabsOrBookmarksInfo createTabs setUp
 removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSeshyFolder openUnsavedTestSession
 createSessionBookmarksFolder getAllLocalStorage isFunction */
 
