@@ -1,5 +1,4 @@
 # Seshy
-Chrome extension for effortlessly syncing browsing sessions.
 
 # Testing
 ### Run Tests
