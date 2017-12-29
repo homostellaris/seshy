@@ -1,4 +1,4 @@
-describe('Session manager.', function () {
+describe('Unit tests.', function () {
   describe('Session object.', function () {
     it('Throws an exception if an argument is not provided.', function () {
       console.log('Unimplemented test.')
