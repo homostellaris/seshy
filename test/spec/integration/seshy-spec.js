@@ -1,7 +1,8 @@
 // TODO Do something about all these.
 /* global chrome saveSession goToSession tabEqualToBookmark getSession getTabsOrBookmarksInfo createTabs
-removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSeshyFolder
-createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession */
+removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSeshyFolder getAllSessionFolders
+createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession getSessionFolderBookmarks
+assertSessionWindowTabs createAndSaveTestSession setUp resetTestContainer isFunction */
 
 describe('Integration tests.', function () {
   describe('Creating sessions.', function () {
@@ -144,14 +145,14 @@ describe('Integration tests.', function () {
   describe('Going to sessions.', function () {
     var assertSessionWindowFocused = (sessionWindow) => {
       expect(chrome.windows.update.calls.count()).toBe(1)
-      actualArgs = chrome.windows.update.calls.argsFor(0)
+      var actualArgs = chrome.windows.update.calls.argsFor(0)
       expect(actualArgs).toContain(sessionWindow.id)
       expect(actualArgs).toContain({'focused': true})
     }
 
     var assertGoneToSession = (session, callback) => {
       assertSessionWindowFocused(session.window)
-      expectedTabs = getTabsOrBookmarksInfo(session.window.id)
+      var expectedTabs = getTabsOrBookmarksInfo(session.window.id)
       assertSessionWindowTabs(session.window, expectedTabs)
       callback()
     }
@@ -347,7 +348,7 @@ describe('Integration tests.', function () {
           var expectedText = 'Test Session'
           var currentlyOpenSessionList = document.getElementById('currently-open-sessions')
           var currentlyOpenSessions = currentlyOpenSessionList.getElementsByClassName('session-card')
-          expect(currentlyOpenSessions.length).toBe(2)  // Includes spec runner window.
+          expect(currentlyOpenSessions.length).toBe(2) // Includes spec runner window.
           var testSession = currentlyOpenSessions[1]
           var sessionNameInput = testSession.getElementsByClassName('session-name-input')[0]
           var actualText = sessionNameInput.value
@@ -389,21 +390,21 @@ describe('Integration tests.', function () {
       })
 
       it('Shows all sessions in the \'Shelved Sessions\' list with a blue saved state icon ' +
-         '(because all \'shelved\' sessions are by definition also \'saved\' sessions.)', function (done) {
-           var expectedRgbColorValue = 'rgb(65, 105, 225)'
-           var assertSavedStateIconColor = () => {
-             var shelvedSessionsList = document.getElementById('saved-sessions')
-             var shelvedSessions = shelvedSessionsList.getElementsByClassName('session-card')
-             expect(shelvedSessions.length).toBe(1)
-             var shelvedSession = shelvedSessions[0]
-             var savedStateIcon = shelvedSession.getElementsByClassName('saved-state-icon')[0]
-             var savedStateIconColor = window.getComputedStyle(savedStateIcon, null).getPropertyValue('color')
+      '(because all \'shelved\' sessions are by definition also \'saved\' sessions.)', function (done) {
+        var expectedRgbColorValue = 'rgb(65, 105, 225)'
+        var assertSavedStateIconColor = () => {
+          var shelvedSessionsList = document.getElementById('saved-sessions')
+          var shelvedSessions = shelvedSessionsList.getElementsByClassName('session-card')
+          expect(shelvedSessions.length).toBe(1)
+          var shelvedSession = shelvedSessions[0]
+          var savedStateIcon = shelvedSession.getElementsByClassName('saved-state-icon')[0]
+          var savedStateIconColor = window.getComputedStyle(savedStateIcon, null).getPropertyValue('color')
 
-             expect(savedStateIconColor).toEqual(expectedRgbColorValue)
-             done()
-           }
-           // TODO Find out why a setTimeout is necessary here. Style should be applied before `setUp` callsback.
-           setTimeout(assertSavedStateIconColor, 500)
+          expect(savedStateIconColor).toEqual(expectedRgbColorValue)
+          done()
+        }
+        // TODO Find out why a setTimeout is necessary here. Style should be applied before `setUp` callsback.
+        setTimeout(assertSavedStateIconColor, 500)
       })
 
       it('Shows the name of shelved sessions.', function (done) {

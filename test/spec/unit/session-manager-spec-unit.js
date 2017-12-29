@@ -1,3 +1,6 @@
+/* global setUp selectPreviousSession selectNextSession selectLastSessionInPreviousSessionList
+selectFirstSessionInNextSessionList goToSelectedSession saveSelectedSession focusSessionNameInput */
+
 describe('Unit tests.', function () {
   describe('Session object.', function () {
     it('Throws an exception if an argument is not provided.', function () {
@@ -126,7 +129,7 @@ describe('Unit tests.', function () {
     describe('Goes to the selected session when the `ENTER` key is pressed.', function () {
       describe('The `goToSelectedSession` function.', function () {
         xit('Calls `getSelectedSession` function.', function () {
-          fakeSessionElement = jasmine.createSpyObj('fakeSessionElement', ['seshySession'])
+          var fakeSessionElement = jasmine.createSpyObj('fakeSessionElement', ['seshySession'])
           spyOn(window, 'getSelectedSession').and.returnValue(fakeSessionElement)
           spyOn(window, 'goToSelectedSession')
 
@@ -144,19 +147,19 @@ describe('Unit tests.', function () {
         })
 
         xit('Calls `chrome.windows.update` with the `focused` property set to `true` if the session is unshelved.',
-            function () {
-          console.log('Unimplemented test.')
-        })
+          function () {
+            console.log('Unimplemented test.')
+          })
       })
     })
 
     describe('Renames the session when the `r` key is pressed.', function () {
       describe('The `focusSessionNameInput` function.', function () {
         it('Calls select on the session name input.', function () {
-          fakeSessionNameInput = jasmine.createSpyObj('fakeSessionNameInput', ['select'])
+          var fakeSessionNameInput = jasmine.createSpyObj('fakeSessionNameInput', ['select'])
           spyOn(window, 'getSessionNameInput').and.returnValue(fakeSessionNameInput)
 
-          fakeEvent = jasmine.createSpy('fakeEvent')
+          var fakeEvent = jasmine.createSpy('fakeEvent')
           focusSessionNameInput(fakeEvent)
 
           expect(fakeSessionNameInput.select).toHaveBeenCalled()
@@ -166,9 +169,9 @@ describe('Unit tests.', function () {
       describe('Saves the session when the `ENTER` key is pressed during renaming.', function () {
         describe('The `saveSelectedSession` function.', function () {
           xit('Calls `getSelectedSession` function.', function () {
-            fakeSessionElement = jasmine.createSpyObj('fakeSessionElement', ['seshySession'])
+            var fakeSessionElement = jasmine.createSpyObj('fakeSessionElement', ['seshySession'])
             spyOn(window, 'getSelectedSession').and.returnValue(fakeSessionElement)
-            fakeSessionNameInput = jasmine.createSpy('fakeSessionNameInput')
+            var fakeSessionNameInput = jasmine.createSpy('fakeSessionNameInput')
             spyOn(window, 'getSessionNameInput').and.returnValue(fakeSessionNameInput)
             spyOn(window, 'saveSession')
 

@@ -6,7 +6,7 @@ module.exports = function(grunt) {
       target: [
         'main/js/*',
         'test/*.js',
-        'test/spec/*.js'
+        'test/spec/**/*.js'
       ]
     },
 

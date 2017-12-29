@@ -1,11 +1,11 @@
 /* global chrome saveSession goToSession tabEqualToBookmark getSession seshyFolderId
-removeWindowToSessionFolderMapping deleteSession isFunction initialise */
+removeWindowToSessionFolderMapping deleteSession isFunction initialise Session asyncLoop */
 
 /**
  * Create a test session (which will create a window with some tabs) and save it (which will create a bookmark folder).
  */
 function createAndSaveTestSession (callback) {
-  var testSession = null;
+  var testSession = null
   var captureTestSessionThenSave = (session) => {
     testSession = session
     saveTestSession(session, captureBookmarkFolderThenCallback)
@@ -87,7 +87,7 @@ function createTabs (tabsInfo, callback) {
 }
 
 function getTabsOrBookmarksInfo (windowOrParentId, asBookmarks, tabSetNumber, urlsOnly) {
-  var tabSetNumber = tabSetNumber || 1
+  tabSetNumber = tabSetNumber || 1
   var tabSetIndex = tabSetNumber - 1
 
   var tabUrls1 = [
@@ -188,7 +188,7 @@ function getSessionFolders (callback) {
   }
 }
 
-function getSessionFolderBookmarks(bookmarkFolder, callback) {
+function getSessionFolderBookmarks (bookmarkFolder, callback) {
   var getSessionFolderChildren = (bookmarkTreeNodes) => {
     var sessionFolder = bookmarkTreeNodes[0]
     chrome.bookmarks.getChildren(sessionFolder.id, returnChildren)
@@ -215,7 +215,7 @@ function removeAllWindows (callback) {
 }
 
 function removeWindows (windows, callback) {
-  windows.splice(0, 1)  // Remove the first window because it is the spec runner.
+  windows.splice(0, 1) // Remove the first window because it is the spec runner.
   var removeWindow = (sessionWindow, callback) => {
     chrome.windows.remove(sessionWindow.id, callback)
   }
