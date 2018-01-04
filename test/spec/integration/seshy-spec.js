@@ -295,35 +295,85 @@ describe('Integration tests.', function () {
   })
 
   describe('Deleting sessions.', function () {
-    beforeEach(function (done) {
-      var saveTestSessionAndCaptureSessionFolderId = (newWindowId) => {
-        this.windowId = newWindowId
-        saveTestSession(this.windowId, captureSessionFolderId)
+    var assertSessionDeleted = (session, callback) => {
+      var assertSessionElementRemoved = (session, callback) => {
+        var savedSessionsList = document.getElementById('saved-sessions')
+        var savedSessions = savedSessionsList.getElementsByClassName('session')
+        var sessionElementRemoved = true
+
+        for (var i = 0; i < savedSessions.length; i++) {
+          var sessionElement = savedSessions[i]
+          if (sessionElement === session.element) {
+            sessionElementRemoved = false
+          }
+        }
+
+        expect(sessionElementRemoved).toBe(true)
+        callback()
       }
 
-      var captureSessionFolderId = (sessionFolderId) => {
-        this.expectedDeletedSessionFolderId = sessionFolderId
-        done()
+      var tryGetSessionFolder = () => {
+        if (session.bookmarkFolder && session.bookmarkFolder.id) {
+          chrome.bookmarks.get(session.bookmarkFolder.id.toString(), assertBookmarkFolderDeleted)
+        } else {
+          callback()
+        }
       }
 
-      openUnsavedTestSession(saveTestSessionAndCaptureSessionFolderId)
+      var assertBookmarkFolderDeleted = (bookmarkFolderId) => {
+        var sessionFolderDeleted = false
+        if (chrome.runtime.lastError) {
+          sessionFolderDeleted = true
+        }
+        expect(sessionFolderDeleted).toBe(true)
+        callback()
+      }
+
+      assertSessionElementRemoved(session, tryGetSessionFolder)
+    }
+
+    describe('Unsaved sessions.', function () {
+      beforeEach(function (done) {
+        openUnsavedTestSession((session) => {
+          this.session = session
+          done()
+        })
+      })
+
+      it('Deletes an unsaved session by removing its window.', function (done) {
+        deleteSession(this.session, () => {
+          assertSessionDeleted(this.session, done)
+        })
+      })
     })
 
-    it('Deletes the session folder.', function (done) {
-      var tryGetSessionFolder = (sessionFolderId) => {
-        chrome.bookmarks.get(sessionFolderId.toString(), assertSessionFolderDeleted)
-        this.sessionFolderDeleted = false
-      }
+    describe('Saved sessions.', function () {
+      beforeEach(function (done) {
+        createAndSaveTestSession((session) => {
+          this.session = session
+          done()
+        })
+      })
 
-      var assertSessionFolderDeleted = (sessionFolderId) => {
-        if (chrome.runtime.lastError) {
-          this.sessionFolderDeleted = true
+      it('Deletes a shelved session by removing its bookmark folder.', function (done) {
+        var assertSessionDeletedThenDone = () => {
+          assertSessionDeleted(this.session, done)
         }
-        expect(this.sessionFolderDeleted).toBe(true)
-        done()
-      }
 
-      deleteSession(this.expectedDeletedSessionFolderId, tryGetSessionFolder) // Method under test.
+        chrome.windows.remove(this.session.window.id, () => {
+          deleteSession(this.session, assertSessionDeletedThenDone)
+        })
+      })
+
+      it('Deletes an unshelved session by removing its window and bookmark folder.', function (done) {
+        var assertSessionDeletedThenDone = () => {
+          assertSessionDeleted(this.session, done)
+        }
+
+        deleteSession(this.session, () => {
+          assertSessionDeletedThenDone()
+        })
+      })
     })
 
     afterEach(function (done) {

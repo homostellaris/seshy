@@ -17,10 +17,10 @@ var driver = new webdriver.Builder()
 // Otherwise jasmine-failures becomes visible.
 driver.findElement(By.className('jasmine-results')).then((jasmineResults) => {
   driver.wait(until.elementIsVisible(jasmineResults))
-  return driver.findElement(By.className('jasmine-summary'))
+  return driver.findElement(By.className('jasmine-summary'), 2000)
 }).then((jasmineSummary) => {
   console.log('Waiting for jasmine-summary element to become visible.')
-  return driver.wait(until.elementIsVisible(jasmineSummary), 2000)
+  return driver.wait(until.elementIsVisible(jasmineSummary))
 }).then(() => {
   console.log('The jasmine-summary element became visible so there should be no failures.')
   pass()

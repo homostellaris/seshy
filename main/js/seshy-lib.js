@@ -135,10 +135,30 @@ function goToSession (session, callback) {
   }
 }
 
-function deleteSession (sessionFolderId, callback) {
-  chrome.bookmarks.removeTree(sessionFolderId, () => {
-    callback(sessionFolderId)
-  })
+function deleteSession (session, callback) {
+  var removeSessionWindowIfOpen = () => {
+    if (session.currentlyOpen()) {
+      session.updateWindow(() => {
+        chrome.windows.remove(session.window.id, removeBookmarkFolderIfSaved)
+      })
+    } else {
+      removeBookmarkFolderIfSaved()
+    }
+  }
+
+  var removeBookmarkFolderIfSaved = () => {
+    if (session.saved()) {
+      chrome.bookmarks.removeTree(session.bookmarkFolder.id, callback)
+    } else {
+      callback()
+    }
+  }
+
+  removeSessionElement(session, removeSessionWindowIfOpen)
+}
+
+var removeSessionElement = (session, callback) => {
+  callback()
 }
 
 /**

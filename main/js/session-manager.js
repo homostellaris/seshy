@@ -1,4 +1,5 @@
-/* global mdc getAllOpenWindows getAllSessionFolders goToSession isFunction done chrome saveSession asyncLoop */
+/* global mdc getAllOpenWindows getAllSessionFolders goToSession isFunction done chrome saveSession deleteSession
+asyncLoop */
 
 // ---===~ Classes ~===-------------------------------------------------------------------------------------------------
 function Session (aWindow, bookmarkFolder) {
@@ -66,6 +67,11 @@ Session.prototype.addEventListeners = function () {
     }
     console.log('Adding selected class to focused element.')
     this.element.classList.add('selected')
+  })
+
+  var resumeIcon = this.element.getElementsByClassName('resume-icon')[0]
+  resumeIcon.addEventListener('click', (event) => {
+    goToSession(this)
   })
 }
 
@@ -188,10 +194,10 @@ function getSessionInnerHtml (title, tabsNumber) {
     </span>
     <span class="mdc-list-item__end-detail">
       <button>
-        <i class="unshelve-icon material-icons">open_in_new</i>
+        <i class="resume-icon material-icons">open_in_new</i>
       </button>
       <button>
-        <i class="unshelve-icon material-icons">delete</i>
+        <i class="delete-icon material-icons">delete</i>
       </button>
     </span>
   `
@@ -228,6 +234,10 @@ function addKeyboardShortcuts () {
 
       case 82: // `r` key.
         focusSessionNameInput(event)
+        break
+
+      case 222:
+        deleteSelectedSession()
         break
 
       default: return // exit this handler for other keys
@@ -353,4 +363,9 @@ function goToSelectedSession () {
 
 function elementIsBeingRenamed () {
   return Boolean(document.activeElement.tagName === 'input')
+}
+
+function deleteSelectedSession () {
+  var selectedSessionElement = getSelectedSession()
+  deleteSession(selectedSessionElement.seshySession)
 }
