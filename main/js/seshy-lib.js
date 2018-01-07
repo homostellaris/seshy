@@ -158,6 +158,7 @@ function deleteSession (session, callback) {
 }
 
 var removeSessionElement = (session, callback) => {
+  session.element.remove()
   callback()
 }
 

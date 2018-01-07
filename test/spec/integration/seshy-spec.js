@@ -297,12 +297,11 @@ describe('Integration tests.', function () {
   describe('Deleting sessions.', function () {
     var assertSessionDeleted = (session, callback) => {
       var assertSessionElementRemoved = (session, callback) => {
-        var savedSessionsList = document.getElementById('saved-sessions')
-        var savedSessions = savedSessionsList.getElementsByClassName('session')
+        var sessionElements = document.getElementsByClassName('session-card')
         var sessionElementRemoved = true
 
-        for (var i = 0; i < savedSessions.length; i++) {
-          var sessionElement = savedSessions[i]
+        for (var i = 0; i < sessionElements.length; i++) {
+          var sessionElement = sessionElements[i]
           if (sessionElement === session.element) {
             sessionElementRemoved = false
           }
@@ -361,6 +360,7 @@ describe('Integration tests.', function () {
         }
 
         chrome.windows.remove(this.session.window.id, () => {
+          this.session.window = null
           deleteSession(this.session, assertSessionDeletedThenDone)
         })
       })

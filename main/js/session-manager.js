@@ -41,8 +41,9 @@ Session.prototype.saved = function () {
 }
 
 Session.prototype.updateWindow = function (callback) {
+  var session = this
   function setWindowAndCallback (updatedWindow) {
-    this.window = updatedWindow
+    session.window = updatedWindow
     callback(updatedWindow)
   }
 
