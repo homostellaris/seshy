@@ -1,34 +1,44 @@
 require('chromedriver')
-const webdriver = require('selenium-webdriver')
+const {Builder, By, until} = require('selenium-webdriver')
 const chrome = require('selenium-webdriver/chrome')
-const By = webdriver.By
-const until = webdriver.until
 
 var chromeOptions = new chrome.Options()
 chromeOptions.addExtensions('output/test.crx')
 chromeOptions.addArguments('start-maximized')
 
-var driver = new webdriver.Builder()
+var driver = new Builder()
   .forBrowser('chrome')
   .setChromeOptions(chromeOptions)
   .build()
 
-// If the tests pass then jasmine-summary becomes visible.
-// Otherwise jasmine-failures becomes visible.
-driver.findElement(By.className('jasmine-results')).then((jasmineResults) => {
-  driver.wait(until.elementIsVisible(jasmineResults))
-  return driver.findElement(By.className('jasmine-summary'), 2000)
-}).then((jasmineSummary) => {
-  console.log('Waiting for jasmine-summary element to become visible.')
-  return driver.wait(until.elementIsVisible(jasmineSummary))
-}).then(() => {
-  console.log('The jasmine-summary element became visible so there should be no failures.')
+// Wait until tests have finished.
+driver.wait(until.elementLocated(By.className('jasmine-duration')))
+
+// Although selenium has a promise manager, couldn't find a way to catch the find element error without using the normal
+//  promise style to provide an error handler.
+driver.findElement(By.className('jasmine-spec-detail jasmine-failed')).then((failuresContainer) => {
+  fail()
+}, (e) => {
+  console.log('No failures element so tests must have passed.')
   pass()
-}, (reason) => {
-  getFailures()
 })
 
-function getFailures () {
+function pass () {
+  if (process.env.TRAVIS) {
+    console.log('On Travis so closing Chrome instance.')
+    quit()
+  }
+}
+
+function quit () {
+  console.log('Quiting.')
+  return driver.close().then(() => {
+    driver.quit()
+  })
+}
+
+// TODO refactor to use promise manager. Find elements was resolving to a promise not the element.
+function fail () {
   driver.findElement(By.className('jasmine-failures')).then((jasmineFailures) => {
     console.log(
       'The jasmine-failures element was located. Now expecting it to have child divs for the failed ' +
@@ -38,7 +48,7 @@ function getFailures () {
   }).then((jasmineFailedSpecs) => {
     var failedSpecsNumber = jasmineFailedSpecs.length
     if (failedSpecsNumber > 0) {
-      fail(failedSpecsNumber)
+      exitCodeOne(failedSpecsNumber)
     } else {
       throw new Error(
         'Unexpected state. The jasmine-failures element is visible but no child divs ' +
@@ -48,16 +58,7 @@ function getFailures () {
   })
 }
 
-function pass () {
-  if (process.env.TRAVIS) {
-    console.log('On Travis so closing Chrome instance.')
-    return driver.close().then(() => {
-      driver.quit()
-    })
-  }
-}
-
-function fail (failedSpecsNumber) {
+function exitCodeOne (failedSpecsNumber) {
   if (process.env.TRAVIS) {
     console.log('On Travis so closing Chrome instance.')
     return driver.close().then(() => {
