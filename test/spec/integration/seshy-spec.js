@@ -1,5 +1,5 @@
 // TODO Do something about all these.
-/* global chrome saveSession goToSession tabEqualToBookmark getSession getTabsOrBookmarksInfo createTabs
+/* global chrome saveSession resumeSession tabEqualToBookmark getSession getTabsOrBookmarksInfo createTabs
 removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSeshyFolder getAllSessionFolders
 createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession getSessionFolderBookmarks
 assertSessionWindowTabs createAndSaveTestSession setUp resetTestContainer isFunction openThreeUnsavedTestSessions
@@ -176,7 +176,7 @@ describe('Integration tests.', function () {
       })
 
       it('Goes to an unshelved session that is already focused by exiting the session manager.', function (done) {
-        goToSession(this.session, () => {
+        resumeSession(this.session, () => {
           assertGoneToSession(this.session, done)
         })
       })
@@ -184,24 +184,24 @@ describe('Integration tests.', function () {
       it('Goes to an unshelved session that is not already focused by focusing it.', function (done) {
         createAndSaveTestSession((session) => {
           this.sessionTwo = session
-          goToSession(this.session, () => {
+          resumeSession(this.session, () => {
             assertGoneToSession(this.session, done)
           })
         })
       })
 
       it('Goes to a shelved session by creating a window with session\'s tabs and focusing it.', function (done) {
-        var goToSessionThenAssert = () => {
-          goToSession(this.session, () => {
+        var resumeSessionThenAssert = () => {
+          resumeSession(this.session, () => {
             assertGoneToSession(this.session, done)
           })
         }
 
-        var removeWindowThenGoToSession = () => {
-          chrome.windows.remove(this.session.window.id, goToSessionThenAssert)
+        var removeWindowThenResumeSession = () => {
+          chrome.windows.remove(this.session.window.id, resumeSessionThenAssert)
         }
 
-        createAndSaveTestSession(goToSessionThenAssert)
+        createAndSaveTestSession(resumeSessionThenAssert)
       })
 
       afterEach(function (done) {

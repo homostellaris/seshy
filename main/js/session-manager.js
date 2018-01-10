@@ -1,4 +1,4 @@
-/* global mdc getAllOpenWindows getAllSessionFolders goToSession isFunction done chrome saveSession deleteSession
+/* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction done chrome saveSession deleteSession
 asyncLoop */
 
 // ---===~ Classes ~===-------------------------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ Session.prototype.addEventListeners = function () {
 
   var resumeIcon = this.element.getElementsByClassName('resume-icon')[0]
   resumeIcon.addEventListener('click', (event) => {
-    goToSession(this)
+    resumeSession(this)
   })
 
   var deleteIcon = this.element.getElementsByClassName('delete-icon')[0]
@@ -219,7 +219,7 @@ function addKeyboardShortcuts () {
         if (elementIsBeingRenamed()) {
           saveSelectedSession()
         } else {
-          goToSelectedSession()
+          resumeSelectedSession()
         }
         break
 
@@ -378,9 +378,9 @@ function saveSelectedSession () {
   saveSession(session)
 }
 
-function goToSelectedSession () {
+function resumeSelectedSession () {
   var selectedSessionElement = getSelectedSession()
-  goToSession(selectedSessionElement.seshySession)
+  resumeSession(selectedSessionElement.seshySession)
 }
 
 function elementIsBeingRenamed () {

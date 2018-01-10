@@ -1,5 +1,5 @@
 /* global setUp selectPreviousSession selectNextSession selectLastSessionInPreviousSessionList
-selectFirstSessionInNextSessionList goToSelectedSession saveSelectedSession focusSessionNameInput */
+selectFirstSessionInNextSessionList resumeSelectedSession saveSelectedSession focusSessionNameInput */
 
 describe('Unit tests.', function () {
   describe('Session object.', function () {
@@ -127,13 +127,13 @@ describe('Unit tests.', function () {
     })
 
     describe('Goes to the selected session when the `ENTER` key is pressed.', function () {
-      describe('The `goToSelectedSession` function.', function () {
+      describe('The `resumeSelectedSession` function.', function () {
         xit('Calls `getSelectedSession` function.', function () {
           var fakeSessionElement = jasmine.createSpyObj('fakeSessionElement', ['seshySession'])
           spyOn(window, 'getSelectedSession').and.returnValue(fakeSessionElement)
-          spyOn(window, 'goToSelectedSession')
+          spyOn(window, 'resumeSelectedSession')
 
-          goToSelectedSession()
+          resumeSelectedSession()
 
           expect(window.getSelectedSession).toHaveBeenCalled()
         })
@@ -142,7 +142,7 @@ describe('Unit tests.', function () {
           console.log('Unimplemented test.')
         })
 
-        xit('Calls `goToSession` if the session is shelved.', function () {
+        xit('Calls `resumeSession` if the session is shelved.', function () {
           console.log('Unimplemented test.')
         })
 

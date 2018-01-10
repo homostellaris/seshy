@@ -1,4 +1,4 @@
-/* global chrome saveSession goToSession tabEqualToBookmark getSession seshyFolderId
+/* global chrome saveSession resumeSession tabEqualToBookmark getSession seshyFolderId
 removeWindowToSessionFolderMapping deleteSession isFunction initialise Session asyncLoop */
 
 /**

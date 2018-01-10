@@ -103,7 +103,7 @@ function saveSession (session, callback) {
   })
 }
 
-function goToSession (session, callback) {
+function resumeSession (session, callback) {
   function extractUrlsFromBookmarks (session) {
     var sessionFolder = session.bookmarkFolder
     var bookmarks = sessionFolder.children
