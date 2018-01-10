@@ -76,6 +76,23 @@ function openUnsavedTestSession (callback, tabSetNumber) {
   chrome.windows.create(createData, createSession)
 }
 
+function openThreeUnsavedTestSessions (callback) {
+  var sessions = []
+
+  var callOpenUnsavedTestSession = (iterableItem, callback) => {
+    openUnsavedTestSession((session) => {
+      sessions.push(session)
+      callback()
+    })
+  }
+
+  var callbackWithSessions = () => {
+    callback(sessions)
+  }
+
+  asyncLoop([1, 2, 3], callOpenUnsavedTestSession, callbackWithSessions)
+}
+
 function createTabs (tabsInfo, callback) {
   chrome.tabs.create(tabsInfo[0])
   chrome.tabs.create(tabsInfo[1])

@@ -2,7 +2,8 @@
 /* global chrome saveSession goToSession tabEqualToBookmark getSession getTabsOrBookmarksInfo createTabs
 removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSeshyFolder getAllSessionFolders
 createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession getSessionFolderBookmarks
-assertSessionWindowTabs createAndSaveTestSession setUp resetTestContainer isFunction */
+assertSessionWindowTabs createAndSaveTestSession setUp resetTestContainer isFunction openThreeUnsavedTestSessions
+deleteSelectedSession */
 
 describe('Integration tests.', function () {
   describe('Creating sessions.', function () {
@@ -373,6 +374,30 @@ describe('Integration tests.', function () {
         deleteSession(this.session, () => {
           assertSessionDeletedThenDone()
         })
+      })
+    })
+
+    describe('Deleting a session with keyboard shortcuts.', function () {
+      beforeEach(function (done) {
+        openThreeUnsavedTestSessions((sessions) => {
+          this.sessions = sessions
+          this.sessionElements = document.getElementsByClassName('session-card')
+          this.secondSessionElement = this.sessionElements[1]
+          this.thirdSessionElement = this.sessionElements[2]
+          this.secondSessionElement.focus()
+          this.secondSessionElement.classList.add('selected')
+          done()
+        })
+      })
+
+      it('Selects the next session.', function (done) {
+        var assertSelectedSession = () => {
+          var selectedSession = document.activeElement
+          expect(selectedSession).toEqual(this.thirdSessionElement)
+          done()
+        }
+
+        deleteSelectedSession(assertSelectedSession)
       })
     })
 

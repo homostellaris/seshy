@@ -74,6 +74,11 @@ Session.prototype.addEventListeners = function () {
   resumeIcon.addEventListener('click', (event) => {
     goToSession(this)
   })
+
+  var deleteIcon = this.element.getElementsByClassName('delete-icon')[0]
+  deleteIcon.addEventListener('click', (event) => {
+    deleteSession(this)
+  })
 }
 
 /**
@@ -91,6 +96,7 @@ Session.prototype.setSavedIconState = function (savedBoolean) {
 function setUp (callback) {
   var done = () => {
     addKeyboardShortcuts()
+    addGlobalEventListeners()
     window.mdc.autoInit()
     if (isFunction(callback)) callback()
   }
@@ -247,6 +253,14 @@ function addKeyboardShortcuts () {
   })
 }
 
+function addGlobalEventListeners () {
+  document.addEventListener('deleteSession', (event) => {
+    var sessionCard = event.srcElement
+    var nextSessionCard = sessionCard.nextElementSibling
+    sessionCard.classList.add('selected')
+  })
+}
+
 function selectNextSession () {
   var sessionElement = getNextSession()
   if (sessionElement === null) {
@@ -279,7 +293,14 @@ function selectLastSessionInPreviousSessionList () {
 }
 
 function getSelectedSession () {
-  return document.getElementsByClassName('selected')[0]
+  var selectedSessionResults = document.getElementsByClassName('selected')
+  if (selectedSessionResults > 1) {
+    console.warn('There is more than one session selected. Is this right?')
+  } else if (selectedSessionResults < 1) {
+    console.warn('There are no selected sessions, this could lead to errors at the moment.')
+  } else {
+    return selectedSessionResults[0]
+  }
 }
 
 function getSessionNameInput (sessionElement) {
@@ -366,7 +387,10 @@ function elementIsBeingRenamed () {
   return Boolean(document.activeElement.tagName === 'input')
 }
 
-function deleteSelectedSession () {
+function deleteSelectedSession (callback) {
+  var nextSessionCard = getNextSession()
   var selectedSessionElement = getSelectedSession()
   deleteSession(selectedSessionElement.seshySession)
+  nextSessionCard.focus()
+  if (isFunction(callback)) callback()
 }
