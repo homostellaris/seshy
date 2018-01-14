@@ -6,13 +6,16 @@ removeWindowToSessionFolderMapping deleteSession isFunction initialise Session a
  */
 function createAndSaveTestSession (callback) {
   var testSession = null
+
   var captureTestSessionThenSave = (session) => {
     testSession = session
     saveTestSession(session, captureBookmarkFolderThenCallback)
   }
+
   var captureBookmarkFolderThenCallback = (bookmarkFolder) => {
     callback(testSession)
   }
+
   openUnsavedTestSession(captureTestSessionThenSave)
 }
 

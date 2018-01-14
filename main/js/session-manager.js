@@ -165,7 +165,7 @@ function createSessionElements (callback) {
 
 function focusCurrentlyOpenSession (callback) {
   console.log('Focusing currently open session.')
-  var focusSessionNameInput = (currentlyOpenWindow) => {
+  var focusSessionElement = (currentlyOpenWindow) => {
     var currentlyOpenSessionList = getSessionLists()[0]
     var sessionElements = getSessionsFromSessionList(currentlyOpenSessionList)
 
@@ -180,7 +180,7 @@ function focusCurrentlyOpenSession (callback) {
     }
   }
 
-  chrome.windows.getCurrent(null, focusSessionNameInput)
+  chrome.windows.getCurrent(null, focusSessionElement)
 }
 
 /**
@@ -384,7 +384,7 @@ function resumeSelectedSession () {
 }
 
 function elementIsBeingRenamed () {
-  return Boolean(document.activeElement.tagName === 'input')
+  return Boolean(document.activeElement.tagName === 'INPUT')
 }
 
 function deleteSelectedSession (callback) {

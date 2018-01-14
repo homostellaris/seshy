@@ -27,13 +27,10 @@ describe('Integration tests.', function () {
 
   describe('Saving sessions.', function () {
     beforeEach(function (done) {
-      // TODO Extract this common setup into a test-data-creator function.
-      var saveTestSessionAndCaptureSessionFolder = (session) => {
+      createAndSaveTestSession((session) => {
         this.session = session
-        saveSession(session, done)
-      }
-
-      openUnsavedTestSession(saveTestSessionAndCaptureSessionFolder)
+        done()
+      })
     })
 
     var assertBookmarks = (expectedTabSetNumber, sessionFolderBookmarks) => {

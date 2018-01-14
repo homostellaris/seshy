@@ -1,4 +1,4 @@
-/* global setUp selectPreviousSession selectNextSession selectLastSessionInPreviousSessionList
+/* global setUp selectPreviousSession selectNextSession selectLastSessionInPreviousSessionList elementIsBeingRenamed
 selectFirstSessionInNextSessionList resumeSelectedSession saveSelectedSession focusSessionNameInput */
 
 describe('Unit tests.', function () {
@@ -184,6 +184,25 @@ describe('Unit tests.', function () {
 
       describe('Arrow key navigation still works and cancels renaming.', function () {
         console.log('Unimplemented test.')
+      })
+    })
+  })
+
+  describe('Session manager module.', function () {
+    describe('The `elementIsBeingRenamed` method.', function () {
+      it('Returns `false` when focused element is not an input.', function () {
+        expect(elementIsBeingRenamed()).toBe(false)
+      })
+
+      it('Returns `true` when focused element is an input.', function (done) {
+        var input = document.createElement('input')
+        var testContainer = document.getElementById('test-container')
+        testContainer.appendChild(input)
+        input.focus()
+
+        expect(elementIsBeingRenamed()).toBe(true)
+        input.remove()
+        done()
       })
     })
   })
