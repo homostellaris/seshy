@@ -140,7 +140,7 @@ describe('Integration tests.', function () {
     })
   })
 
-  describe('Going to sessions.', function () {
+  describe('Resuming sessions.', function () {
     var assertSessionWindowFocused = (sessionWindow) => {
       expect(chrome.windows.update.calls.count()).toBe(1)
       var actualArgs = chrome.windows.update.calls.argsFor(0)
@@ -164,7 +164,7 @@ describe('Integration tests.', function () {
       spyOn(chrome.windows, 'update').and.callThrough()
     })
 
-    describe('User goes to a session from the session manager.', function () {
+    describe('User resumes a session from the session manager.', function () {
       beforeEach(function (done) {
         createAndSaveTestSession((session) => {
           this.session = session
@@ -172,13 +172,13 @@ describe('Integration tests.', function () {
         })
       })
 
-      it('Goes to an unshelved session that is already focused by exiting the session manager.', function (done) {
+      it('Resumes an unshelved session that is already focused by exiting the session manager.', function (done) {
         resumeSession(this.session, () => {
           assertGoneToSession(this.session, done)
         })
       })
 
-      it('Goes to an unshelved session that is not already focused by focusing it.', function (done) {
+      it('Resumes an unshelved session that is not already focused by focusing it.', function (done) {
         createAndSaveTestSession((session) => {
           this.sessionTwo = session
           resumeSession(this.session, () => {
@@ -187,7 +187,7 @@ describe('Integration tests.', function () {
         })
       })
 
-      it('Goes to a shelved session by creating a window with session\'s tabs and focusing it.', function (done) {
+      it('Resumes a shelved session by creating a window with session\'s tabs and focusing it.', function (done) {
         var resumeSessionThenAssert = () => {
           resumeSession(this.session, () => {
             assertGoneToSession(this.session, done)
