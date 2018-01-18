@@ -368,13 +368,11 @@ describe('Integration tests.', function () {
           assertSessionDeleted(this.session, done)
         }
 
-        deleteSession(this.session, () => {
-          assertSessionDeletedThenDone()
-        })
+        deleteSession(this.session, assertSessionDeletedThenDone)
       })
     })
 
-    describe('Deleting a session with keyboard shortcuts.', function () {
+    fdescribe('Deleting a session with keyboard shortcuts.', function () {
       beforeEach(function (done) {
         openThreeUnsavedTestSessions((sessions) => {
           this.sessions = sessions

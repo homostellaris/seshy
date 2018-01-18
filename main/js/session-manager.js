@@ -388,9 +388,12 @@ function elementIsBeingRenamed () {
 }
 
 function deleteSelectedSession (callback) {
+  var focusNextSessionCardThenCallback = () => {
+    nextSessionCard.focus()
+    if (isFunction(callback)) callback()
+  }
+
   var nextSessionCard = getNextSession()
   var selectedSessionElement = getSelectedSession()
-  deleteSession(selectedSessionElement.seshySession)
-  nextSessionCard.focus()
-  if (isFunction(callback)) callback()
+  deleteSession(selectedSessionElement.seshySession, focusNextSessionCardThenCallback)
 }

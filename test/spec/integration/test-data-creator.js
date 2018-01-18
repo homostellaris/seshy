@@ -187,10 +187,17 @@ function cleanUp (callback) {
     })
   }
 
-  removeAllWindows(() => {
-    resetTestContainer()
-    chrome.storage.local.clear(callGetSessionFolders)
-  })
+  var removeAllWindowsThenResetContainer = () => {
+    removeAllWindows(() => {
+      resetTestContainer()
+      chrome.storage.local.clear(callGetSessionFolders)
+    })
+  }
+
+  // This wait is necessary because some of the tests involve calling `chrome.windows.remove` which seems to callback
+  // before the window is actually removed because the `chrome.windows.getAll` called by the `cleanUp` method returns
+  // windows removed earlier in the test. Adding just a small wait seems to stop these windows being returned.
+  setTimeout(removeAllWindowsThenResetContainer, 100)
 }
 
 function resetTestContainer () {
