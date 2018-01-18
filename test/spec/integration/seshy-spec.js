@@ -372,7 +372,7 @@ describe('Integration tests.', function () {
       })
     })
 
-    fdescribe('Deleting a session with keyboard shortcuts.', function () {
+    describe('Deleting a session with keyboard shortcuts.', function () {
       beforeEach(function (done) {
         openThreeUnsavedTestSessions((sessions) => {
           this.sessions = sessions
