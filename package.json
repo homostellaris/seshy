@@ -24,7 +24,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "grunt test -v"
+    "test": "grunt test -v",
+    "start": "grunt run"
   },
   "repository": {
     "type": "git",

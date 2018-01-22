@@ -3,7 +3,7 @@
 removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSeshyFolder getAllSessionFolders
 createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession getSessionFolderBookmarks
 assertSessionWindowTabs createAndSaveTestSession setUp resetTestContainer isFunction openThreeUnsavedTestSessions
-deleteSelectedSession */
+deleteSelectedSession createAndSaveThreeTestSessions addKeyboardShortcuts */
 
 describe('Integration tests.', function () {
   describe('Creating sessions.', function () {
@@ -428,6 +428,10 @@ describe('Integration tests.', function () {
         setTimeout(assertSessionNameShown, 500)
       })
 
+      xit('Shows sessions in the order they were opened.', function (done) {
+        console.log('Unimplemented test.')
+      })
+
       afterEach(function (done) {
         cleanUp(done)
       })
@@ -494,6 +498,73 @@ describe('Integration tests.', function () {
 
       afterEach(function (done) {
         cleanUp(done)
+      })
+    })
+  })
+
+  describe('Renaming sessions.', function () {
+    var assertSessionRenamed = (session, expectedName, callback) => {
+      session.updateBookmarkFolder(() => {
+        expect(session.bookmarkFolder.title).toEqual(expectedName)
+        var sessionNameInput = session.element.getElementsByClassName('session-name-input')[0]
+        expect(sessionNameInput.value).toEqual(expectedName)
+        callback()
+      })
+    }
+
+    describe('Saved sessions.', function () {
+      beforeEach(function (done) {
+        createAndSaveThreeTestSessions((sessions) => {
+          this.sessions = sessions
+          this.secondSession = this.sessions[1]
+
+          this.sessionNameInputs = document.getElementsByClassName('session-name-input')
+          this.secondSessionNameInput = this.sessionNameInputs[1]
+          this.thirdSessionNameInput = this.sessionNameInputs[2]
+
+          this.secondSessionNameInput.focus()
+          this.secondSession.element.classList.add('selected')
+          this.secondSessionNameInput.value = 'Renamed Session'
+
+          addKeyboardShortcuts()
+          done()
+        })
+      })
+
+      it('Renames the session when the `ENTER` key is pressed ' +
+      'whilst the session name input is focused.', function (done) {
+        var event = new KeyboardEvent('keydown', {'key': 'Enter'})
+        document.dispatchEvent(event)
+        setTimeout(() => {
+          assertSessionRenamed(this.secondSession, 'Renamed Session', done)
+        }, 100)
+      })
+
+      xit('Displays a rename session button whilst the session name input is focused.', function (done) {
+        console.log('Unimplemented test.')
+        done()
+      })
+
+      xit('Renames the session when the rename session button is clicked.', function (done) {
+        console.log('Unimplemented test.')
+        done()
+      })
+
+      xit('Restores the session name to its original value if the session name input loses focus before confirming the ' +
+      'renaming.', function (done) {
+        console.log('Unimplemented test.')
+        done()
+      })
+
+      afterEach(function (done) {
+        cleanUp(done)
+      })
+    })
+
+    xdescribe('Unsaved sessions.', function () {
+      it('Does not allow the user to rename unsaved sessions by disabling the session name input.', function (done) {
+        console.log('Unimplemented test.')
+        done()
       })
     })
   })

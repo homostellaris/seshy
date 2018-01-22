@@ -19,6 +19,23 @@ function createAndSaveTestSession (callback) {
   openUnsavedTestSession(captureTestSessionThenSave)
 }
 
+function createAndSaveThreeTestSessions (callback) {
+  var sessions = []
+
+  var callCreateAndSaveTestSession = (iterableItem, callback) => {
+    createAndSaveTestSession((session) => {
+      sessions.push(session)
+      callback()
+    })
+  }
+
+  var callbackWithSessions = () => {
+    callback(sessions)
+  }
+
+  asyncLoop([1, 2, 3], callCreateAndSaveTestSession, callbackWithSessions)
+}
+
 /**
  * Save passed session and callback with bookmark folder ID.
  */

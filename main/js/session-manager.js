@@ -1,5 +1,5 @@
 /* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction done chrome saveSession deleteSession
-asyncLoop */
+asyncLoop renameSession getSessionNameInput */
 
 // ---===~ Classes ~===-------------------------------------------------------------------------------------------------
 function Session (aWindow, bookmarkFolder) {
@@ -214,36 +214,41 @@ function getSessionInnerHtml (title, tabsNumber) {
 function addKeyboardShortcuts () {
   document.addEventListener('keydown', (event) => {
     console.log('Keydown event triggered.')
-    switch (event.keyCode) {
-      case 13: // `ENTER` key.
+    switch (event.key) {
+      case 'Enter':
         if (elementIsBeingRenamed()) {
-          saveSelectedSession()
+          var selectedSessionElement = getSelectedSession()
+          if (selectedSessionElement.seshySession.saved()) {
+            renameSelectedSession()
+          } else {
+            saveSelectedSession()
+          }
         } else {
           resumeSelectedSession()
         }
         break
 
-      case 37: // `LEFT` arrow key.
+      case 'ArrowLeft':
         selectLastSessionInPreviousSessionList()
         break
 
-      case 38: // `UP` arrow key.
+      case 'ArrowUp':
         selectPreviousSession()
         break
 
-      case 39: // `RIGHT` arrow key.
+      case 'ArrowRight':
         selectFirstSessionInNextSessionList()
         break
 
-      case 40: // `DOWN` arrow key.
+      case 'ArrowDown':
         selectNextSession()
         break
 
-      case 82: // `r` key.
+      case 'r':
         focusSessionNameInput(event)
         break
 
-      case 222:
+      case '#':
         deleteSelectedSession()
         break
 
@@ -303,13 +308,9 @@ function getSelectedSession () {
   }
 }
 
-function getSessionNameInput (sessionElement) {
-  return sessionElement.getElementsByClassName('session-name-input')[0]
-}
-
 function getSelectedSessionNameInput () {
   var selectedSession = getSelectedSession()
-  var selectedSessionNameInput = getSessionNameInput(selectedSession)
+  var selectedSessionNameInput = getSessionNameInput(selectedSession.seshySession)
   return selectedSessionNameInput
 }
 
@@ -364,18 +365,27 @@ function getSessionsFromSessionList (sessionList) {
 
 function focusSessionNameInput (event) {
   var sessionElement = event.srcElement
-  var sessionNameInput = getSessionNameInput(sessionElement)
+  var sessionNameInput = getSessionNameInput(sessionElement.seshySession)
   sessionNameInput.select()
 }
 
 function saveSelectedSession () {
   var selectedSessionElement = getSelectedSession()
-  var sessionNameInput = getSessionNameInput(selectedSessionElement)
+  var sessionNameInput = getSessionNameInput(selectedSessionElement.seshySession)
   var session = selectedSessionElement.seshySession
 
   session.name = sessionNameInput.value // Session instance was created before name input text changed so must update.
 
   saveSession(session)
+}
+
+function renameSelectedSession () {
+  var selectedSessionElement = getSelectedSession()
+  var sessionNameInput = getSessionNameInput(selectedSessionElement.seshySession)
+  var newName = sessionNameInput.value
+  var session = selectedSessionElement.seshySession
+
+  renameSession(session, newName)
 }
 
 function resumeSelectedSession () {

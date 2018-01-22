@@ -160,8 +160,12 @@ describe('Unit tests.', function () {
           spyOn(window, 'getSessionNameInput').and.returnValue(fakeSessionNameInput)
 
           var fakeEvent = jasmine.createSpy('fakeEvent')
-          focusSessionNameInput(fakeEvent)
+          var fakeElement = jasmine.createSpy('fakeElement')
+          var fakeSession = jasmine.createSpy('fakeSession')
+          fakeEvent.srcElement = fakeElement
+          fakeEvent.srcElement.seshySession = fakeSession
 
+          focusSessionNameInput(fakeEvent)
           expect(fakeSessionNameInput.select).toHaveBeenCalled()
         })
       })

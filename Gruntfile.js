@@ -49,7 +49,7 @@ module.exports = function(grunt) {
         cmd: 'node test/run-tests.js'
       },
       run: {
-        cmd: 'google-chrome-unstable --load-extension="output/main/" --disable-gpu --auto-open-devtools-for-tabs'
+        cmd: 'google-chrome-stable --load-extension="output/main/" --user-data-dir=/tmp/chrome-test-data-dir --no-first-run --disable-gpu'
       }
     },
 

@@ -28,3 +28,7 @@ function asyncLoop (iterable, iterateFunction, callback) {
 function isFunction (variable) {
   return typeof variable === 'function'
 }
+
+function getSessionNameInput (session) {
+  return session.element.getElementsByClassName('session-name-input')[0]
+}

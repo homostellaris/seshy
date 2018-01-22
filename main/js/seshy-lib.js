@@ -1,4 +1,4 @@
-/* global chrome seshyFolderId:true isFunction */
+/* global chrome seshyFolderId:true isFunction getSessionNameInput */
 
 // TODO See if using Chrome messages API to communicate with Seshy lib will utilise multiple threads and therefore
 // improve performance.
@@ -101,6 +101,19 @@ function saveSession (session, callback) {
   session.updateWindow(() => {
     checkIfSavedSession(session)
   })
+}
+
+function renameSession (session, newName, callback) {
+  console.log(`Renaming session ${session.name} to ${newName}.`)
+
+  var updateSessionElement = () => {
+    var sessionNameInput = getSessionNameInput(session)
+    sessionNameInput.value = newName
+    if (isFunction(callback)) callback()
+  }
+
+  var bookmarkFolderId = session.bookmarkFolder.id
+  chrome.bookmarks.update(bookmarkFolderId, {'title': newName}, updateSessionElement)
 }
 
 function resumeSession (session, callback) {
