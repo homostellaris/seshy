@@ -4,7 +4,7 @@
 // improve performance.
 // ---===~ Initialisation ~===------------------------------------------------------------------------------------------
 function checkIfSeshyFolderExists () {
-  console.log('Checking for existing Seshy folder.')
+  console.log('Checking for existing Seshy folder...')
 
   var query = {
     'title': 'Seshy',
@@ -181,11 +181,8 @@ var removeSessionElement = (session, callback) => {
 function getSession (windowToCheck, callback) {
   var tabs
 
-  console.log('Clearing any left over window to session folder mapping.')
-  removeWindowToSessionFolderMapping(windowToCheck.id, () => {
-    console.log('Checking if tab set is a saved session.')
-    getTabs(windowToCheck)
-  })
+  console.log('Checking if tab set is a saved session.')
+  getTabs(windowToCheck)
 
   function getTabs (windowToCheck) {
     if (windowToCheck.tabs) {
