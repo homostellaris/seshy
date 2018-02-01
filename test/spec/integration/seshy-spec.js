@@ -4,7 +4,7 @@ removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSesh
 createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession getSessionFolderBookmarks
 assertSessionWindowTabs createAndSaveTestSession setUp resetTestContainer isFunction openThreeUnsavedTestSessions
 deleteSelectedSession createAndSaveThreeTestSessions addKeyboardShortcuts saveSelectedSession
-getCurrentlyOpenSessionElements */
+getCurrentlyOpenSessionElements storeWindowToSessionFolderMapping asyncLoop */
 
 describe('Integration tests.', function () {
   describe('Creating sessions.', function () {
@@ -401,29 +401,30 @@ describe('Integration tests.', function () {
   describe('Browsing sessions.', function () {
     describe('Currently open sessions.', function () {
       beforeEach(function (done) {
-        var createSavedSession = () => {
-          openUnsavedTestSession((session) => {
-            this.sessions.push(session)
-            var sessionNameInput = session.element.getElementsByClassName('session-name-input')[0]
-            sessionNameInput.value = 'Saved Session'
-            sessionNameInput.focus()
-            session.element.classList.add('selected')
-            saveSelectedSession(createAnotherUnsavedSession)
+        this.windows = []
+
+        var createWindow = (uselessNumber, callback) => {
+          chrome.windows.create(null, (aWindow) => {
+            this.windows.push(aWindow)
+            callback()
           })
         }
 
-        var createAnotherUnsavedSession = () => {
-          openUnsavedTestSession((session) => {
-            this.sessions.push(session)
-            done()
+        var createSavedSecondSession = () => {
+          getSeshyFolder((bookmarkTreeNodes) => {
+            createSessionBookmarksFolder(bookmarkTreeNodes, storeWindowToBookmarkFolderMapping)
           })
         }
 
-        this.sessions = []
-        openUnsavedTestSession((session) => {
-          this.sessions.push(session)
-          createSavedSession()
-        })
+        var storeWindowToBookmarkFolderMapping = (bookmarkFolder) => {
+          storeWindowToSessionFolderMapping(this.windows[1].id, bookmarkFolder.id, initialiseSessionManager)
+        }
+
+        var initialiseSessionManager = () => {
+          setUp(done)
+        }
+
+        asyncLoop([1, 2], createWindow, createSavedSecondSession)
       })
 
       it('Shows the name of currently open saved sessions.', function (done) {
