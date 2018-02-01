@@ -369,14 +369,18 @@ function focusSessionNameInput (event) {
   sessionNameInput.select()
 }
 
-function saveSelectedSession () {
+function saveSelectedSession (callback) {
   var selectedSessionElement = getSelectedSession()
   var sessionNameInput = getSessionNameInput(selectedSessionElement.seshySession)
   var session = selectedSessionElement.seshySession
 
   session.name = sessionNameInput.value // Session instance was created before name input text changed so must update.
 
-  saveSession(session)
+  if (isFunction(callback)) {
+    saveSession(session, callback)
+  } else {
+    saveSession(session)
+  }
 }
 
 function renameSelectedSession () {

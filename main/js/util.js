@@ -32,3 +32,9 @@ function isFunction (variable) {
 function getSessionNameInput (session) {
   return session.element.getElementsByClassName('session-name-input')[0]
 }
+
+function getCurrentlyOpenSessionElements () {
+  var currentlyOpenSessionsList = document.getElementById('currently-open-sessions')
+  var currentlyOpenSessionElements = currentlyOpenSessionsList.getElementsByClassName('session-card')
+  return currentlyOpenSessionElements
+}

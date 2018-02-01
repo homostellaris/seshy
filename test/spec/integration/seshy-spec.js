@@ -3,7 +3,8 @@
 removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSeshyFolder getAllSessionFolders
 createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession getSessionFolderBookmarks
 assertSessionWindowTabs createAndSaveTestSession setUp resetTestContainer isFunction openThreeUnsavedTestSessions
-deleteSelectedSession createAndSaveThreeTestSessions addKeyboardShortcuts */
+deleteSelectedSession createAndSaveThreeTestSessions addKeyboardShortcuts saveSelectedSession
+getCurrentlyOpenSessionElements */
 
 describe('Integration tests.', function () {
   describe('Creating sessions.', function () {
@@ -104,11 +105,7 @@ describe('Integration tests.', function () {
       getTestWindow()
     })
 
-    xit('Saves shelved sessions when their window is closed.', function (done) {
-      console.log('Unimplemented test.')
-    })
-
-    xit('Adds a window ID to session folder ID mapping in local storage.', function (done) {
+    xit('Saves saved sessions when their window is closed.', function (done) {
       console.log('Unimplemented test.')
     })
 
@@ -404,32 +401,73 @@ describe('Integration tests.', function () {
   describe('Browsing sessions.', function () {
     describe('Currently open sessions.', function () {
       beforeEach(function (done) {
-        var callSetupThenDone = () => {
-          setUp(done)
+        var createSavedSession = () => {
+          openUnsavedTestSession((session) => {
+            this.sessions.push(session)
+            var sessionNameInput = session.element.getElementsByClassName('session-name-input')[0]
+            sessionNameInput.value = 'Saved Session'
+            sessionNameInput.focus()
+            session.element.classList.add('selected')
+            saveSelectedSession(createAnotherUnsavedSession)
+          })
         }
-        createAndSaveTestSession((session) => {
-          resetTestContainer()
-          callSetupThenDone()
+
+        var createAnotherUnsavedSession = () => {
+          openUnsavedTestSession((session) => {
+            this.sessions.push(session)
+            done()
+          })
+        }
+
+        this.sessions = []
+        openUnsavedTestSession((session) => {
+          this.sessions.push(session)
+          createSavedSession()
         })
       })
 
       it('Shows the name of currently open saved sessions.', function (done) {
         var assertSessionNameShown = () => {
-          var expectedText = 'Test Session'
-          var currentlyOpenSessionList = document.getElementById('currently-open-sessions')
-          var currentlyOpenSessions = currentlyOpenSessionList.getElementsByClassName('session-card')
-          expect(currentlyOpenSessions.length).toBe(2) // Includes spec runner window.
-          var testSession = currentlyOpenSessions[1]
-          var sessionNameInput = testSession.getElementsByClassName('session-name-input')[0]
-          var actualText = sessionNameInput.value
-          expect(actualText).toEqual(expectedText)
+          var currentlyOpenSessions = getCurrentlyOpenSessionElements()
+          expect(currentlyOpenSessions.length).toBe(3) // Includes spec runner window.
+
+          var expectedSessionNames = ['Unsaved Session', 'Saved Session', 'Unsaved Session']
+
+          for (var i = 0; i < currentlyOpenSessions.length; i++) {
+            var savedSession = currentlyOpenSessions[i]
+            var sessionNameInput = savedSession.getElementsByClassName('session-name-input')[0]
+            var expectedText = expectedSessionNames[i]
+            var actualText = sessionNameInput.value
+            expect(actualText).toEqual(expectedText)
+          }
+
           done()
         }
+
         setTimeout(assertSessionNameShown, 500)
       })
 
-      xit('Shows sessions in the order they were opened.', function (done) {
-        console.log('Unimplemented test.')
+      it('Shows sessions in the order they were opened.', function (done) {
+        var assertSessionsOrder = () => {
+          var currentlyOpenSessionElements = getCurrentlyOpenSessionElements()
+
+          var expectedWindowIdsInOrder = []
+          for (let i = 0; i < currentlyOpenSessionElements.length; i++) {
+            let windowId = currentlyOpenSessionElements[i].seshySession.window.id
+            expectedWindowIdsInOrder.push(windowId)
+          }
+
+          var actualWindowIdsInOrder = []
+          for (let i = 0; i < currentlyOpenSessionElements.length; i++) {
+            let windowId = currentlyOpenSessionElements[i].seshySession.window.id
+            actualWindowIdsInOrder.push(windowId)
+          }
+
+          expect(expectedWindowIdsInOrder).toEqual(actualWindowIdsInOrder)
+          done()
+        }
+
+        assertSessionsOrder()
       })
 
       afterEach(function (done) {
