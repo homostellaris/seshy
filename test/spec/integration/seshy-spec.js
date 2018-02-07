@@ -411,13 +411,13 @@ describe('Integration tests.', function () {
         }
 
         var createSavedSecondSession = () => {
-          getSeshyFolder((bookmarkTreeNodes) => {
-            createSessionBookmarksFolder(bookmarkTreeNodes, storeWindowToBookmarkFolderMapping)
+          getSeshyFolder((seshyFolder) => {
+            createSessionBookmarksFolder(seshyFolder, storeWindowToBookmarkFolderMapping)
           })
         }
 
         var storeWindowToBookmarkFolderMapping = (bookmarkFolder) => {
-          storeWindowToSessionFolderMapping(this.windows[1].id, bookmarkFolder.id, initialiseSessionManager)
+          storeWindowToSessionFolderMapping(this.windows[0].id, bookmarkFolder.id, initialiseSessionManager)
         }
 
         var initialiseSessionManager = () => {
@@ -432,7 +432,7 @@ describe('Integration tests.', function () {
           var currentlyOpenSessions = getCurrentlyOpenSessionElements()
           expect(currentlyOpenSessions.length).toBe(3) // Includes spec runner window.
 
-          var expectedSessionNames = ['Unsaved Session', 'Saved Session', 'Unsaved Session']
+          var expectedSessionNames = ['Unsaved Session', 'Test Session', 'Unsaved Session']
 
           for (var i = 0; i < currentlyOpenSessions.length; i++) {
             var savedSession = currentlyOpenSessions[i]

@@ -6,21 +6,20 @@
  */
 function asyncLoop (iterable, iterateFunction, callback) {
   var i = iterable.length
-  var returnIfFinished = () => {
-    if (i <= 1) {
+  if (typeof i !== 'number') {
+    throw new Error('Iterable must have an integer length.')
+  }
+
+  var iterate = () => {
+    if (i === 0) {
       callback()
+    } else {
+      iterateFunction(iterable[--i], iterate)
     }
-    i--
   }
-  var iterate = (element) => {
-    iterateFunction(element, returnIfFinished)
-  }
+
   // For each won't do anything if iterable length is 0 so just callback.
-  if (i === 0) {
-    callback()
-  } else {
-    iterable.forEach(iterate)
-  }
+  iterate()
 }
 
 // TODO May be some weird edge cases where this returns true in undesirable circumstances.
