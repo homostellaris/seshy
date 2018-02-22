@@ -110,8 +110,8 @@ describe('Integration tests.', function () {
       getTestWindow()
     })
 
-    describe('Saves \'saved\' sessions when their window is closed.', function () {
-      it('Added tab is there when the session is closed and re-opened.', function (done) {
+    describe('Saving of \'saved\' sessions when their window is closed.', function () {
+      it('Saves the session again when a tab is added.', function (done) {
         var sessionWindowId = this.session.window.id
 
         var closeWindow = () => {
@@ -153,15 +153,18 @@ describe('Integration tests.', function () {
           setTimeout(closeWindow, 2000)
         })
       })
-      // add tab
-      // close
-      // re-open
-      // assert tabs
 
-      // remove tab
-      // close
-      // re-open
-      // assert tabs
+      xit('Saves the session again when a tab\'s URL is changed.', function () {
+        console.log('Unimplemented test.')
+      })
+
+      xit('Saves the session again when a tab is removed.', function () {
+        console.log('Unimplemented test.')
+      })
+
+      xit('Saves the session again when a tab is moved.', function () {
+        console.log('Unimplemented test.')
+      })
     })
 
     describe('Representation of saved state.', function () {
@@ -185,6 +188,10 @@ describe('Integration tests.', function () {
           done()
         })
       })
+    })
+
+    xit('Changes the browser extension icon whilst session save is pending.', function () {
+      console.log('Unimplemented test.')
     })
 
     afterEach(function (done) {
@@ -594,6 +601,78 @@ describe('Integration tests.', function () {
         cleanUp(done)
       })
     })
+
+    xdescribe('Selecting sessions.', function () {
+      beforeAll(function (done) {
+        this.windowIds = []
+
+        var createSessionManagerDom = (callback) => {
+          this.container = document.getElementById('test-container')
+          this.container.innerHTML = `
+            <ul id="currently-open-sessions">
+            </ul>
+            <ul id="saved-sessions">
+            </ul>
+          `
+          if (isFunction(callback)) callback()
+        }
+
+        var openThreeUnsavedTestSessions = () => {
+          for (var i = 0; i < 3; i++) {
+            openUnsavedTestSession((newWindowId) => {
+              this.windowIds.push(newWindowId)
+              this.tabsInfo = getTabsOrBookmarksInfo(this.windowId)
+              if (this.windowIds.length === 3) {
+                createSessionManagerDom(() => {
+                  setUp(() => {
+                    setTimeout(done, 1000)
+                  })
+                })
+              }
+            })
+          }
+        }
+
+        // TODO Get rid of this setTimeout to wait for Seshy bookmarks folder to be created when running this test by itself.
+        openThreeUnsavedTestSessions()
+      })
+
+      afterAll(function (done) {
+        cleanUp(done)
+        console.log('FINISHED!')
+      })
+
+      it('Focuses the currently open session when opened.', function () {
+        console.log('Asserting focused.')
+        // Currently open session will be the last opened window and therefore the last one in the list.
+        let currentlyOpenSession = this.container.getElementsByClassName('session-card')[3]
+        let currentlyOpenSessionNameInput = currentlyOpenSession.getElementsByClassName('session-name-input')[0]
+        expect(currentlyOpenSessionNameInput).toBe(document.activeElement)
+      })
+
+      it('Assigns \'selected\' class to session with focus.', function () {
+        console.log('Asserting selected.')
+        // Currently open session will be the last opened window and therefore the last one in the list.
+        let currentlyOpenSession = this.container.getElementsByClassName('session-card')[3]
+        expect(currentlyOpenSession.classList.contains('selected')).toBe(true)
+      })
+
+      it('Only ever assigns one session card the \'selected\' class.', function () {
+        let currentlyOpenSession = this.container.getElementsByClassName('selected')
+        expect(currentlyOpenSession.length).toBe(1)
+      })
+
+      xit('Creates an orange border around the currently open session.', () => {
+        // Not implemented.
+      })
+    })
+
+    describe('Browser icon.', function () {
+      xit('Shows a tooltip on mouseover that provides information about the session for the current window.',
+      function () {
+        console.log('Unimplemented test.')
+      })
+    })
   })
 
   describe('Renaming sessions.', function () {
@@ -660,71 +739,6 @@ describe('Integration tests.', function () {
         console.log('Unimplemented test.')
         done()
       })
-    })
-  })
-
-  xdescribe('Selecting sessions.', function () {
-    beforeAll(function (done) {
-      this.windowIds = []
-
-      var createSessionManagerDom = (callback) => {
-        this.container = document.getElementById('test-container')
-        this.container.innerHTML = `
-          <ul id="currently-open-sessions">
-          </ul>
-          <ul id="saved-sessions">
-          </ul>
-        `
-        if (isFunction(callback)) callback()
-      }
-
-      var openThreeUnsavedTestSessions = () => {
-        for (var i = 0; i < 3; i++) {
-          openUnsavedTestSession((newWindowId) => {
-            this.windowIds.push(newWindowId)
-            this.tabsInfo = getTabsOrBookmarksInfo(this.windowId)
-            if (this.windowIds.length === 3) {
-              createSessionManagerDom(() => {
-                setUp(() => {
-                  setTimeout(done, 1000)
-                })
-              })
-            }
-          })
-        }
-      }
-
-      // TODO Get rid of this setTimeout to wait for Seshy bookmarks folder to be created when running this test by itself.
-      openThreeUnsavedTestSessions()
-    })
-
-    afterAll(function (done) {
-      cleanUp(done)
-      console.log('FINISHED!')
-    })
-
-    it('Focuses the currently open session when opened.', function () {
-      console.log('Asserting focused.')
-      // Currently open session will be the last opened window and therefore the last one in the list.
-      let currentlyOpenSession = this.container.getElementsByClassName('session-card')[3]
-      let currentlyOpenSessionNameInput = currentlyOpenSession.getElementsByClassName('session-name-input')[0]
-      expect(currentlyOpenSessionNameInput).toBe(document.activeElement)
-    })
-
-    it('Assigns \'selected\' class to session with focus.', function () {
-      console.log('Asserting selected.')
-      // Currently open session will be the last opened window and therefore the last one in the list.
-      let currentlyOpenSession = this.container.getElementsByClassName('session-card')[3]
-      expect(currentlyOpenSession.classList.contains('selected')).toBe(true)
-    })
-
-    it('Only ever assigns one session card the \'selected\' class.', function () {
-      let currentlyOpenSession = this.container.getElementsByClassName('selected')
-      expect(currentlyOpenSession.length).toBe(1)
-    })
-
-    xit('Creates an orange border around the currently open session.', () => {
-      // Not implemented.
     })
   })
 })

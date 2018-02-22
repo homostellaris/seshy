@@ -31,7 +31,7 @@ var pendingTabUpdatedListenerCalls = 0
 chrome.tabs.onUpdated.addListener(scheduleSaveSessionIfNecessary)
 
 function scheduleSaveSessionIfNecessary (tabId, changeInfo, tab) {
-  console.warn('Tab %d is %s.', tabId, changeInfo.status)
+  console.log('Tab %d is %s.', tabId, changeInfo.status)
   pendingTabUpdatedListenerCalls++
   setTimeout(() => { saveSessionIfNoPendingTabUpdatedListenerCalls(tab) }, 1000)
 }
@@ -44,11 +44,11 @@ function saveSessionIfNoPendingTabUpdatedListenerCalls (tab) {
   console.log('Tab updated event handler triggered.')
 
   if (--pendingTabUpdatedListenerCalls !== 0) {
-    console.warn('%d newer pending tab updated listener calls. Returning without trying to save.',
+    console.log('%d newer pending tab updated listener calls. Returning without trying to save.',
       pendingTabUpdatedListenerCalls)
     return
   }
-  console.warn('0 newer pending tab updated listener calls. Will save if session is a \'saved\' one...')
+  console.log('0 newer pending tab updated listener calls. Will save if session is a \'saved\' one...')
 
   var sessionWindowId = tab.windowId
   var bookmarkFolderId
@@ -57,7 +57,7 @@ function saveSessionIfNoPendingTabUpdatedListenerCalls (tab) {
       // If tab is changed and then window removed quickly this listener can fire after the window is removed.
       removeWindowToSessionFolderMapping(sessionWindowId)
     }
-    console.warn('Tab %d caused window %d to be retrieved with %d tabs.', tab.id, sessionWindowId, sessionWindow.tabs.length)
+    console.log('Tab %d caused window %d to be retrieved with %d tabs.', tab.id, sessionWindowId, sessionWindow.tabs.length)
     checkIfSavedSession(sessionWindowId.toString(), (storageObject) => {
       bookmarkFolderId = storageObject[sessionWindowId]
       // `bookmarkFolderId` will be undefined and therefore falsey if no window-to-bookmark-folder-mapping exists.
@@ -88,7 +88,7 @@ function windowsOnCreatedListener (windowToCheck) {
  * window closing and another one opening (such as saving updated sessions) will think that sessions are still open.
  */
 function windowsOnRemovedListener (windowId) {
-  console.warn('Window %d event fired. Clearing window to session folder mapping...', windowId)
+  console.log('Window %d event fired. Clearing window to session folder mapping...', windowId)
   // Have to remove the mapping here rather than in `removeWindow` so that it
   removeWindowToSessionFolderMapping(windowId)
 }
