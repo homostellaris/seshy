@@ -669,9 +669,9 @@ describe('Integration tests.', function () {
 
     describe('Browser icon.', function () {
       xit('Shows a tooltip on mouseover that provides information about the session for the current window.',
-      function () {
-        console.log('Unimplemented test.')
-      })
+        function () {
+          console.log('Unimplemented test.')
+        })
     })
   })
 
