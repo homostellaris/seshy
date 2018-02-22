@@ -49,6 +49,7 @@ function createSeshyFolder () {
 function saveSession (session, callback) {
   console.log('Saving tab set into bookmarks folder.')
 
+  // TODO Replace with global function.
   var checkIfSavedSession = (session) => {
     if (session.saved()) {
       getBookmarksInFolder(session.bookmarkFolder.id)
@@ -152,7 +153,7 @@ function deleteSession (session, callback) {
   var removeSessionWindowIfOpen = () => {
     if (session.currentlyOpen()) {
       session.updateWindow(() => {
-        chrome.windows.remove(session.window.id, removeBookmarkFolderIfSaved)
+        removeWindow(session, removeBookmarkFolderIfSaved)
       })
     } else {
       removeBookmarkFolderIfSaved()
@@ -264,8 +265,8 @@ function getAllOpenWindows (callback) {
   chrome.windows.getAll({'populate': true}, callback)
 }
 
-function checkIfSavedSession (windowToCheck, callback) {
-  getWindowToSessionFolderMapping(windowToCheck.id, callback)
+function checkIfSavedSession (windowToCheckId, callback) {
+  getWindowToSessionFolderMapping(windowToCheckId, callback)
 }
 
 function createSessionFolder (session, callback) {
@@ -286,8 +287,27 @@ function saveOpenSessionTabs (session, callback) {
   })
 }
 
+// TODO Use this function in `saveSession`
+function saveWindowAsBookmarkFolder (window, bookmarkFolderId, callback) {
+  var getBookmarksInFolder = (bookmarkFolderId) => {
+    chrome.bookmarks.getChildren(bookmarkFolderId, removeBookmarksInFolder)
+  }
+
+  var removeBookmarksInFolder = (bookmarkTreeNodes) => {
+    removeBookmarks(bookmarkTreeNodes, callSaveTabsAsBookmarks)
+  }
+
+  var callSaveTabsAsBookmarks = () => {
+    saveTabsAsBookmarks(window.tabs, bookmarkFolderId, callback)
+  }
+
+  getBookmarksInFolder(bookmarkFolderId)
+}
+
 function saveTabsAsBookmarks (tabs, bookmarkFolderId, callback) {
+  console.warn('Creating %d bookmarks.', tabs.length)
   for (var i = 0; i < tabs.length; i++) {
+    console.warn('Creating bookmark %d', i + 1)
     var tab = tabs[i]
 
     var createProperties = {
@@ -306,13 +326,29 @@ function saveTabsAsBookmarks (tabs, bookmarkFolderId, callback) {
 }
 
 function removeBookmarks (bookmarkTreeNodes, callback) {
+  console.warn('Removing %d tabs.', bookmarkTreeNodes.length)
   for (var i = 0; i < bookmarkTreeNodes.length; i++) {
+    console.warn('Removing tab %d', i + 1)
     var bookmarkTreeNode = bookmarkTreeNodes[i]
     chrome.bookmarks.remove(bookmarkTreeNode.id)
 
     if (i === bookmarkTreeNodes.length - 1 && isFunction(callback)) {
       callback()
     }
+  }
+}
+
+function removeWindow (session, callback) {
+  var preventSessionManagerThinkingSessionIsOpen = () => {
+    removeWindowToSessionFolderMapping(session.window.id, () => {
+      chrome.windows.remove(session.window.id, callback)
+    })
+  }
+
+  if (session.saved()) {
+    saveSession(session, preventSessionManagerThinkingSessionIsOpen)
+  } else {
+    preventSessionManagerThinkingSessionIsOpen()
   }
 }
 
@@ -332,6 +368,10 @@ function storeWindowToSessionFolderMapping (windowId, sessionFolderId, callback)
   }
 }
 
+/**
+ * The callback should take an `items` object as its parameter.
+ * If nothing is found in storage for the passed `windowId` then the object will have no keys.
+ */
 function getWindowToSessionFolderMapping (windowId, callback) {
   chrome.storage.local.get(windowId.toString(), callback)
 }

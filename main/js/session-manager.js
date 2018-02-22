@@ -392,9 +392,10 @@ function renameSelectedSession () {
   renameSession(session, newName)
 }
 
-function resumeSelectedSession () {
+function resumeSelectedSession (callback) {
   var selectedSessionElement = getSelectedSession()
   resumeSession(selectedSessionElement.seshySession)
+  if (isFunction(callback)) callback()
 }
 
 function elementIsBeingRenamed () {

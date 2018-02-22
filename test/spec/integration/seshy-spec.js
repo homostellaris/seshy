@@ -4,9 +4,14 @@ removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSesh
 createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession getSessionFolderBookmarks
 assertSessionWindowTabs createAndSaveTestSession setUp resetTestContainer isFunction openThreeUnsavedTestSessions
 deleteSelectedSession createAndSaveThreeTestSessions addKeyboardShortcuts saveSelectedSession
-getCurrentlyOpenSessionElements storeWindowToSessionFolderMapping asyncLoop */
+getCurrentlyOpenSessionElements storeWindowToSessionFolderMapping asyncLoop resumeSelectedSession removeWindow */
 
 describe('Integration tests.', function () {
+  beforeAll(function (done) {
+    console.log('Waiting for seshyFolder variable to be populated.')
+    setTimeout(done, 500) // Wait for initialise() to create Seshy folder.
+  })
+
   describe('Creating sessions.', function () {
     beforeEach(function (done) {
       spyOn(chrome.storage.local, 'remove')
@@ -105,8 +110,58 @@ describe('Integration tests.', function () {
       getTestWindow()
     })
 
-    xit('Saves saved sessions when their window is closed.', function (done) {
-      console.log('Unimplemented test.')
+    describe('Saves \'saved\' sessions when their window is closed.', function () {
+      it('Added tab is there when the session is closed and re-opened.', function (done) {
+        var sessionWindowId = this.session.window.id
+
+        var closeWindow = () => {
+          chrome.windows.remove(this.session.window.id, () => {
+            // Give event listener time to remove window-to-session-folder-mapping so that session correctly appears in
+            // unsaved session list.
+            setTimeout(resetSessionManager, 500)
+          })
+        }
+
+        var resetSessionManager = () => {
+          resetTestContainer()
+          setUp(() => {
+            var savedSessionsList = document.getElementById('saved-sessions')
+            var savedSessionElements = savedSessionsList.getElementsByClassName('session-card')
+            expect(savedSessionElements.length).toEqual(1)
+            this.sessionElement = savedSessionElements[0]
+            this.sessionElement.focus()
+            this.sessionElement.classList.add('selected')
+            resumeSelectedSession(assertTabs)
+          })
+        }
+
+        var assertTabs = () => {
+          var sessionWindow = chrome.windows.getAll({populate: true}, (windows) => {
+            var resumedSessionWindow = windows[1]
+            expect(resumedSessionWindow.tabs.length).toEqual(5)
+            expect(resumedSessionWindow.tabs[4].url).toEqual(this.expectedUrl)
+            done()
+          })
+        }
+
+        this.expectedUrl = 'chrome://history/syncedTabs'
+        var createProperties = {
+          windowId: sessionWindowId,
+          url: this.expectedUrl
+        }
+        chrome.tabs.create(createProperties, () => {
+          setTimeout(closeWindow, 2000)
+        })
+      })
+      // add tab
+      // close
+      // re-open
+      // assert tabs
+
+      // remove tab
+      // close
+      // re-open
+      // assert tabs
     })
 
     describe('Representation of saved state.', function () {
