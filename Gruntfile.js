@@ -59,6 +59,7 @@ module.exports = function(grunt) {
           'test/**/*',
           'main/**/*',
           '!main/manifest.json',
+          'node_modules/jasmine-core/lib/jasmine-core/*',
           'node_modules/material-components-web/dist/material-components-web.js',
           'node_modules/material-components-web/dist/material-components-web.css',
           'main/css/session-manager.css'
