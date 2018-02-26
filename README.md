@@ -1,6 +1,9 @@
-A Chrome window is not always a throwaway set of tabs, sometimes it is an ongoing *session* with the same lifecycle as the task you are working on. The problem is that tasks can be easily put down and picked back up again but browsing sessions cannot. Seshy aims to solve that problem.
+# Seshy
+A Chrome window is not always a throwaway set of tabs, sometimes it is an ongoing *session* with the same lifecycle as the task you are working on. The problem is that tasks can be easily put down and picked back up again but browsing sessions cannot. **Seshy** aims to solve that problem.
 
-To Seshy every Chrome window is a *session*. If a *session* is marked as *saved* when it becomes persistent and is stored in a bookmark folder. Tabs are stored as bookmarks in the session's bookmark folder and are updated (almost) immediately whenever something changes about them. In fact, you can view Seshy simply as an extension that maps windows to *sessions* and tabs to *bookmarks* and provides a UI for browsing and resuming them.
+To **Seshy**, every Chrome window is a *session*. If a *session* is marked as *saved* when it becomes persistent and is stored in a bookmark folder. Tabs are stored as bookmarks in the session's bookmark folder and are updated (almost) immediately whenever something changes about them. In fact, you can view Seshy simply as an extension that maps windows to *sessions* and tabs to *bookmarks* and provides a UI for browsing and resuming them.
+
+**Seshy 1.0** is still in development but will be coming to the [Chrome Web Store](https://chrome.google.com/webstore/category/extensions) in the next few months.
 
 # Testing
 ### Running the tests.
