@@ -23,3 +23,6 @@ The difficulty with this is that there is no easy way to get the test results an
 - DOM inspection is used from the Chrome Driver to get the test results and return an appropriate exit code.
 
 The key here is that Chrome Driver has greater access to the host system than a browser does so it is much easier to return the exit code Travis needs.
+
+# Contributing
+_Coming soon..._
