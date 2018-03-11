@@ -117,6 +117,9 @@ function renameSession (session, newName, callback) {
   chrome.bookmarks.update(bookmarkFolderId, {'title': newName}, updateSessionElement)
 }
 
+/**
+ * Resumes a session. The callback has no parameters.
+ */
 function resumeSession (session, callback) {
   function extractUrlsFromBookmarks (session) {
     var sessionFolder = session.bookmarkFolder
@@ -130,9 +133,13 @@ function resumeSession (session, callback) {
       'url': urls
     }
     chrome.windows.create(createData, (newWindow) => {
-      storeWindowToSessionFolderMapping(newWindow.id, session.bookmarkFolder.id, () => {
-        callback(newWindow)
-      })
+      if (isFunction(callback)) {
+        storeWindowToSessionFolderMapping(newWindow.id, session.bookmarkFolder.id, () => {
+          callback(newWindow)
+        })
+      } else {
+        storeWindowToSessionFolderMapping(newWindow.id, session.bookmarkFolder.id)
+      }
     })
   }
 
@@ -287,14 +294,20 @@ function saveOpenSessionTabs (session, callback) {
   })
 }
 
-// TODO Use this function in `saveSession`
+// TODO Use this function in `saveSession`.
 function saveWindowAsBookmarkFolder (window, bookmarkFolderId, callback) {
   var getBookmarksInFolder = (bookmarkFolderId) => {
     chrome.bookmarks.getChildren(bookmarkFolderId, removeBookmarksInFolder)
   }
 
   var removeBookmarksInFolder = (bookmarkTreeNodes) => {
-    removeBookmarks(bookmarkTreeNodes, callSaveTabsAsBookmarks)
+    if (chrome.runtime.lastError) {
+      console.warn('Tried to save but bookmark folder was not found. Must have been removed since the tab updated ' +
+      'handler was called.')
+      callback()
+    } else {
+      removeBookmarks(bookmarkTreeNodes, callSaveTabsAsBookmarks)
+    }
   }
 
   var callSaveTabsAsBookmarks = () => {

@@ -15,6 +15,7 @@
   },
 
   "browser_action": {
+    "default_icon": "images/unsaved.png",
     "default_title": "Manage your sessions.",
     "default_popup": "html/session-manager.html"
   },

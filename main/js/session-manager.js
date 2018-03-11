@@ -219,8 +219,10 @@ function addKeyboardShortcuts () {
         if (elementIsBeingRenamed()) {
           var selectedSessionElement = getSelectedSession()
           if (selectedSessionElement.seshySession.saved()) {
+            console.warn('Renaming selected session.')
             renameSelectedSession()
           } else {
+            console.warn('Saving selected session.')
             saveSelectedSession()
           }
         } else {
@@ -395,7 +397,12 @@ function renameSelectedSession () {
 function resumeSelectedSession (callback) {
   var selectedSessionElement = getSelectedSession()
   resumeSession(selectedSessionElement.seshySession)
-  if (isFunction(callback)) callback()
+
+  if (isFunction(callback)) {
+    resumeSession(selectedSessionElement.seshySession, callback)
+  } else {
+    resumeSession(selectedSessionElement.seshySession)
+  }
 }
 
 function elementIsBeingRenamed () {

@@ -14,7 +14,7 @@ chrome.tabs.query({}, navigateToSpecRunner)
 function navigateToSpecRunner (tabs) {
   var tab = tabs[0]
   var extensionId = chrome.runtime.id
-  var specRunnerUrl = 'chrome-extension://' + extensionId + '/spec-runner.html'
+  var specRunnerUrl = 'chrome-extension://' + extensionId + '/test/spec-runner.html'
 
   var updateInfo = {
     'url': specRunnerUrl

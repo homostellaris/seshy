@@ -188,10 +188,24 @@ describe('Integration tests.', function () {
           done()
         })
       })
-    })
 
-    xit('Changes the browser extension icon whilst session save is pending.', function () {
-      console.log('Unimplemented test.')
+      it('Changes the browser extension icon whilst session save is pending.', function (done) {
+        var assertBrowserActionIconSetToSavingState = () => {
+          expect(window.setBrowserActionIconToSaving).toHaveBeenCalled()
+          expect(window.setBrowserActionIconToIdle).not.toHaveBeenCalled()
+          setTimeout(assertBrowserActionIconSetToSavedState, 2000)
+        }
+
+        var assertBrowserActionIconSetToSavedState = () => {
+          expect(window.setBrowserActionIconToSaving).toHaveBeenCalled()
+          expect(window.setBrowserActionIconToIdle).toHaveBeenCalled()
+          done()
+        }
+
+        spyOn(window, 'setBrowserActionIconToSaving').and.callThrough()
+        spyOn(window, 'setBrowserActionIconToIdle').and.callThrough()
+        setTimeout(assertBrowserActionIconSetToSavingState, 200)
+      })
     })
 
     afterEach(function (done) {
@@ -710,7 +724,7 @@ describe('Integration tests.', function () {
         document.dispatchEvent(event)
         setTimeout(() => {
           assertSessionRenamed(this.secondSession, 'Renamed Session', done)
-        }, 100)
+        }, 2000)
       })
 
       xit('Displays a rename session button whilst the session name input is focused.', function (done) {

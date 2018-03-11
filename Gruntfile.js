@@ -1,4 +1,4 @@
-module.exports = function(grunt) {
+module.exports = function (grunt) {
 
   grunt.initConfig({
 
@@ -11,7 +11,7 @@ module.exports = function(grunt) {
     },
 
     clean: {
-      output: 'output/*'
+      output: 'output/**'
     },
 
     copy: {
@@ -20,26 +20,38 @@ module.exports = function(grunt) {
           // Copy all implementation files.
           {
             expand: true,
-            src: ['main/**'],
+            cwd: 'main/',
+            src: ['**'],
+            dest: 'output/'
+          },
+          {
+            src: [
+              'node_modules/mousetrap/mousetrap.min.js',
+              'node_modules/material-components-web/dist/material-components-web.js',
+            ],
+            dest: 'output/'
+          },
+          {
+            expand: true,
+            src: [
+              'node_modules/material-components-web/dist/material-components-web.css',
+            ],
+            dest: 'output/'
+          },
+        ]
+      },
+      test: {
+        files: [
+          {
+            src: ['test/**', '!test/manifest.json', 'node_modules/jasmine-core/lib/jasmine-core/**'],
             dest: 'output/'
           },
           {
             expand: true,
             flatten: true,
-            src: [
-              'node_modules/mousetrap/mousetrap.min.js',
-              'node_modules/material-components-web/dist/material-components-web.js',
-            ],
-            dest: 'output/main/js/'
-          },
-          {
-            expand: true,
-            flatten: true,
-            src: [
-              'node_modules/material-components-web/dist/material-components-web.css',
-            ],
-            dest: 'output/main/css/'
-          },
+            src: ['test/manifest.json'],
+            dest: 'output/'
+          }
         ]
       }
     },
@@ -49,22 +61,20 @@ module.exports = function(grunt) {
         cmd: 'node test/run-tests.js'
       },
       run: {
-        cmd: 'google-chrome-stable --load-extension="output/main/" --user-data-dir=/tmp/chrome-test-data-dir --no-first-run --disable-gpu'
+        cmd: 'google-chrome-stable --load-extension="output/" --user-data-dir=/tmp/chrome-test-data-dir --no-first-run --disable-gpu'
       }
     },
 
     crx: {
       createTestArtefact: {
-        src: [
-          'test/**/*',
-          'main/**/*',
-          '!main/manifest.json',
-          'node_modules/jasmine-core/lib/jasmine-core/*',
-          'node_modules/material-components-web/dist/material-components-web.js',
-          'node_modules/material-components-web/dist/material-components-web.css',
-          'main/css/session-manager.css'
+        files: [
+          {
+            src: [
+              'output/**'
+            ],
+            dest: 'output/test.crx'
+          }
         ],
-        dest: 'output/test.crx',
         options: {
           privateKey: 'seshy-development.pem'
         }
@@ -80,7 +90,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-crx');
 
   grunt.registerTask('lint', ['eslint']);
-  grunt.registerTask('test', ['lint', 'crx:createTestArtefact', 'exec:test']);
+  grunt.registerTask('test', ['lint', 'clean', 'copy', 'crx:createTestArtefact', 'exec:test']);
   // TODO Can selectively copy files into CRX so earlier copy and clean tasks may be unnecessary.
-  grunt.registerTask('run', ['clean:output', 'copy:main', 'exec:run']);
+  grunt.registerTask('run', ['clean', 'copy:main', 'exec:run']);
 };

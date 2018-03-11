@@ -8,9 +8,9 @@ chrome.runtime.onStartup.addListener(() => {
 chrome.runtime.onSuspend.addListener(() => {
   console.log('Suspend event fired.')
 })
-
 chrome.windows.onCreated.addListener(windowsOnCreatedListener)
 chrome.windows.onRemoved.addListener(windowsOnRemovedListener)
+chrome.tabs.onUpdated.addListener(scheduleSaveSessionIfNecessary)
 
 var pendingTabUpdatedListenerCalls = 0
 
@@ -28,27 +28,8 @@ var pendingTabUpdatedListenerCalls = 0
  * In the time it takes to get to some of the later removals an earlier pending removal may complete resulting in a
  * "can't find bookmark for id" error.
  */
-chrome.tabs.onUpdated.addListener(scheduleSaveSessionIfNecessary)
-
 function scheduleSaveSessionIfNecessary (tabId, changeInfo, tab) {
   console.log('Tab %d is %s.', tabId, changeInfo.status)
-  pendingTabUpdatedListenerCalls++
-  setTimeout(() => { saveSessionIfNoPendingTabUpdatedListenerCalls(tab) }, 1000)
-}
-
-function saveSessionIfNoPendingTabUpdatedListenerCalls (tab) {
-  var logSessionSaved = () => {
-    console.log(`Session with window ID ${sessionWindowId} saved to bookmark folder with ID ${bookmarkFolderId}`)
-  }
-
-  console.log('Tab updated event handler triggered.')
-
-  if (--pendingTabUpdatedListenerCalls !== 0) {
-    console.log('%d newer pending tab updated listener calls. Returning without trying to save.',
-      pendingTabUpdatedListenerCalls)
-    return
-  }
-  console.log('0 newer pending tab updated listener calls. Will save if session is a \'saved\' one...')
 
   var sessionWindowId = tab.windowId
   var bookmarkFolderId
@@ -58,16 +39,42 @@ function saveSessionIfNoPendingTabUpdatedListenerCalls (tab) {
       removeWindowToSessionFolderMapping(sessionWindowId)
     }
     console.log('Tab %d caused window %d to be retrieved with %d tabs.', tab.id, sessionWindowId, sessionWindow.tabs.length)
+
     checkIfSavedSession(sessionWindowId.toString(), (storageObject) => {
       bookmarkFolderId = storageObject[sessionWindowId]
       // `bookmarkFolderId` will be undefined and therefore falsey if no window-to-bookmark-folder-mapping exists.
       if (bookmarkFolderId) {
-        saveWindowAsBookmarkFolder(sessionWindow, bookmarkFolderId, () => {
-          logSessionSaved()
-        })
+        setBrowserActionIconToSaving()
+        pendingTabUpdatedListenerCalls++
+        setTimeout(() => {
+          saveSessionIfNoPendingTabUpdatedListenerCalls(sessionWindow, bookmarkFolderId)
+        }, 1000)
       }
     })
   })
+}
+
+function saveSessionIfNoPendingTabUpdatedListenerCalls (sessionWindow, bookmarkFolderId) {
+  if (--pendingTabUpdatedListenerCalls !== 0) {
+    console.log('%d newer pending tab updated listener calls. Returning without trying to save.',
+      pendingTabUpdatedListenerCalls)
+    return
+  }
+  console.log('%d newer pending tab updated listener calls. Saving session to bookmark folder.',
+    pendingTabUpdatedListenerCalls)
+
+  saveWindowAsBookmarkFolder(sessionWindow, bookmarkFolderId, () => {
+    console.log(`Session with window ID ${sessionWindow.id} saved to bookmark folder with ID ${bookmarkFolderId}`)
+    setBrowserActionIconToIdle()
+  })
+}
+
+function setBrowserActionIconToSaving () {
+  chrome.browserAction.setIcon({path: '../images/saving.png'})
+}
+
+function setBrowserActionIconToIdle () {
+  chrome.browserAction.setIcon({path: '../images/saved.png'})
 }
 
 /**
@@ -88,7 +95,7 @@ function windowsOnCreatedListener (windowToCheck) {
  * window closing and another one opening (such as saving updated sessions) will think that sessions are still open.
  */
 function windowsOnRemovedListener (windowId) {
-  console.log('Window %d event fired. Clearing window to session folder mapping...', windowId)
+  console.log('The windows.onRemoved event fired. Clearing window to session folder mapping...')
   // Have to remove the mapping here rather than in `removeWindow` so that it
   removeWindowToSessionFolderMapping(windowId)
 }
