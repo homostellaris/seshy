@@ -5,16 +5,16 @@
  * such functions.
  */
 function asyncLoop (iterable, iterateFunction, callback) {
-  var i = iterable.length
+  var i = 0
   if (typeof i !== 'number') {
     throw new Error('Iterable must have an integer length.')
   }
 
   var iterate = () => {
-    if (i === 0) {
+    if (i === iterable.length) {
       callback()
     } else {
-      iterateFunction(iterable[--i], iterate)
+      iterateFunction(iterable[i++], iterate)
     }
   }
 

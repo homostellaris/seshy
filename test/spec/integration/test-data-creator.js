@@ -176,17 +176,11 @@ function createBookmarks (sessionBookmarksFolder, callback) {
   var sessionFolderId = sessionBookmarksFolder.id
   var bookmarksInfo = getTabsOrBookmarksInfo(sessionFolderId, asBookmarks)
 
-  chrome.bookmarks.create(bookmarksInfo[0])
-  chrome.bookmarks.create(bookmarksInfo[1])
-  chrome.bookmarks.create(bookmarksInfo[2])
-
-  if (isFunction(callback)) {
-    chrome.bookmarks.create(bookmarksInfo[3], () => {
-      callback(bookmarksInfo)
-    })
-  } else {
-    chrome.bookmarks.create(bookmarksInfo[3])
+  var createBookmark = (bookmarkInfo, callback) => {
+    chrome.bookmarks.create(bookmarkInfo, callback)
   }
+
+  asyncLoop(bookmarksInfo, createBookmark, callback)
 }
 
 function addWindowToSessionMapping (windowId, expectedSessionFolderId, callback) {
