@@ -385,13 +385,17 @@ function saveSelectedSession (callback) {
   }
 }
 
-function renameSelectedSession () {
+function renameSelectedSession (callback) {
   var selectedSessionElement = getSelectedSession()
   var sessionNameInput = getSessionNameInput(selectedSessionElement.seshySession)
   var newName = sessionNameInput.value
   var session = selectedSessionElement.seshySession
 
-  renameSession(session, newName)
+  if (isFunction(callback)) {
+    renameSession(session, newName, callback)
+  } else {
+    renameSession(session, newName)
+  }
 }
 
 function resumeSelectedSession (callback) {

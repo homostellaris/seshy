@@ -4,7 +4,8 @@ removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSesh
 createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession getSessionFolderBookmarks
 assertSessionWindowTabs createAndSaveTestSession setUp resetTestContainer isFunction openThreeUnsavedTestSessions
 deleteSelectedSession createAndSaveThreeTestSessions addKeyboardShortcuts saveSelectedSession
-getCurrentlyOpenSessionElements storeWindowToSessionFolderMapping asyncLoop resumeSelectedSession removeWindow */
+getCurrentlyOpenSessionElements storeWindowToSessionFolderMapping asyncLoop resumeSelectedSession removeWindow
+renameSelectedSession */
 
 describe('Integration tests.', function () {
   beforeAll(function (done) {
@@ -720,11 +721,12 @@ describe('Integration tests.', function () {
 
       it('Renames the session when the `ENTER` key is pressed ' +
       'whilst the session name input is focused.', function (done) {
-        var event = new KeyboardEvent('keydown', {'key': 'Enter'})
-        document.dispatchEvent(event)
-        setTimeout(() => {
+        // Dispatching an event for the ENTER keypress produces inconsistent results so am calling the handler directly.
+        this.secondSession.element.focus()
+        this.secondSession.element.classList.add('selected')
+        renameSelectedSession(() => {
           assertSessionRenamed(this.secondSession, 'Renamed Session', done)
-        }, 2000)
+        })
       })
 
       xit('Displays a rename session button whilst the session name input is focused.', function (done) {
