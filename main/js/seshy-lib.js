@@ -183,6 +183,7 @@ var removeSessionElement = (session, callback) => {
   callback()
 }
 
+// TODO Is this method necessary?
 /**
  * Check if the passed window is a saved session and if so callback with its bookmark folder.
  */

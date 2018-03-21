@@ -8,8 +8,11 @@ chrome.runtime.onStartup.addListener(() => {
 chrome.runtime.onSuspend.addListener(() => {
   console.log('Suspend event fired.')
 })
-chrome.windows.onCreated.addListener(windowsOnCreatedListener)
-chrome.windows.onRemoved.addListener(windowsOnRemovedListener)
+
+// TODO Break these methods up into multiple independent listeners.
+chrome.windows.onCreated.addListener(removePotentiallyReusedWindowIdFromInternalMappingOfOpenSessions)
+chrome.windows.onRemoved.addListener(removeClosedSessionFromInternalMappingOfOpenSessions)
+chrome.windows.onFocusChanged.addListener(setBrowserActionIcon)
 chrome.tabs.onUpdated.addListener(scheduleSaveSessionIfNecessary)
 
 var pendingTabUpdatedListenerCalls = 0
@@ -65,24 +68,30 @@ function saveSessionIfNoPendingTabUpdatedListenerCalls (sessionWindow, bookmarkF
 
   saveWindowAsBookmarkFolder(sessionWindow, bookmarkFolderId, () => {
     console.log(`Session with window ID ${sessionWindow.id} saved to bookmark folder with ID ${bookmarkFolderId}`)
-    setBrowserActionIconToIdle()
+    setBrowserActionIconToSaved()
   })
+}
+
+function setBrowserActionIconToUnsaved () {
+  chrome.browserAction.setIcon({path: '../images/unsaved.png'})
 }
 
 function setBrowserActionIconToSaving () {
   chrome.browserAction.setIcon({path: '../images/saving.png'})
 }
 
-function setBrowserActionIconToIdle () {
+function setBrowserActionIconToSaved () {
   chrome.browserAction.setIcon({path: '../images/saved.png'})
 }
 
+// TODO This may delete the mapping that was just stored by resuming a saved session. Need to move the storage from
+// `resumeSession` to here so that there can't be any clash.
 /**
  * Closing a window calls chrome.windows.remove so need to saveSession there somehow. But window is already gone.
- * A wrapper for chrome's window won't work because the user can effectively call that explicitly at any time by
- * closing the window.
+ * A wrapper for chrome's window.remove method won't work because the user can effectively call that explicitly at any
+ * time by closing the window.
  */
-function windowsOnCreatedListener (windowToCheck) {
+function removePotentiallyReusedWindowIdFromInternalMappingOfOpenSessions (windowToCheck) {
   console.log('The windows.onCreated event fired. Clearing window to session folder mapping...')
   removeWindowToSessionFolderMapping(windowToCheck.id, () => {
     getSession(windowToCheck)
@@ -94,10 +103,23 @@ function windowsOnCreatedListener (windowToCheck) {
  * It is not enough to remove the mapping when a window is opened because any logic that is executed inbetween the
  * window closing and another one opening (such as saving updated sessions) will think that sessions are still open.
  */
-function windowsOnRemovedListener (windowId) {
+function removeClosedSessionFromInternalMappingOfOpenSessions (windowId) {
   console.log('The windows.onRemoved event fired. Clearing window to session folder mapping...')
   // Have to remove the mapping here rather than in `removeWindow` so that it
   removeWindowToSessionFolderMapping(windowId)
+}
+
+function setBrowserActionIcon (windowId) {
+  var setBrowserActionIconToSavedOrUnsaved = (storageObject) => {
+    var bookmarkFolderId = storageObject[windowId]
+    if (bookmarkFolderId) {
+      setBrowserActionIconToSaved()
+    } else {
+      setBrowserActionIconToUnsaved()
+    }
+  }
+
+  checkIfSavedSession(windowId.toString(), setBrowserActionIconToSavedOrUnsaved)
 }
 
 // ---===~ Initialisation ~===------------------------------------------------------------------------------------------

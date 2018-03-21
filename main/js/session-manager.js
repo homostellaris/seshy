@@ -400,7 +400,6 @@ function renameSelectedSession (callback) {
 
 function resumeSelectedSession (callback) {
   var selectedSessionElement = getSelectedSession()
-  resumeSession(selectedSessionElement.seshySession)
 
   if (isFunction(callback)) {
     resumeSession(selectedSessionElement.seshySession, callback)

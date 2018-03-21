@@ -168,36 +168,70 @@ describe('Integration tests.', function () {
     })
 
     describe('Representation of saved state.', function () {
-      beforeEach(function (done) {
-        var saveTestSessionAndCaptureSession = (session) => {
-          this.session = session
-          done()
-        }
+      describe('Browser action icon.', function () {
+        beforeEach(function (done) {
+          var captureSession = (session) => {
+            this.session = session
+            done()
+          }
 
-        openUnsavedTestSession(saveTestSessionAndCaptureSession)
-      })
+          openUnsavedTestSession(captureSession)
+        })
 
-      it('Fills the save icon blue when a session is saved.', function (done) {
-        var savedClassAdded = () => {
-          return this.session.element.classList.contains('saved')
-        }
-        expect(savedClassAdded()).toBe(false)
+        it('Is an \'unfilled bookmark\' icon when the currently focused session is unsaved.', function (done) {
+          var assertBrowserActionIconSetToUnsavedState = () => {
+            expect(window.setBrowserActionIconToUnsaved).toHaveBeenCalled()
+            // TODO Assert icon is changed back to idle.
+            done()
+          }
 
-        saveSession(this.session, () => {
-          expect(savedClassAdded()).toBe(true)
-          done()
+          spyOn(window, 'setBrowserActionIconToUnsaved').and.callThrough()
+          setTimeout(assertBrowserActionIconSetToUnsavedState, 1000)
+        })
+
+        it('Is a \'sync\' icon whilst a session save is pending.', function (done) {
+          var assertBrowserActionIconSetToSavingState = () => {
+            expect(window.setBrowserActionIconToSaving).toHaveBeenCalled()
+            // TODO Assert icon is changed back to idle.
+            done()
+          }
+
+          spyOn(window, 'setBrowserActionIconToSaving').and.callThrough()
+          setTimeout(assertBrowserActionIconSetToSavingState, 1000)
+        })
+
+        it('Is a \'filled bookmark\' icon when the currently focused session is saved.', function (done) {
+          var assertBrowserActionIconSetToSavedState = () => {
+            expect(window.setBrowserActionIconToSaved).toHaveBeenCalled()
+            // TODO Assert icon is changed back to idle.
+            done()
+          }
+
+          spyOn(window, 'setBrowserActionIconToSaved').and.callThrough()
+          setTimeout(assertBrowserActionIconSetToSavedState, 2000)
         })
       })
 
-      it('Changes the browser extension icon whilst session save is pending.', function (done) {
-        var assertBrowserActionIconSetToSavingState = () => {
-          expect(window.setBrowserActionIconToSaving).toHaveBeenCalled()
-          // TODO Assert icon is changed back to idle.
-          done()
-        }
+      describe('Session cards in the session manager.', function () {
+        beforeEach(function (done) {
+          var saveTestSessionAndCaptureSession = (session) => {
+            this.session = session
+            done()
+          }
+          openUnsavedTestSession(saveTestSessionAndCaptureSession)
+        })
 
-        spyOn(window, 'setBrowserActionIconToSaving').and.callThrough()
-        setTimeout(assertBrowserActionIconSetToSavingState, 1000)
+        it('Fills the save icon blue when a session is saved.', function (done) {
+          var savedClassAdded = () => {
+            return this.session.element.classList.contains('saved')
+          }
+          expect(savedClassAdded()).toBe(false)
+
+          saveSession(this.session, () => {
+            expect(savedClassAdded()).toBe(true)
+            done()
+          })
+        })
       })
     })
 
