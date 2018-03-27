@@ -20,7 +20,7 @@ function Session (aWindow, bookmarkFolder) {
   sessionElement.setAttribute('tabindex', '0') // Make `li` element focusable.
 
   var tabsNumber = aWindow ? aWindow.tabs.length : bookmarkFolder.children.length
-  sessionElement.innerHTML = getSessionInnerHtml(this.name, tabsNumber)
+  sessionElement.innerHTML = getSessionInnerHtml(this.name, tabsNumber, this.saved())
   sessionList.appendChild(sessionElement)
 
   sessionElement.seshySession = this // So this created instance is always easily accessible.
@@ -29,7 +29,6 @@ function Session (aWindow, bookmarkFolder) {
   Session.prototype.addEventListeners.call(this)
   // TODO Find out why this doesn't work. Throws syntax error because is not a function.
   // this.addEventListeners()
-  if (Session.prototype.saved.call(this)) Session.prototype.setSavedIconState.call(this, true)
 }
 
 Session.prototype.currentlyOpen = function () {
@@ -85,10 +84,11 @@ Session.prototype.addEventListeners = function () {
  * Pass a truthy value to set saved state icon to 'saved' or a falsey value to set it to 'unsaved'.
  */
 Session.prototype.setSavedIconState = function (savedBoolean) {
+  var savedStateIcon = this.element.getElementsByClassName('saved-state-icon')[0]
   if (savedBoolean) {
-    this.element.classList.add('saved')
+    savedStateIcon.textContent = 'bookmark'
   } else {
-    this.element.classList.remove('saved')
+    savedStateIcon.textContent = 'bookmark_border'
   }
 }
 
@@ -186,10 +186,11 @@ function focusCurrentlyOpenSession (callback) {
 /**
  * Get the HTML for a single session.
  */
-function getSessionInnerHtml (title, tabsNumber) {
+function getSessionInnerHtml (title, tabsNumber, saved) {
+  var savedStateIcon = saved ? 'bookmark' : 'bookmark_border'
   var innerHtml = `
     <span class="mdc-list-item__start-detail">
-      <i class="saved-state-icon material-icons">backup</i>
+      <i class="saved-state-icon material-icons">${savedStateIcon}</i>
     </span>
     <span class="mdc-list-item__text">
       <div class="mdc-textfield mdc-textfield--dense">
@@ -300,14 +301,18 @@ function selectLastSessionInPreviousSessionList () {
 }
 
 function getSelectedSession () {
-  var selectedSessionResults = document.getElementsByClassName('selected')
-  if (selectedSessionResults > 1) {
-    console.warn('There is more than one session selected. Is this right?')
-  } else if (selectedSessionResults < 1) {
-    console.warn('There are no selected sessions, this could lead to errors at the moment.')
-  } else {
-    return selectedSessionResults[0]
+  // Check if focused element is a session-card. Could be a session-name-input for example.
+  var element = document.activeElement
+  if (element.classList.contains('session-card')) {
+    return document.activeElement
   }
+  for (var i = 0; i < 10; i++) {
+    element = element.parentElement
+    if (element.classList.contains('session-card')) {
+      return element
+    }
+  }
+  throw Error(`Save was called with unexpected element ${document.activeElement.tagName} focused.`)
 }
 
 function getSelectedSessionNameInput () {
@@ -372,17 +377,17 @@ function focusSessionNameInput (event) {
 }
 
 function saveSelectedSession (callback) {
+  var updateSavedStateIcon = () => {
+    session.setSavedIconState(true)
+    if (isFunction(callback)) callback()
+  }
+
   var selectedSessionElement = getSelectedSession()
   var sessionNameInput = getSessionNameInput(selectedSessionElement.seshySession)
   var session = selectedSessionElement.seshySession
 
   session.name = sessionNameInput.value // Session instance was created before name input text changed so must update.
-
-  if (isFunction(callback)) {
-    saveSession(session, callback)
-  } else {
-    saveSession(session)
-  }
+  saveSession(session, updateSavedStateIcon)
 }
 
 function renameSelectedSession (callback) {

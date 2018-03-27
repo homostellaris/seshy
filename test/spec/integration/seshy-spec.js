@@ -33,85 +33,94 @@ describe('Integration tests.', function () {
   })
 
   describe('Saving sessions.', function () {
-    beforeEach(function (done) {
-      createAndSaveTestSession((session) => {
-        this.session = session
-        done()
-      })
-    })
-
-    var assertBookmarks = (expectedTabSetNumber, sessionFolderBookmarks) => {
-      var expectedTabsInfo = getTabsOrBookmarksInfo(null, true, expectedTabSetNumber)
-      for (var i = 0; i < sessionFolderBookmarks.length; i++) {
-        var bookmark = sessionFolderBookmarks[i]
-        var expectedTabInfo = expectedTabsInfo[i]
-        expect(bookmark.index).toEqual(expectedTabInfo.index)
-        expect(bookmark.url).toEqual(expectedTabInfo.url)
-      }
-    }
-
-    it('Saves a set of tabs as bookmarks in a folder.', function (done) {
-      this.session.updateBookmarkFolder((updatedBookmarkFolder) => {
-        assertBookmarks(1, this.session.bookmarkFolder.children)
-        done()
-      })
-    })
-
-    it('Saves an already saved session to the same session folder as before.', function (done) {
-      var assertOneSessionFolder = (callback) => {
-        getAllSessionFolders((sessionFolders) => {
-          expect(sessionFolders.length).toBe(1)
-          callback()
+    describe('Saves open sessions as they are updated.', function () {
+      beforeEach(function (done) {
+        createAndSaveTestSession((session) => {
+          this.session = session
+          done()
         })
-      }
+      })
 
-      var saveSessionAgain = () => {
-        saveSession(this.session, getSessionFolderBookmarksAndAssert)
-      }
-
-      var getSessionFolderBookmarksAndAssert = () => {
-        assertOneSessionFolder(done)
-        // TODO Assert is actually the same session folder.
-      }
-
-      assertOneSessionFolder(saveSessionAgain)
-    })
-
-    it('Overwrites the bookmarks in a folder when an already saved session is saved again.', function (done) {
-      // TODO This is probably redundant as the window is a property of the session anyway.
-      var getTestWindow = () => {
-        chrome.windows.get(this.session.window.id, {'populate': true}, (testWindow) => {
-          this.testWindow = testWindow
-          expect(testWindow.id).toBe(this.session.window.id)
-          changeOpenTabs()
-        })
-      }
-
-      var changeOpenTabs = () => {
-        var tabs = this.testWindow.tabs
-        this.expectedTabsInfo = getTabsOrBookmarksInfo(null, false, 2)
-        for (var i = 0; i < tabs.length; i++) {
-          var tabId = tabs[i].id
-          chrome.tabs.update(tabId, {'url': this.expectedTabsInfo[i]['url']})
+      var assertBookmarks = (expectedTabSetNumber, sessionFolderBookmarks) => {
+        var expectedTabsInfo = getTabsOrBookmarksInfo(null, true, expectedTabSetNumber)
+        for (var i = 0; i < sessionFolderBookmarks.length; i++) {
+          var bookmark = sessionFolderBookmarks[i]
+          var expectedTabInfo = expectedTabsInfo[i]
+          expect(bookmark.index).toEqual(expectedTabInfo.index)
+          expect(bookmark.url).toEqual(expectedTabInfo.url)
         }
-        setTimeout(() => {
+      }
+
+      it('Saves a set of tabs as bookmarks in a folder.', function (done) {
+        this.session.updateBookmarkFolder((updatedBookmarkFolder) => {
+          assertBookmarks(1, this.session.bookmarkFolder.children)
+          done()
+        })
+      })
+
+      it('Saves an already saved session to the same session folder as before.', function (done) {
+        var assertOneSessionFolder = (callback) => {
+          getAllSessionFolders((sessionFolders) => {
+            expect(sessionFolders.length).toBe(1)
+            callback()
+          })
+        }
+
+        var saveSessionAgain = () => {
           saveSession(this.session, getSessionFolderBookmarksAndAssert)
-        }, 1000)
-      }
+        }
 
-      var getSessionFolderBookmarksAndAssert = () => {
-        getSessionFolderBookmarks(this.session.bookmarkFolder, captureSessionFolderBookmarksAndAssert)
-      }
+        var getSessionFolderBookmarksAndAssert = () => {
+          assertOneSessionFolder(done)
+          // TODO Assert is actually the same session folder.
+        }
 
-      var captureSessionFolderBookmarksAndAssert = (sessionFolderBookmarks) => {
-        assertBookmarks(2, sessionFolderBookmarks)
-        done()
-      }
+        assertOneSessionFolder(saveSessionAgain)
+      })
 
-      getTestWindow()
+      it('Overwrites the bookmarks in a folder when an already saved session is saved again.', function (done) {
+        // TODO This is probably redundant as the window is a property of the session anyway.
+        var getTestWindow = () => {
+          chrome.windows.get(this.session.window.id, {'populate': true}, (testWindow) => {
+            this.testWindow = testWindow
+            expect(testWindow.id).toBe(this.session.window.id)
+            changeOpenTabs()
+          })
+        }
+
+        var changeOpenTabs = () => {
+          var tabs = this.testWindow.tabs
+          this.expectedTabsInfo = getTabsOrBookmarksInfo(null, false, 2)
+          for (var i = 0; i < tabs.length; i++) {
+            var tabId = tabs[i].id
+            chrome.tabs.update(tabId, {'url': this.expectedTabsInfo[i]['url']})
+          }
+          setTimeout(() => {
+            saveSession(this.session, getSessionFolderBookmarksAndAssert)
+          }, 1000)
+        }
+
+        var getSessionFolderBookmarksAndAssert = () => {
+          getSessionFolderBookmarks(this.session.bookmarkFolder, captureSessionFolderBookmarksAndAssert)
+        }
+
+        var captureSessionFolderBookmarksAndAssert = (sessionFolderBookmarks) => {
+          assertBookmarks(2, sessionFolderBookmarks)
+          done()
+        }
+
+        getTestWindow()
+      })
     })
 
     describe('Saving of \'saved\' sessions when their window is closed.', function () {
+      beforeEach(function (done) {
+        createAndSaveTestSession((session) => {
+          this.session = session
+          done()
+        })
+      })
+
       it('Saves the session again when a tab is added.', function (done) {
         var sessionWindowId = this.session.window.id
 
@@ -178,7 +187,7 @@ describe('Integration tests.', function () {
           openUnsavedTestSession(captureSession)
         })
 
-        it('Is an \'unfilled bookmark\' icon when the currently focused session is unsaved.', function (done) {
+        it('Is an \'bookmark border\' icon when the currently focused session is unsaved.', function (done) {
           var assertBrowserActionIconSetToUnsavedState = () => {
             expect(window.setBrowserActionIconToUnsaved).toHaveBeenCalled()
             // TODO Assert icon is changed back to idle.
@@ -197,10 +206,13 @@ describe('Integration tests.', function () {
           }
 
           spyOn(window, 'setBrowserActionIconToSaving').and.callThrough()
-          setTimeout(assertBrowserActionIconSetToSavingState, 1000)
+          this.session.element.focus()
+          saveSelectedSession(() => {
+            setTimeout(assertBrowserActionIconSetToSavingState, 1000)
+          })
         })
 
-        it('Is a \'filled bookmark\' icon when the currently focused session is saved.', function (done) {
+        it('Is a \'bookmark\' icon when the currently focused session is saved.', function (done) {
           var assertBrowserActionIconSetToSavedState = () => {
             expect(window.setBrowserActionIconToSaved).toHaveBeenCalled()
             // TODO Assert icon is changed back to idle.
@@ -208,7 +220,10 @@ describe('Integration tests.', function () {
           }
 
           spyOn(window, 'setBrowserActionIconToSaved').and.callThrough()
-          setTimeout(assertBrowserActionIconSetToSavedState, 2000)
+          this.session.element.focus()
+          saveSelectedSession(() => {
+            setTimeout(assertBrowserActionIconSetToSavedState, 1000)
+          })
         })
       })
 
@@ -221,14 +236,13 @@ describe('Integration tests.', function () {
           openUnsavedTestSession(saveTestSessionAndCaptureSession)
         })
 
-        it('Fills the save icon blue when a session is saved.', function (done) {
-          var savedClassAdded = () => {
-            return this.session.element.classList.contains('saved')
-          }
-          expect(savedClassAdded()).toBe(false)
+        it('Displays a bookmark icon on the session card when it is saved.', function (done) {
+          var sessionStateIcon = this.session.element.getElementsByClassName('saved-state-icon')[0]
+          expect(sessionStateIcon.textContent).toBe('bookmark_border')
 
-          saveSession(this.session, () => {
-            expect(savedClassAdded()).toBe(true)
+          document.getElementsByClassName('session-card')[0].focus()
+          saveSelectedSession(() => {
+            expect(sessionStateIcon.textContent).toBe('bookmark')
             done()
           })
         })
@@ -605,22 +619,23 @@ describe('Integration tests.', function () {
         setTimeout(assertNumberOfTabsShown, 500)
       })
 
-      it('Shows all sessions in the \'Shelved Sessions\' list with a blue saved state icon ' +
+      it('Shows all sessions in the \'Shelved Sessions\' list with a bookmark icon ' +
       '(because all \'shelved\' sessions are by definition also \'saved\' sessions.)', function (done) {
-        var expectedRgbColorValue = 'rgb(65, 105, 225)'
-        var assertSavedStateIconColor = () => {
+        var expectedIconName = 'bookmark'
+
+        var assertBookmarkIconOnPatientCard = () => {
           var shelvedSessionsList = document.getElementById('saved-sessions')
           var shelvedSessions = shelvedSessionsList.getElementsByClassName('session-card')
           expect(shelvedSessions.length).toBe(1)
           var shelvedSession = shelvedSessions[0]
           var savedStateIcon = shelvedSession.getElementsByClassName('saved-state-icon')[0]
-          var savedStateIconColor = window.getComputedStyle(savedStateIcon, null).getPropertyValue('color')
+          var actualIconName = savedStateIcon.textContent
 
-          expect(savedStateIconColor).toEqual(expectedRgbColorValue)
+          expect(actualIconName).toEqual(expectedIconName)
           done()
         }
         // TODO Find out why a setTimeout is necessary here. Style should be applied before `setUp` callsback.
-        setTimeout(assertSavedStateIconColor, 500)
+        setTimeout(assertBookmarkIconOnPatientCard, 500)
       })
 
       it('Shows the name of shelved sessions.', function (done) {

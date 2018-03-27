@@ -86,17 +86,12 @@ function saveSession (session, callback) {
 
   var updateBookmarkFolderThenStoreWindowToSessionFolderMapping = () => {
     session.updateBookmarkFolder((bookmarkFolder) => {
-      callStoreWindowToSessionFolderMapping(setSavedStateIconToSaved)
+      callStoreWindowToSessionFolderMapping(callback)
     })
   }
 
   var callStoreWindowToSessionFolderMapping = () => {
-    storeWindowToSessionFolderMapping(session.window.id, session.bookmarkFolder.id, setSavedStateIconToSaved)
-  }
-
-  var setSavedStateIconToSaved = () => {
-    session.setSavedIconState(true)
-    callback()
+    storeWindowToSessionFolderMapping(session.window.id, session.bookmarkFolder.id, callback)
   }
 
   session.updateWindow(() => {
