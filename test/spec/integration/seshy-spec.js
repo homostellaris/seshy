@@ -222,7 +222,7 @@ describe('Integration tests.', function () {
           spyOn(window, 'setBrowserActionIconToSaved').and.callThrough()
           this.session.element.focus()
           saveSelectedSession(() => {
-            setTimeout(assertBrowserActionIconSetToSavedState, 1000)
+            setTimeout(assertBrowserActionIconSetToSavedState, 2000)
           })
         })
       })
@@ -764,7 +764,6 @@ describe('Integration tests.', function () {
       'whilst the session name input is focused.', function (done) {
         // Dispatching an event for the ENTER keypress produces inconsistent results so am calling the handler directly.
         this.secondSession.element.focus()
-        this.secondSession.element.classList.add('selected')
         // TODO Call `renameSelectedSession` instead.
         renameSession(this.secondSession, 'Renamed Session', () => {
           assertSessionRenamed(this.secondSession, 'Renamed Session', done)
