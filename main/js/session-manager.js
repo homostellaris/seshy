@@ -193,7 +193,7 @@ function getSessionInnerHtml (title, tabsNumber, saved) {
       <i class="saved-state-icon material-icons">${savedStateIcon}</i>
     </span>
     <span class="mdc-list-item__text">
-      <div class="session-name mdc-text-field mdc-text-field--fullwidth">
+      <div class="session-name mdc-text-field mdc-text-field--dense mdc-text-field--fullwidth">
         <input type="text" class="session-name-input mdc-text-field__input" value="${title}">
         <div class="mdc-line-ripple"></div>
       </div>
