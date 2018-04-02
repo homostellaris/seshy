@@ -189,18 +189,22 @@ function focusCurrentlyOpenSession (callback) {
 function getSessionInnerHtml (title, tabsNumber, saved) {
   var savedStateIcon = saved ? 'bookmark' : 'bookmark_border'
   var innerHtml = `
-    <span class="mdc-list-item__start-detail">
+    <span class="mdc-list-item__graphic">
       <i class="saved-state-icon material-icons">${savedStateIcon}</i>
     </span>
     <span class="mdc-list-item__text">
-      <div class="mdc-textfield mdc-textfield--dense">
-        <input class="session-name-input mdc-text-field__input" type="text" value="${title}">
+      <div class="session-name mdc-text-field mdc-text-field--fullwidth">
+        <input type="text" class="session-name-input mdc-text-field__input" value="${title}">
+        <div class="mdc-line-ripple"></div>
       </div>
-      <span class="tabs-number mdc-list-item__text__secondary">
+      <span class="tabs-number mdc-list-item__secondary-text">
         ${tabsNumber} tabs
       </span>
     </span>
-    <span class="mdc-list-item__end-detail">
+    <span class="mdc-list-item__meta">
+      <button>
+        <i class="resume-icon material-icons">edit</i>
+      </button>
       <button>
         <i class="resume-icon material-icons">open_in_new</i>
       </button>

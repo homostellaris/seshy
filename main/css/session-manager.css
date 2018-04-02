@@ -7,6 +7,7 @@
 body {
   background-color: #F1F1F1;
   width: 600px;
+  padding: 0 0.5em;
 }
 
 button {
@@ -17,21 +18,25 @@ button {
   cursor: pointer;
 }
 
+#sessions {
+  margin-bottom: 1em;
+}
+
 .session-card {
   margin-top: 0.5em;
   margin-bottom: 0.5em;
   padding: 0.5em;
 }
 
-#sessions {
-  margin-bottom: 1em;
+.mdc-list--two-line .mdc-list-item.session-card {
+  height: 80px;
 }
 
-.mdc-list--dense .mdc-list-item__start-detail {
+.mdc-list--dense .mdc-list-item__graphic {
   margin-left: 16px;
 }
 
-.mdc-list--dense .mdc-list-item__end-detail {
+.mdc-list--dense .mdc-list-item__meta {
   width: auto;
   height: auto;
   display: inline-flex;
@@ -47,6 +52,6 @@ button {
   color: blue;
 }
 
-.saved .saved-state-icon {
-  color: royalblue;
+.session-name {
+  height: auto !important;
 }
