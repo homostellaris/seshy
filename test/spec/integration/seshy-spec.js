@@ -5,8 +5,7 @@ createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession getSessio
 assertSessionWindowTabs createAndSaveTestSession setUp resetTestContainer isFunction openThreeUnsavedTestSessions
 deleteSelectedSession createAndSaveThreeTestSessions addKeyboardShortcuts saveSelectedSession
 getCurrentlyOpenSessionElements storeWindowToSessionFolderMapping asyncLoop resumeSelectedSession removeWindow
-renameSelectedSession renameSession */
-
+renameSelectedSession renameSession editSession finishRenamingSelectedSession */
 describe('Integration tests.', function () {
   beforeAll(function (done) {
     console.log('Waiting for seshyFolder variable to be populated.')
@@ -732,70 +731,76 @@ describe('Integration tests.', function () {
   })
 
   describe('Renaming sessions.', function () {
-    var assertSessionRenamed = (session, expectedName, callback) => {
-      session.updateBookmarkFolder(() => {
-        expect(session.bookmarkFolder.title).toEqual(expectedName)
-        var sessionNameInput = session.element.getElementsByClassName('session-name-input')[0]
-        expect(sessionNameInput.value).toEqual(expectedName)
-        callback()
-      })
-    }
-
-    describe('Saved sessions.', function () {
-      beforeEach(function (done) {
-        createAndSaveThreeTestSessions((sessions) => {
-          this.sessions = sessions
-          this.secondSession = this.sessions[1]
-
-          this.sessionNameInputs = document.getElementsByClassName('session-name-input')
-          this.secondSessionNameInput = this.sessionNameInputs[1]
-          this.thirdSessionNameInput = this.sessionNameInputs[2]
-
-          this.secondSessionNameInput.focus()
-          this.secondSession.element.classList.add('selected')
-          this.secondSessionNameInput.value = 'Renamed Session'
-
-          addKeyboardShortcuts()
-          done()
-        })
-      })
-
-      it('Renames the session when the `ENTER` key is pressed ' +
-      'whilst the session name input is focused.', function (done) {
-        // Dispatching an event for the ENTER keypress produces inconsistent results so am calling the handler directly.
+    beforeEach(function (done) {
+      createAndSaveThreeTestSessions((sessions) => {
+        this.sessions = sessions
+        this.secondSession = this.sessions[1]
+        this.secondSessionEditIcon = this.secondSession.element.getElementsByClassName('edit-icon')[0]
+        addKeyboardShortcuts()
         this.secondSession.element.focus()
-        // TODO Call `renameSelectedSession` instead.
-        renameSession(this.secondSession, 'Renamed Session', () => {
-          assertSessionRenamed(this.secondSession, 'Renamed Session', done)
-        })
-      })
-
-      xit('Displays a rename session button whilst the session name input is focused.', function (done) {
-        console.log('Unimplemented test.')
         done()
-      })
-
-      xit('Renames the session when the rename session button is clicked.', function (done) {
-        console.log('Unimplemented test.')
-        done()
-      })
-
-      xit('Restores the session name to its original value if the session name input loses focus before confirming the ' +
-      'renaming.', function (done) {
-        console.log('Unimplemented test.')
-        done()
-      })
-
-      afterEach(function (done) {
-        cleanUp(done)
       })
     })
 
-    xdescribe('Unsaved sessions.', function () {
-      it('Does not allow the user to rename unsaved sessions by disabling the session name input.', function (done) {
-        console.log('Unimplemented test.')
+    it('Starts the renaming when the \'edit\' icon is clicked by focusing the session name input...', function (done) {
+      expect(document.activeElement).toEqual(this.secondSession.element)
+      editSession.call(this.secondSessionEditIcon, () => {
+        var secondSessionNameInput = this.secondSession.element.getElementsByClassName('session-name-input')[0]
+        expect(document.activeElement).toEqual(secondSessionNameInput)
         done()
       })
+    })
+
+    xit('...Or alternatively when the `r` button is pressed.', function (done) {
+      console.log('Unimplemented test.')
+      done()
+    })
+
+    it('Changes the \'edit\' button to a \'done\' button once the renaming has started.', function (done) {
+      expect(this.secondSessionEditIcon.textContent).toEqual('edit')
+      editSession.call(this.secondSessionEditIcon, () => {
+        expect(this.secondSessionEditIcon.textContent).toEqual('done')
+        done()
+      })
+    })
+
+    it('Saves the renaming when the \'done\' icon is clicked...', function (done) {
+      var saveRenamingThenAssert = () => {
+        secondSessionNameInput.value = 'Renamed Session'
+        finishRenamingSelectedSession(() => {
+          assertSessionRenamed(this.secondSession, 'Renamed Session', done)
+        })
+      }
+
+      var assertSessionRenamed = (session, expectedName, callback) => {
+        session.updateBookmarkFolder(() => {
+          expect(session.bookmarkFolder.title).toEqual(expectedName)
+          expect(secondSessionNameInput.value).toEqual(expectedName)
+          callback()
+        })
+      }
+
+      var secondSessionNameInput = this.secondSession.element.getElementsByClassName('session-name-input')[0]
+      editSession.call(this.secondSessionEditIcon, saveRenamingThenAssert)
+    })
+
+    xit('...Or alternatively when the `ENTER` key is pressed.', function (done) {
+      console.log('Unimplemented test.')
+    })
+
+    xit('Restores the session name to its original value if the session name input loses focus before confirming the ' +
+    'renaming.', function (done) {
+      console.log('Unimplemented test.')
+      done()
+    })
+
+    xit('Saves the session if was not already saved.', function (done) {
+      console.log('Unimplemented test.')
+      done()
+    })
+
+    afterEach(function (done) {
+      cleanUp(done)
     })
   })
 })

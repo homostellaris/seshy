@@ -69,6 +69,9 @@ Session.prototype.addEventListeners = function () {
     this.element.classList.add('selected')
   })
 
+  var editIcon = this.element.getElementsByClassName('edit-icon')[0]
+  editIcon.addEventListener('click', editSession)
+
   var resumeIcon = this.element.getElementsByClassName('resume-icon')[0]
   resumeIcon.addEventListener('click', (event) => {
     resumeSession(this)
@@ -190,7 +193,9 @@ function getSessionInnerHtml (title, tabsNumber, saved) {
   var savedStateIcon = saved ? 'bookmark' : 'bookmark_border'
   var innerHtml = `
     <span class="mdc-list-item__graphic">
-      <i class="saved-state-icon material-icons">${savedStateIcon}</i>
+      <button title="saved state">
+        <i class="saved-state-icon material-icons">${savedStateIcon}</i>
+      </button>
     </span>
     <span class="mdc-list-item__text">
       <div class="session-name mdc-text-field mdc-text-field--dense mdc-text-field--fullwidth">
@@ -202,13 +207,13 @@ function getSessionInnerHtml (title, tabsNumber, saved) {
       </span>
     </span>
     <span class="mdc-list-item__meta">
-      <button>
-        <i class="resume-icon material-icons">edit</i>
+      <button title="edit">
+        <i class="edit-icon material-icons">edit</i>
       </button>
-      <button>
+      <button title="resume">
         <i class="resume-icon material-icons">open_in_new</i>
       </button>
-      <button>
+      <button title="delete">
         <i class="delete-icon material-icons">delete</i>
       </button>
     </span>
@@ -222,14 +227,7 @@ function addKeyboardShortcuts () {
     switch (event.key) {
       case 'Enter':
         if (elementIsBeingRenamed()) {
-          var selectedSessionElement = getSelectedSession()
-          if (selectedSessionElement.seshySession.saved()) {
-            console.warn('Renaming selected session.')
-            renameSelectedSession()
-          } else {
-            console.warn('Saving selected session.')
-            saveSelectedSession()
-          }
+          finishRenamingSelectedSession()
         } else {
           resumeSelectedSession()
         }
@@ -374,8 +372,8 @@ function getSessionsFromSessionList (sessionList) {
   return sessionList.getElementsByClassName('session-card')
 }
 
-function focusSessionNameInput (event) {
-  var sessionElement = event.srcElement
+function focusSessionNameInput () {
+  var sessionElement = getSelectedSession()
   var sessionNameInput = getSessionNameInput(sessionElement.seshySession)
   sessionNameInput.select()
 }
@@ -430,4 +428,37 @@ function deleteSelectedSession (callback) {
   var nextSessionCard = getNextSession()
   var selectedSessionElement = getSelectedSession()
   deleteSession(selectedSessionElement.seshySession, focusNextSessionCardThenCallback)
+}
+
+function editSession (callback) {
+  focusSessionNameInput()
+  changeEditIconToConfirmEditIcon(this)
+  if (isFunction(callback)) callback()
+}
+
+function changeEditIconToConfirmEditIcon (editIcon) {
+  var finishRenamingThenResetState = () => {
+    finishRenamingSelectedSession()
+    editIcon.textContent = 'edit'
+    editIcon.style.color = '#000'
+    editIcon.removeEventListener('click', finishRenamingThenResetState)
+    editIcon.addEventListener('click', editSession)
+  }
+
+  editIcon.textContent = 'done'
+  editIcon.style.color = '#4CAF50'
+  editIcon.removeEventListener('click', editSession)
+  editIcon.addEventListener('click', finishRenamingThenResetState)
+}
+
+function finishRenamingSelectedSession (callback) {
+  var selectedSessionElement = getSelectedSession()
+  if (selectedSessionElement.seshySession.saved()) {
+    console.warn('Renaming selected session.')
+    renameSelectedSession()
+  } else {
+    console.warn('Saving selected session.')
+    saveSelectedSession()
+  }
+  if (isFunction(callback)) callback()
 }
