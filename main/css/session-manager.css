@@ -7,7 +7,7 @@
 body {
   background-color: #F1F1F1;
   width: 600px;
-  padding: 0 0.5em 0.5em 0.5em;
+  padding-bottom: 0.5em;
 }
 
 button {
@@ -19,9 +19,8 @@ button {
 }
 
 .session-card {
-  // There is no guttering between session cards by default, add some.
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+  /* There is no guttering between session cards by default, add some. */
+  margin: 0.5rem;
 }
 
 .session-name {
@@ -29,5 +28,6 @@ button {
 }
 
 .mdc-list-item__text {
-  width: 65%;  // Allows full width text input.
+  /* Allows full width text input. */
+  width: 65%;
 }

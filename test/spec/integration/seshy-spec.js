@@ -799,6 +799,11 @@ describe('Integration tests.', function () {
       done()
     })
 
+    xit('Disables the keyboard shortucts whilst renaming.', function (done) {
+      console.log('Unimplemented test.')
+      done()
+    })
+
     afterEach(function (done) {
       cleanUp(done)
     })

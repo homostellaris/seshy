@@ -154,22 +154,6 @@ describe('Unit tests.', function () {
     })
 
     describe('Renames the session when the `r` key is pressed.', function () {
-      describe('The `focusSessionNameInput` function.', function () {
-        it('Calls select on the session name input.', function () {
-          var fakeSessionNameInput = jasmine.createSpyObj('fakeSessionNameInput', ['select'])
-          spyOn(window, 'getSessionNameInput').and.returnValue(fakeSessionNameInput)
-
-          var fakeEvent = jasmine.createSpy('fakeEvent')
-          var fakeElement = jasmine.createSpy('fakeElement')
-          var fakeSession = jasmine.createSpy('fakeSession')
-          fakeEvent.srcElement = fakeElement
-          fakeEvent.srcElement.seshySession = fakeSession
-
-          focusSessionNameInput(fakeEvent)
-          expect(fakeSessionNameInput.select).toHaveBeenCalled()
-        })
-      })
-
       describe('Saves the session when the `ENTER` key is pressed during renaming.', function () {
         describe('The `saveSelectedSession` function.', function () {
           xit('Calls `getSelectedSession` function.', function () {
