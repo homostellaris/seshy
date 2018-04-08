@@ -722,7 +722,7 @@ describe('Integration tests.', function () {
       })
     })
 
-    describe('Browser icon.', function () {
+    describe('Browser action icon.', function () {
       xit('Shows a tooltip on mouseover that provides information about the session for the current window.',
         function () {
           console.log('Unimplemented test.')
@@ -799,7 +799,7 @@ describe('Integration tests.', function () {
       done()
     })
 
-    xit('Disables the keyboard shortucts whilst renaming.', function (done) {
+    xit('Disables the keyboard shortcuts whilst renaming.', function (done) {
       console.log('Unimplemented test.')
       done()
     })
