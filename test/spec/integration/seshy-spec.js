@@ -5,7 +5,7 @@ createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession getSessio
 assertSessionWindowTabs createAndSaveTestSession setUp resetTestContainer isFunction openThreeUnsavedTestSessions
 deleteSelectedSession createAndSaveThreeTestSessions addKeyboardShortcuts saveSelectedSession
 getCurrentlyOpenSessionElements storeWindowToSessionFolderMapping asyncLoop resumeSelectedSession removeWindow
-renameSelectedSession renameSession editSession finishRenamingSelectedSession */
+renameSelectedSession renameSession startEditingSession finishEditingSession */
 describe('Integration tests.', function () {
   beforeAll(function (done) {
     console.log('Waiting for seshyFolder variable to be populated.')
@@ -220,7 +220,7 @@ describe('Integration tests.', function () {
 
           spyOn(window, 'setBrowserActionIconToSaved').and.callThrough()
           this.session.element.focus()
-          saveSelectedSession(() => {
+          saveSession(this.session, () => {
             setTimeout(assertBrowserActionIconSetToSavedState, 2000)
           })
         })
@@ -744,7 +744,7 @@ describe('Integration tests.', function () {
 
     it('Starts the renaming when the \'edit\' icon is clicked by focusing the session name input...', function (done) {
       expect(document.activeElement).toEqual(this.secondSession.element)
-      editSession.call(this.secondSessionEditIcon, () => {
+      startEditingSession(this.secondSession, () => {
         var secondSessionNameInput = this.secondSession.element.getElementsByClassName('session-name-input')[0]
         expect(document.activeElement).toEqual(secondSessionNameInput)
         done()
@@ -758,7 +758,7 @@ describe('Integration tests.', function () {
 
     it('Changes the \'edit\' button to a \'done\' button once the renaming has started.', function (done) {
       expect(this.secondSessionEditIcon.textContent).toEqual('edit')
-      editSession.call(this.secondSessionEditIcon, () => {
+      startEditingSession(this.secondSession, () => {
         expect(this.secondSessionEditIcon.textContent).toEqual('done')
         done()
       })
@@ -767,7 +767,7 @@ describe('Integration tests.', function () {
     it('Saves the renaming when the \'done\' icon is clicked...', function (done) {
       var saveRenamingThenAssert = () => {
         secondSessionNameInput.value = 'Renamed Session'
-        finishRenamingSelectedSession(() => {
+        finishEditingSession(this.secondSession, () => {
           assertSessionRenamed(this.secondSession, 'Renamed Session', done)
         })
       }
@@ -781,7 +781,7 @@ describe('Integration tests.', function () {
       }
 
       var secondSessionNameInput = this.secondSession.element.getElementsByClassName('session-name-input')[0]
-      editSession.call(this.secondSessionEditIcon, saveRenamingThenAssert)
+      startEditingSession(this.secondSession, saveRenamingThenAssert)
     })
 
     xit('...Or alternatively when the `ENTER` key is pressed.', function (done) {

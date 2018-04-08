@@ -69,18 +69,50 @@ Session.prototype.addEventListeners = function () {
     this.element.classList.add('selected')
   })
 
-  var editIcon = this.element.getElementsByClassName('edit-icon')[0]
-  editIcon.addEventListener('click', editSession)
-
-  var resumeIcon = this.element.getElementsByClassName('resume-icon')[0]
-  resumeIcon.addEventListener('click', (event) => {
-    resumeSession(this)
+  this.element.addEventListener('click', (event) => {
+    var classList = event.target.classList
+    if (classList.contains('edit-icon')) {
+      if (sessionIsBeingRenamed(event.target)) {
+        finishEditingSession(this)
+      } else {
+        startEditingSession(this)
+      }
+    } else if (classList.contains('resume-icon')) {
+      resumeSession(this)
+    } else if (classList.contains('delete-icon')) {
+      deleteSelectedSession()
+    }
   })
 
-  var deleteIcon = this.element.getElementsByClassName('delete-icon')[0]
-  deleteIcon.addEventListener('click', (event) => {
-    deleteSession(this)
-  })
+  this.keydownEventListener = (event) => {
+    switch (event.key) {
+      case 'r':
+        startEditingSession(this)
+        break
+
+      case '#':
+        deleteSelectedSession()
+        break
+
+      default: return
+    }
+    event.preventDefault()
+  }
+
+  this.enterKeydownEventListener = (event) => {
+    if (event.key === 'Enter') {
+      if (sessionIsBeingRenamed(event.target)) {
+        finishEditingSession(this)
+        event.stopPropagation()
+      } else {
+        resumeSelectedSession()
+        event.stopPropagation()
+      }
+    }
+  }
+
+  this.element.addEventListener('keydown', this.enterKeydownEventListener)
+  this.element.addEventListener('keydown', this.keydownEventListener)
 }
 
 /**
@@ -99,7 +131,6 @@ Session.prototype.setSavedIconState = function (savedBoolean) {
 function setUp (callback) {
   var done = () => {
     addKeyboardShortcuts()
-    addGlobalEventListeners()
     window.mdc.autoInit()
     if (isFunction(callback)) callback()
   }
@@ -199,7 +230,7 @@ function getSessionInnerHtml (title, tabsNumber, saved) {
     </span>
     <span class="mdc-list-item__text">
       <div class="session-name mdc-text-field mdc-text-field--dense mdc-text-field--fullwidth">
-        <input type="text" class="session-name-input mdc-text-field__input" value="${title}">
+        <input type="text" class="session-name-input mdc-text-field__input" value="${title}" readonly="true">
         <div class="mdc-line-ripple"></div>
       </div>
       <span class="tabs-number mdc-list-item__secondary-text">
@@ -207,13 +238,13 @@ function getSessionInnerHtml (title, tabsNumber, saved) {
       </span>
     </span>
     <span class="mdc-list-item__meta">
-      <button title="edit">
+      <button class="edit-button" title="edit">
         <i class="edit-icon material-icons">edit</i>
       </button>
-      <button title="resume">
+      <button class="resume-button" title="resume">
         <i class="resume-icon material-icons">open_in_new</i>
       </button>
-      <button title="delete">
+      <button class="delete-button" title="delete">
         <i class="delete-icon material-icons">delete</i>
       </button>
     </span>
@@ -223,16 +254,7 @@ function getSessionInnerHtml (title, tabsNumber, saved) {
 
 function addKeyboardShortcuts () {
   document.addEventListener('keydown', (event) => {
-    console.log('Keydown event triggered.')
     switch (event.key) {
-      case 'Enter':
-        if (elementIsBeingRenamed()) {
-          finishRenamingSelectedSession()
-        } else {
-          resumeSelectedSession()
-        }
-        break
-
       case 'ArrowLeft':
         selectLastSessionInPreviousSessionList()
         break
@@ -249,25 +271,9 @@ function addKeyboardShortcuts () {
         selectNextSession()
         break
 
-      case 'r':
-        focusSessionNameInput(event)
-        break
-
-      case '#':
-        deleteSelectedSession()
-        break
-
       default: return // exit this handler for other keys
     }
     event.preventDefault() // prevent the default action (scroll / move caret)
-  })
-}
-
-function addGlobalEventListeners () {
-  document.addEventListener('deleteSession', (event) => {
-    var sessionCard = event.srcElement
-    var nextSessionCard = sessionCard.nextElementSibling
-    sessionCard.classList.add('selected')
   })
 }
 
@@ -415,8 +421,14 @@ function resumeSelectedSession (callback) {
   }
 }
 
-function elementIsBeingRenamed () {
-  return Boolean(document.activeElement.tagName === 'INPUT')
+function sessionIsBeingRenamed (element) {
+  var editIcon
+  if (element.classList.contains('edit-icon')) {
+    editIcon = element
+  } else {
+    editIcon = getSelectedSession().getElementsByClassName('edit-icon')[0]
+  }
+  return Boolean(editIcon.textContent === 'done')
 }
 
 function deleteSelectedSession (callback) {
@@ -430,30 +442,31 @@ function deleteSelectedSession (callback) {
   deleteSession(selectedSessionElement.seshySession, focusNextSessionCardThenCallback)
 }
 
-function editSession (callback) {
-  focusSessionNameInput()
-  changeEditIconToConfirmEditIcon(this)
+function startEditingSession (session, callback) {
+  session.element.removeEventListener('keydown', session.keydownEventListener)
+  var sessionNameInput = session.element.getElementsByClassName('session-name-input')[0]
+  sessionNameInput.readOnly = false
+  sessionNameInput.select()
+  var editIcon = session.element.getElementsByClassName('edit-icon')[0]
+  changeEditIconToConfirmEditIcon(editIcon)
   if (isFunction(callback)) callback()
 }
 
-function changeEditIconToConfirmEditIcon (editIcon) {
-  var finishRenamingThenResetState = () => {
-    finishRenamingSelectedSession()
-    editIcon.textContent = 'edit'
-    editIcon.style.color = '#000'
-    editIcon.removeEventListener('click', finishRenamingThenResetState)
-    editIcon.addEventListener('click', editSession)
+function finishEditingSession (session, callback) {
+  var updateUiState = () => {
+    session.element.addEventListener('keydown', session.keydownEventListener)
+    var sessionNameInput = session.element.getElementsByClassName('session-name-input')[0]
+    sessionNameInput.readOnly = true
+    var editIcon = session.element.getElementsByClassName('edit-icon')[0]
+    changeConfirmEditIconBackToEditIcon(editIcon)
+    if (isFunction(callback)) callback()
   }
 
-  editIcon.textContent = 'done'
-  editIcon.style.color = '#4CAF50'
-  editIcon.removeEventListener('click', editSession)
-  editIcon.addEventListener('click', finishRenamingThenResetState)
+  finishRenamingSession(session, updateUiState)
 }
 
-function finishRenamingSelectedSession (callback) {
-  var selectedSessionElement = getSelectedSession()
-  if (selectedSessionElement.seshySession.saved()) {
+function finishRenamingSession (session, callback) {
+  if (session.saved()) {
     console.warn('Renaming selected session.')
     renameSelectedSession()
   } else {
@@ -461,4 +474,14 @@ function finishRenamingSelectedSession (callback) {
     saveSelectedSession()
   }
   if (isFunction(callback)) callback()
+}
+
+function changeEditIconToConfirmEditIcon (editIcon) {
+  editIcon.textContent = 'done'
+  editIcon.style.color = '#4CAF50'
+}
+
+function changeConfirmEditIconBackToEditIcon (editIcon) {
+  editIcon.textContent = 'edit'
+  editIcon.style.color = '#000'
 }
