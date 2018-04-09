@@ -1,6 +1,7 @@
 require('chromedriver')
 const {Builder, By, until} = require('selenium-webdriver')
 const chrome = require('selenium-webdriver/chrome')
+const promise = require('selenium-webdriver/lib/promise')
 
 var chromeOptions = new chrome.Options()
 chromeOptions.addExtensions('output/test.crx')
@@ -44,11 +45,10 @@ function fail () {
       'The jasmine-failures element was located. Now expecting it to have child divs for the failed ' +
       'specs. Trying to find...'
     )
-    return jasmineFailures.findElements(By.className('jasmine-spec-detail jasmine-failed'))
+    return jasmineFailures.findElements(By.css('.jasmine-failures .jasmine-description a:last-child'))
   }).then((jasmineFailedSpecs) => {
-    var failedSpecsNumber = jasmineFailedSpecs.length
-    if (failedSpecsNumber > 0) {
-      exitCodeOne(failedSpecsNumber)
+    if (jasmineFailedSpecs.length > 0) {
+      exitCodeOne(jasmineFailedSpecs)
     } else {
       throw new Error(
         'Unexpected state. The jasmine-failures element is visible but no child divs ' +
@@ -58,17 +58,22 @@ function fail () {
   })
 }
 
-function exitCodeOne (failedSpecsNumber) {
+function exitCodeOne (jasmineFailedSpecs) {
   if (process.env.TRAVIS) {
     console.log('On Travis so closing Chrome instance.')
     return driver.close().then(() => {
-      throwFailedSpecsError(failedSpecsNumber)
+      throwFailedSpecsError(jasmineFailedSpecs)
     })
   } else {
-    throwFailedSpecsError(failedSpecsNumber)
+    throwFailedSpecsError(jasmineFailedSpecs)
   }
 }
 
-function throwFailedSpecsError (failedSpecsNumber) {
-  throw new Error(failedSpecsNumber + ' failed specs.')
+function throwFailedSpecsError (jasmineFailedSpecs) {
+  var failedSpecsNumber = jasmineFailedSpecs.length
+  console.error(`${failedSpecsNumber} failed specs found:`)
+  promise.map(jasmineFailedSpecs, e => e.getText()).then((texts) => {
+    console.error(texts)
+    process.exit(1)
+  })
 }
