@@ -59,21 +59,19 @@ function fail () {
 }
 
 function exitCodeOne (jasmineFailedSpecs) {
-  if (process.env.TRAVIS) {
-    console.log('On Travis so closing Chrome instance.')
-    return driver.close().then(() => {
-      throwFailedSpecsError(jasmineFailedSpecs)
-    })
-  } else {
-    throwFailedSpecsError(jasmineFailedSpecs)
-  }
-}
-
-function throwFailedSpecsError (jasmineFailedSpecs) {
   var failedSpecsNumber = jasmineFailedSpecs.length
   console.error(`${failedSpecsNumber} failed specs found:`)
   promise.map(jasmineFailedSpecs, e => e.getText()).then((texts) => {
     console.error(texts)
     process.exit(1)
+  }).then(() => {
+    if (process.env.TRAVIS) {
+      console.log('On Travis so closing Chrome instance.')
+      return driver.close().then(() => {
+        process.exit(1)
+      })
+    } else {
+      process.exit(1)
+    }
   })
 }
