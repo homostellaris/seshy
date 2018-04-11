@@ -1,46 +1,44 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Help</title>
+    <title>More information</title>
     <link rel="stylesheet" href="../node_modules/material-components-web/dist/material-components-web.css">
+    <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/session-manager.css">
+    <link rel="stylesheet" href="../css/more-information.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   </head>
   <body>
-    <header class="mdc-toolbar">
-      <div class="mdc-toolbar__row">
-        <section class="mdc-toolbar__section mdc-toolbar__section--align-start">
-          <span class="mdc-toolbar__title">Seshy</span>
-        </section>
-        <section class="mdc-toolbar__section mdc-toolbar__section--align-end mdc-toolbar__section--shrink-to-fit">
-          <a href="help.html">
-            <i class="material-icons">help</i>
-          </a>
+    <header class="mdc-top-app-bar">
+      <div class="mdc-top-app-bar__row">
+        <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+          <a id="go-back" class="material-icons mdc-top-app-bar__navigation-icon" href="session-manager.html">arrow_back</a>
+          <span class="mdc-top-app-bar__title">Seshy</span>
         </section>
       </div>
     </header>
     <ul class="mdc-list">
-      <li class="mdc-list-item">
+      <li id="show-keyboard-shortcuts" class="mdc-list-item">
         <span class="mdc-list-item__graphic">
           <i class="material-icons">keyboard</i>
         </span>
         Show keyboard shortcuts
       </li>
       <li role="separator" class="mdc-list-divider"></li>
-      <li class="mdc-list-item">
+      <li id="submit-a-feature-request" class="mdc-list-item">
         <span class="mdc-list-item__graphic">
           <i class="material-icons">lightbulb_outline</i>
         </span>
         Submit a feature request
       </li>
-      <li class="mdc-list-item">
+      <li id="report-a-bug" class="mdc-list-item">
         <span class="mdc-list-item__graphic">
           <i class="material-icons">bug_report</i>
         </span>
         Report a bug
       </li>
       <li role="separator" class="mdc-list-divider"></li>
-      <li class="mdc-list-item">
+      <li id="see-open-source-credits" class="mdc-list-item">
         <span class="mdc-list-item__graphic">
           <i class="material-icons">code</i>
         </span>
@@ -48,4 +46,6 @@
       </li>
     </ul>
   </body>
+
+  <script src="../js/more-information.js"></script>
 </html>

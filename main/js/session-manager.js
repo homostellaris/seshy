@@ -271,6 +271,9 @@ function addKeyboardShortcuts () {
         selectNextSession()
         break
 
+      case '?':
+        window.location.href = 'keyboard-shortcuts.html'
+
       default: return // exit this handler for other keys
     }
     event.preventDefault() // prevent the default action (scroll / move caret)
