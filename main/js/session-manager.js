@@ -273,6 +273,7 @@ function addKeyboardShortcuts () {
 
       case '?':
         window.location.href = 'keyboard-shortcuts.html'
+        break
 
       default: return // exit this handler for other keys
     }
