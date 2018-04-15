@@ -130,6 +130,15 @@ Session.prototype.setSavedIconState = function (savedBoolean) {
 // ---===~ Functions ~===-----------------------------------------------------------------------------------------------
 function setUp (callback) {
   var done = () => {
+    addKeyboardShortcuts()
+    window.mdc.autoInit()
+    // var shelvedSessions = document.querySelector('#saved-sessions .session-card')
+    // if (shelvedSessions === null) {
+    //   var noShelvedSessionsPlaceholder = document.createElement('li')
+    //   noShelvedSessionsPlaceholder.classList.add('placeholder')
+    //   noShelvedSessionsPlaceholder.innerHTML = 'YO'
+    //   document.getElementById('saved-sessions').appendChild(noShelvedSessionsPlaceholder)
+    // }
     if (isFunction(callback)) callback()
   }
 
@@ -155,6 +164,10 @@ function initialiseKeyboardShortcutsDialog (callback) {
   })
   if (isFunction(callback)) callback()
 }
+
+// function openKeyboardShortcutsDialog() {
+//
+// }
 
 /**
  * Create session cards to populate session lists.
