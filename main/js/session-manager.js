@@ -137,6 +137,14 @@ function setUp (callback) {
   createSessionElements(() => {
     focusCurrentlyOpenSession(done)
   })
+  initialiseKeyboardShortcutsDialog()
+}
+
+function initialiseKeyboardShortcutsDialog() {
+  this.dialog = new mdc.dialog.MDCDialog(document.querySelector('#keyboard-shortcuts'))
+  this.dialog.listen('MDCDialog:accept', () => {
+    document.body.style.minHeight = 'initial'
+  })
 }
 
 /**
@@ -272,7 +280,8 @@ function addKeyboardShortcuts () {
         break
 
       case '?':
-        window.location.href = 'keyboard-shortcuts.html'
+        document.body.style.minHeight = '424px'
+        this.dialog.show()
         break
 
       default: return // exit this handler for other keys

@@ -1,5 +1,9 @@
 body {
-  background-color: #F1F1F1;
   width: 600px;
   padding-bottom: 0.5em;
+  background-color: #F1F1F1;
+}
+
+#keyboard-shortcuts table {
+  border-spacing: 1em;
 }
