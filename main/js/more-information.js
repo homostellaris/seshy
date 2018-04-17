@@ -6,7 +6,7 @@ var openNewTabThenExitBrowserActionPopup = (url) => {
 }
 
 var showKeyboardShortcuts = () => {
-  window.location.href = 'keyboard-shortcuts.html'
+  window.location.href = 'session-manager.html'
 }
 
 var submitAFeatureRequest = () => {
@@ -18,7 +18,7 @@ var reportABug = () => {
 }
 
 var seeOpenSourceCredits = () => {
-  alert('Not yet implemented')
+  window.location.href = 'credits.html'
 }
 
 var setUp = () => {
