@@ -140,7 +140,7 @@ function setUp (callback) {
   initialiseKeyboardShortcutsDialog()
 }
 
-function initialiseKeyboardShortcutsDialog() {
+function initialiseKeyboardShortcutsDialog () {
   this.dialog = new mdc.dialog.MDCDialog(document.querySelector('#keyboard-shortcuts'))
   this.dialog.listen('MDCDialog:accept', () => {
     document.body.style.minHeight = 'initial'
