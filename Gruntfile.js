@@ -17,7 +17,6 @@ module.exports = function (grunt) {
     copy: {
       main: {
         files: [
-          // Copy all implementation files.
           {
             expand: true,
             cwd: 'main/',
@@ -26,7 +25,6 @@ module.exports = function (grunt) {
           },
           {
             src: [
-              'node_modules/mousetrap/mousetrap.min.js',
               'node_modules/material-components-web/dist/material-components-web.js',
             ],
             dest: 'output/'
@@ -79,6 +77,33 @@ module.exports = function (grunt) {
           privateKey: 'seshy-development.pem'
         }
       }
+    },
+
+    compress: {
+      main:{
+        files: [
+          {
+            expand: true,
+            cwd: 'main/',
+            src: ['**']
+          },
+          {
+            src: [
+              'node_modules/material-components-web/dist/material-components-web.js',
+            ]
+          },
+          {
+            expand: true,
+            src: [
+              'node_modules/material-components-web/dist/material-components-web.css',
+            ]
+          },
+        ],
+        options: {
+          archive: 'output/seshy.zip',
+          mode: 'zip'
+        }
+      }
     }
 
   });
@@ -88,9 +113,11 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-exec');
   grunt.loadNpmTasks('grunt-crx');
+  grunt.loadNpmTasks('grunt-contrib-compress');
 
   grunt.registerTask('lint', ['eslint']);
   grunt.registerTask('test', ['lint', 'clean', 'copy', 'crx:createTestArtefact', 'exec:test']);
   // TODO Can selectively copy files into CRX so earlier copy and clean tasks may be unnecessary.
   grunt.registerTask('run', ['clean', 'copy:main', 'exec:run']);
+  grunt.registerTask('publish', ['clean', 'lint', 'compress:main']);
 };

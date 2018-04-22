@@ -31,6 +31,12 @@
     }
   },
 
+  "icons": {
+    "16": "images/seshy-logo-16.png",
+    "48": "images/seshy-logo-48.png",
+    "128": "images/seshy-logo-128.png"
+  },
+
   "permissions": [
     "bookmarks",
     "windows",
