@@ -130,13 +130,30 @@ Session.prototype.setSavedIconState = function (savedBoolean) {
 // ---===~ Functions ~===-----------------------------------------------------------------------------------------------
 function setUp (callback) {
   var done = () => {
-    addKeyboardShortcuts()
-    window.mdc.autoInit()
     if (isFunction(callback)) callback()
   }
+
+  var callAddKeyboardShortcuts = () => {
+    addKeyboardShortcuts(initialiseMaterialComponents)
+  }
+
+  var initialiseMaterialComponents = () => {
+    window.mdc.autoInit()
+    initialiseKeyboardShortcutsDialog(done)
+  }
+
   createSessionElements(() => {
-    focusCurrentlyOpenSession(done)
+    focusCurrentlyOpenSession(callAddKeyboardShortcuts)
   })
+}
+
+function initialiseKeyboardShortcutsDialog (callback) {
+  var keyboardShortcutsElement = document.querySelector('#keyboard-shortcuts')
+  this.dialog = new mdc.dialog.MDCDialog(keyboardShortcutsElement)
+  this.dialog.listen('MDCDialog:accept', () => {
+    document.body.style.minHeight = 'initial'
+  })
+  if (isFunction(callback)) callback()
 }
 
 /**
@@ -224,9 +241,7 @@ function getSessionInnerHtml (title, tabsNumber, saved) {
   var savedStateIcon = saved ? 'bookmark' : 'bookmark_border'
   var innerHtml = `
     <span class="mdc-list-item__graphic">
-      <button title="saved state">
-        <i class="saved-state-icon material-icons">${savedStateIcon}</i>
-      </button>
+      <i class="saved-state-icon material-icons" title="saved state">${savedStateIcon}</i>
     </span>
     <span class="mdc-list-item__text">
       <div class="session-name mdc-text-field mdc-text-field--dense mdc-text-field--fullwidth">
@@ -252,7 +267,7 @@ function getSessionInnerHtml (title, tabsNumber, saved) {
   return innerHtml
 }
 
-function addKeyboardShortcuts () {
+function addKeyboardShortcuts (callback) {
   document.addEventListener('keydown', (event) => {
     switch (event.key) {
       case 'ArrowLeft':
@@ -271,10 +286,17 @@ function addKeyboardShortcuts () {
         selectNextSession()
         break
 
+      case '?':
+        document.body.style.minHeight = '424px'
+        this.dialog.show()
+        break
+
       default: return // exit this handler for other keys
     }
     event.preventDefault() // prevent the default action (scroll / move caret)
   })
+
+  if (isFunction(callback)) callback()
 }
 
 function selectNextSession () {

@@ -29,6 +29,10 @@ describe('Integration tests.', function () {
       expect(chrome.storage.local.remove.calls.argsFor(0)).toEqual([this.session.window.id.toString()])
       done()
     })
+
+    afterEach(function (done) {
+      cleanUp(done)
+    })
   })
 
   describe('Saving sessions.', function () {

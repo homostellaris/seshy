@@ -1,0 +1,11 @@
+#more-information-links li {
+  cursor: pointer;
+}
+
+#introduction {
+  height: auto;
+}
+
+#introduction p {
+  padding: 16px 0;
+}
