@@ -241,9 +241,7 @@ function getSessionInnerHtml (title, tabsNumber, saved) {
   var savedStateIcon = saved ? 'bookmark' : 'bookmark_border'
   var innerHtml = `
     <span class="mdc-list-item__graphic">
-      <button title="saved state">
-        <i class="saved-state-icon material-icons">${savedStateIcon}</i>
-      </button>
+      <i class="saved-state-icon material-icons" title="saved state">${savedStateIcon}</i>
     </span>
     <span class="mdc-list-item__text">
       <div class="session-name mdc-text-field mdc-text-field--dense mdc-text-field--fullwidth">

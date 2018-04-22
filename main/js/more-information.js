@@ -5,10 +5,6 @@ var openNewTabThenExitBrowserActionPopup = (url) => {
   window.close()
 }
 
-var showKeyboardShortcuts = () => {
-  window.location.href = 'session-manager.html'
-}
-
 var submitAFeatureRequest = () => {
   openNewTabThenExitBrowserActionPopup('https://github.com/moderatemisbehaviour/seshy/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement')
 }
@@ -22,12 +18,10 @@ var seeOpenSourceCredits = () => {
 }
 
 var setUp = () => {
-  var showKeyboardShortcutsElement = document.getElementById('show-keyboard-shortcuts')
   var submitAFeatureRequestElement = document.getElementById('submit-a-feature-request')
   var reportABugElement = document.getElementById('report-a-bug')
   var seeOpenSourceCreditsElement = document.getElementById('see-open-source-credits')
 
-  showKeyboardShortcutsElement.addEventListener('click', showKeyboardShortcuts)
   submitAFeatureRequestElement.addEventListener('click', submitAFeatureRequest)
   reportABugElement.addEventListener('click', reportABug)
   seeOpenSourceCreditsElement.addEventListener('click', seeOpenSourceCredits)
