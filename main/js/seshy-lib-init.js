@@ -1,5 +1,5 @@
 /* global chrome getSession removeWindowToSessionFolderMapping checkIfSeshyFolderExists saveWindowAsBookmarkFolder
-checkIfSavedSession */
+checkIfSavedSession setBrowserActionIconToSaved */
 
 // ---===~ Add listeners. ~===------------------------------------------------------------------------------------------
 chrome.runtime.onStartup.addListener(() => {
@@ -18,8 +18,8 @@ chrome.tabs.onUpdated.addListener(scheduleSaveSessionIfNecessary)
 var pendingTabUpdatedListenerCalls = 0
 
 /**
- * The first implementation for this was dumb in that it would simply get all the tabs for the parent window, removed
- * all bookmarks from the bookmark folder, and re-created all the bookmarks based on the tabs currently in the window.
+ * The first implementation for this was dumb in that it would simply get all the tabs for the parent window, remove
+ * all bookmarks from the bookmark folder, and re-create all the bookmarks based on the tabs currently in the window.
  * This did not work for several reasons...
  *
  * Creation of tabs seems to be quicker than removal of tabs. This means that if 2 tabs are created or updated in quick
@@ -78,10 +78,6 @@ function setBrowserActionIconToUnsaved () {
 
 function setBrowserActionIconToSaving () {
   chrome.browserAction.setIcon({path: '../images/saving.png'})
-}
-
-function setBrowserActionIconToSaved () {
-  chrome.browserAction.setIcon({path: '../images/saved.png'})
 }
 
 // TODO This may delete the mapping that was just stored by resuming a saved session. Need to move the storage from
