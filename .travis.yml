@@ -4,5 +4,7 @@ addons:
 language: node_js
 node_js:
   - "6"
+before_install:
+  - npm install -g grunt-cli
 script:
   - xvfb-run npm test
