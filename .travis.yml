@@ -6,4 +6,4 @@ before_install:
   - sudo dpkg -i google-chrome-stable_current_amd64.deb
   - npm install -g grunt-cli
 script:
-  - xvfb npm test
+  - xvfb-run npm test
