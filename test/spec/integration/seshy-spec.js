@@ -215,7 +215,7 @@ describe('Integration tests.', function () {
           })
         })
 
-        it('Is a \'bookmark\' icon when the currently focused session is saved.', function (done) {
+        fit('Is a \'bookmark\' icon when the currently focused session is saved.', function (done) {
           var assertBrowserActionIconSetToSavedState = () => {
             expect(window.setBrowserActionIconToSaved).toHaveBeenCalled()
             // TODO Assert icon is changed back to idle.
