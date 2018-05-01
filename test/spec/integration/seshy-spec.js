@@ -225,7 +225,7 @@ describe('Integration tests.', function () {
           spyOn(window, 'setBrowserActionIconToSaved').and.callThrough()
           this.session.element.focus()
           saveSession(this.session, () => {
-            setTimeout(assertBrowserActionIconSetToSavedState, 2000)
+            setTimeout(assertBrowserActionIconSetToSavedState, 500)
           })
         })
       })

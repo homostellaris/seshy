@@ -3,9 +3,11 @@ const {Builder, By, until} = require('selenium-webdriver')
 const chrome = require('selenium-webdriver/chrome')
 const promise = require('selenium-webdriver/lib/promise')
 
+// Headless Chrome does not support extensions.
 var chromeOptions = new chrome.Options()
-chromeOptions.addExtensions('output/test.crx')
+chromeOptions.addArguments('--no-sandbox')
 chromeOptions.addArguments('start-maximized')
+chromeOptions.addExtensions('output/test.crx')
 
 var driver = new Builder()
   .forBrowser('chrome')
@@ -17,7 +19,7 @@ driver.wait(until.elementLocated(By.className('jasmine-duration')))
 
 // Although selenium has a promise manager, couldn't find a way to catch the find element error without using the normal
 //  promise style to provide an error handler.
-driver.findElement(By.className('jasmine-spec-detail jasmine-failed')).then((failuresContainer) => {
+driver.findElement(By.css('.jasmine-spec-detail.jasmine-failed')).then((failuresContainer) => {
   fail()
 }, (e) => {
   console.log('No failures element so tests must have passed.')

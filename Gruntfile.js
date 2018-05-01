@@ -56,7 +56,7 @@ module.exports = function (grunt) {
 
     exec: {
       test: {
-        cmd: 'node test/run-tests.js'
+        cmd: 'node output/test/run-tests.js'
       },
       run: {
         cmd: 'google-chrome-stable --load-extension="output/" --user-data-dir=/tmp/chrome-test-data-dir --no-first-run --disable-gpu'

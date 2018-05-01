@@ -91,7 +91,10 @@ function saveSession (session, callback) {
   }
 
   var callStoreWindowToSessionFolderMapping = () => {
-    storeWindowToSessionFolderMapping(session.window.id, session.bookmarkFolder.id, callback)
+    storeWindowToSessionFolderMapping(session.window.id, session.bookmarkFolder.id, () => {
+      setBrowserActionIconToSaved()
+      callback()
+    })
   }
 
   session.updateWindow(() => {
@@ -359,6 +362,10 @@ function removeWindow (session, callback) {
   } else {
     preventSessionManagerThinkingSessionIsOpen()
   }
+}
+
+function setBrowserActionIconToSaved () {
+  chrome.browserAction.setIcon({path: '../images/saved.png'})
 }
 
 // ---===~ Storage ~===-------------------------------------------------------------------------------------------------
