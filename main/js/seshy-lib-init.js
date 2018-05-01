@@ -1,5 +1,5 @@
 /* global chrome getSession removeWindowToSessionFolderMapping checkIfSeshyFolderExists saveWindowAsBookmarkFolder
-checkIfSavedSession setBrowserActionIconToSaved */
+checkIfSavedSession setBrowserActionIconToSaved isFunction asyncLoop */
 
 // ---===~ Add listeners. ~===------------------------------------------------------------------------------------------
 chrome.runtime.onStartup.addListener(() => {
@@ -125,9 +125,45 @@ initialise()
 // TODO Ensure this is loaded before anything else occurs.
 // Currently it only works because it finishes before anything tries to reference seshyFolderId.
 function initialise () {
-  console.log('Extension started, clearing local storage...')
-  chrome.storage.local.clear(() => {
+  console.log('Extension started, pruning local storage...')
+  pruneLocalStorage(() => {
     console.log('Local storage cleared.')
     checkIfSeshyFolderExists()
   })
+}
+
+function pruneLocalStorage (callback) {
+  var getAllWindows = (storageObject) => {
+    chrome.windows.getAll(null, (windows) => {
+      getStorageKeysToBeRemoved(storageObject, windows)
+    })
+  }
+
+  var getStorageKeysToBeRemoved = (storageObject, windows) => {
+    var storedWindowIds = Object.keys(storageObject).map(windowId => parseInt(windowId))
+    var currentlyOpenWindowIds = windows.map(aWindow => aWindow.id)
+    this.windowIdsToRemove = []
+
+    var iterateFunction = (storedWindowId, callback) => {
+      if (!currentlyOpenWindowIds.includes(storedWindowId)) {
+        this.windowIdsToRemove.push(storedWindowId)
+      }
+      callback()
+    }
+
+    asyncLoop(storedWindowIds, iterateFunction, removeStorageKeysIfNecessary)
+  }
+
+  var removeStorageKeysIfNecessary = () => {
+    if (this.windowIdsToRemove) {
+      var keysToRemove = this.windowIdsToRemove.map(windowId => windowId.toString())
+      chrome.storage.local.remove(keysToRemove, () => {
+        if (isFunction(callback)) callback()
+      })
+    } else {
+      if (isFunction(callback)) callback()
+    }
+  }
+
+  chrome.storage.local.get(null, getAllWindows)
 }
