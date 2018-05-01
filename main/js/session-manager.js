@@ -268,7 +268,7 @@ function getSessionInnerHtml (title, tabsNumber, saved) {
 }
 
 function addKeyboardShortcuts (callback) {
-  document.addEventListener('keydown', (event) => {
+  document.keydownEventListener = (event) => {
     switch (event.key) {
       case 'ArrowLeft':
         selectLastSessionInPreviousSessionList()
@@ -294,7 +294,9 @@ function addKeyboardShortcuts (callback) {
       default: return // exit this handler for other keys
     }
     event.preventDefault() // prevent the default action (scroll / move caret)
-  })
+  }
+
+  document.addEventListener('keydown', document.keydownEventListener)
 
   if (isFunction(callback)) callback()
 }
@@ -466,6 +468,7 @@ function deleteSelectedSession (callback) {
 
 function startEditingSession (session, callback) {
   session.element.removeEventListener('keydown', session.keydownEventListener)
+  document.removeEventListener('keydown', document.keydownEventListener)
   var sessionNameInput = session.element.getElementsByClassName('session-name-input')[0]
   sessionNameInput.readOnly = false
   sessionNameInput.select()
@@ -477,6 +480,7 @@ function startEditingSession (session, callback) {
 function finishEditingSession (session, callback) {
   var updateUiState = () => {
     session.element.addEventListener('keydown', session.keydownEventListener)
+    document.addEventListener('keydown', document.keydownEventListener)
     var sessionNameInput = session.element.getElementsByClassName('session-name-input')[0]
     sessionNameInput.readOnly = true
     var editIcon = session.element.getElementsByClassName('edit-icon')[0]
