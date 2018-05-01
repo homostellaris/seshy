@@ -3,13 +3,13 @@
 
   "name": "Seshy",
   "description": "Chrome extension for effortlessly syncing browsing sessions.",
-  "version": "0.1.0",
+  "version": "0.1.1",
 
   "background": {
     "scripts": [
+      "js/util.js",
       "js/seshy-lib.js",
-      "js/seshy-lib-init.js",
-      "js/util.js"
+      "js/seshy-lib-init.js"
     ],
     "persistent": false
   },
