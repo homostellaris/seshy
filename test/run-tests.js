@@ -8,6 +8,7 @@ var chromeOptions = new chrome.Options()
 chromeOptions.addArguments('--no-sandbox')
 chromeOptions.addArguments('start-maximized')
 chromeOptions.addExtensions('output/test.crx')
+chromeOptions.setChromeBinaryPath('/usr/bin/google-chrome-unstable')
 
 var driver = new Builder()
   .forBrowser('chrome')

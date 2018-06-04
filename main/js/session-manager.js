@@ -1,8 +1,13 @@
 /* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction done chrome saveSession deleteSession
 asyncLoop renameSession getSessionNameInput */
 
+import { BookmarkPersistenceManager } from './persistence.js'
+import { asyncLoop, isFunction, getSessionNameInput } from './util.js'
+
+var bookmarkPersistenceManager = new BookmarkPersistenceManager()
+
 // ---===~ Classes ~===-------------------------------------------------------------------------------------------------
-function Session (aWindow, bookmarkFolder) {
+export function Session (aWindow, bookmarkFolder) {
   if (!aWindow && !bookmarkFolder) {
     throw Error('A session must have either a window or a bookmarks folder.')
   }
@@ -128,7 +133,7 @@ Session.prototype.setSavedIconState = function (savedBoolean) {
 }
 
 // ---===~ Functions ~===-----------------------------------------------------------------------------------------------
-function setUp (callback) {
+export function setUp (callback) {
   var done = () => {
     if (isFunction(callback)) callback()
   }
@@ -149,8 +154,8 @@ function setUp (callback) {
 
 function initialiseKeyboardShortcutsDialog (callback) {
   var keyboardShortcutsElement = document.querySelector('#keyboard-shortcuts')
-  this.dialog = new mdc.dialog.MDCDialog(keyboardShortcutsElement)
-  this.dialog.listen('MDCDialog:accept', () => {
+  document.dialog = new mdc.dialog.MDCDialog(keyboardShortcutsElement)
+  document.dialog.listen('MDCDialog:accept', () => {
     document.body.style.minHeight = 'initial'
   })
   if (isFunction(callback)) callback()
@@ -161,7 +166,7 @@ function initialiseKeyboardShortcutsDialog (callback) {
  */
 function createSessionElements (callback) {
   var createCurrentlyOpenSessions = (storageObject) => {
-    getAllOpenWindows((windows) => {
+    chrome.windows.getAll({'populate': true}, (windows) => {
       createSessionsFromWindows(windows, storageObject)
     })
   }
@@ -194,7 +199,7 @@ function createSessionElements (callback) {
   }
 
   var createShelvedSessions = (storageObject) => {
-    getAllSessionFolders((bookmarkFolders) => {
+    bookmarkPersistenceManager.getAllSessionFolders((bookmarkFolders) => {
       var shelvedSessionBookmarkFolderIds = Object.values(storageObject)
 
       var createShelvedSession = (bookmarkFolder, callback) => {
@@ -288,7 +293,7 @@ function addKeyboardShortcuts (callback) {
 
       case '?':
         document.body.style.minHeight = '424px'
-        this.dialog.show()
+        document.dialog.show()
         break
 
       default: return // exit this handler for other keys
@@ -419,7 +424,7 @@ function saveSelectedSession (callback) {
   var session = selectedSessionElement.seshySession
 
   session.name = sessionNameInput.value // Session instance was created before name input text changed so must update.
-  saveSession(session, updateSavedStateIcon)
+  bookmarkPersistenceManager.saveSession(session, updateSavedStateIcon)
 }
 
 function renameSelectedSession (callback) {
@@ -429,9 +434,9 @@ function renameSelectedSession (callback) {
   var session = selectedSessionElement.seshySession
 
   if (isFunction(callback)) {
-    renameSession(session, newName, callback)
+    bookmarkPersistenceManager.renameSession(session, newName, callback)
   } else {
-    renameSession(session, newName)
+    bookmarkPersistenceManager.renameSession(session, newName)
   }
 }
 
@@ -439,9 +444,9 @@ function resumeSelectedSession (callback) {
   var selectedSessionElement = getSelectedSession()
 
   if (isFunction(callback)) {
-    resumeSession(selectedSessionElement.seshySession, callback)
+    bookmarkPersistenceManager.resumeSession(selectedSessionElement.seshySession, callback)
   } else {
-    resumeSession(selectedSessionElement.seshySession)
+    bookmarkPersistenceManager.resumeSession(selectedSessionElement.seshySession)
   }
 }
 
@@ -463,7 +468,7 @@ function deleteSelectedSession (callback) {
 
   var nextSessionCard = getNextSession()
   var selectedSessionElement = getSelectedSession()
-  deleteSession(selectedSessionElement.seshySession, focusNextSessionCardThenCallback)
+  bookmarkPersistenceManager.deleteSession(selectedSessionElement.seshySession, focusNextSessionCardThenCallback)
 }
 
 function startEditingSession (session, callback) {

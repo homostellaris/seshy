@@ -6,16 +6,23 @@ assertSessionWindowTabs createAndSaveTestSession setUp resetTestContainer isFunc
 deleteSelectedSession createAndSaveThreeTestSessions addKeyboardShortcuts saveSelectedSession
 getCurrentlyOpenSessionElements storeWindowToSessionFolderMapping asyncLoop resumeSelectedSession removeWindow
 renameSelectedSession renameSession startEditingSession finishEditingSession */
+
+import { getCurrentlyOpenSessionElements, isFunction } from '/js/util.js'
+import { BookmarkPersistenceManager } from '/js/persistence.js'
+import { TestDataCreator } from '/test/spec/integration/test-data-creator.js'
+
 describe('Integration tests.', function () {
   beforeAll(function (done) {
+    this.bookmarkPersistenceManager = new BookmarkPersistenceManager()
+    this.testDataCreator = new TestDataCreator()
     console.log('Waiting for seshyFolder variable to be populated.')
-    setTimeout(done, 500) // Wait for initialise() to create Seshy folder.
+    setTimeout(done, 1000) // Wait for initialise() to create Seshy folder.
   })
 
-  describe('Creating sessions.', function () {
+  fdescribe('Creating sessions.', function () {
     beforeEach(function (done) {
       spyOn(chrome.storage.local, 'remove')
-      openUnsavedTestSession((session) => {
+      this.testDataCreator.openUnsavedTestSession((session) => {
         this.session = session
         done()
       })
@@ -31,32 +38,32 @@ describe('Integration tests.', function () {
     })
 
     afterEach(function (done) {
-      cleanUp(done)
+      this.testDataCreator.cleanUp(done)
     })
   })
 
-  describe('Saving sessions.', function () {
+  fdescribe('Saving sessions.', function () {
     describe('Saves open sessions as they are updated.', function () {
       beforeEach(function (done) {
-        createAndSaveTestSession((session) => {
+        this.assertBookmarks = function (expectedTabSetNumber, sessionFolderBookmarks) {
+          var expectedTabsInfo = this.testDataCreator.getTabsOrBookmarksInfo(null, true, expectedTabSetNumber)
+          for (var i = 0; i < sessionFolderBookmarks.length; i++) {
+            var bookmark = sessionFolderBookmarks[i]
+            var expectedTabInfo = expectedTabsInfo[i]
+            expect(bookmark.index).toEqual(expectedTabInfo.index)
+            expect(bookmark.url).toEqual(expectedTabInfo.url)
+          }
+        }
+
+        this.testDataCreator.createAndSaveTestSession((session) => {
           this.session = session
           done()
         })
       })
 
-      var assertBookmarks = (expectedTabSetNumber, sessionFolderBookmarks) => {
-        var expectedTabsInfo = getTabsOrBookmarksInfo(null, true, expectedTabSetNumber)
-        for (var i = 0; i < sessionFolderBookmarks.length; i++) {
-          var bookmark = sessionFolderBookmarks[i]
-          var expectedTabInfo = expectedTabsInfo[i]
-          expect(bookmark.index).toEqual(expectedTabInfo.index)
-          expect(bookmark.url).toEqual(expectedTabInfo.url)
-        }
-      }
-
       it('Saves a set of tabs as bookmarks in a folder.', function (done) {
         this.session.updateBookmarkFolder((updatedBookmarkFolder) => {
-          assertBookmarks(1, this.session.bookmarkFolder.children)
+          this.assertBookmarks(1, this.session.bookmarkFolder.children)
           done()
         })
       })
@@ -70,7 +77,7 @@ describe('Integration tests.', function () {
         }
 
         var saveSessionAgain = () => {
-          saveSession(this.session, getSessionFolderBookmarksAndAssert)
+          this.bookmarkPersistenceManager.saveSession(this.session, getSessionFolderBookmarksAndAssert)
         }
 
         var getSessionFolderBookmarksAndAssert = () => {
@@ -93,22 +100,22 @@ describe('Integration tests.', function () {
 
         var changeOpenTabs = () => {
           var tabs = this.testWindow.tabs
-          this.expectedTabsInfo = getTabsOrBookmarksInfo(null, false, 2)
+          this.expectedTabsInfo = this.testDataCreator.getTabsOrBookmarksInfo(null, false, 2)
           for (var i = 0; i < tabs.length; i++) {
             var tabId = tabs[i].id
             chrome.tabs.update(tabId, {'url': this.expectedTabsInfo[i]['url']})
           }
           setTimeout(() => {
-            saveSession(this.session, getSessionFolderBookmarksAndAssert)
+            this.bookmarkPersistenceManager.saveSession(this.session, getSessionFolderBookmarksAndAssert)
           }, 1000)
         }
 
         var getSessionFolderBookmarksAndAssert = () => {
-          getSessionFolderBookmarks(this.session.bookmarkFolder, captureSessionFolderBookmarksAndAssert)
+          this.testDataCreator.getSessionFolderBookmarks(this.session.bookmarkFolder, captureSessionFolderBookmarksAndAssert)
         }
 
         var captureSessionFolderBookmarksAndAssert = (sessionFolderBookmarks) => {
-          assertBookmarks(2, sessionFolderBookmarks)
+          this.assertBookmarks(2, sessionFolderBookmarks)
           done()
         }
 
@@ -224,7 +231,7 @@ describe('Integration tests.', function () {
 
           spyOn(window, 'setBrowserActionIconToSaved').and.callThrough()
           this.session.element.focus()
-          saveSession(this.session, () => {
+          this.bookmarkPersistenceManager.saveSession(this.session, () => {
             setTimeout(assertBrowserActionIconSetToSavedState, 500)
           })
         })
@@ -253,7 +260,7 @@ describe('Integration tests.', function () {
     })
 
     afterEach(function (done) {
-      cleanUp(done)
+      this.testDataCreator.cleanUp(done)
     })
   })
 
@@ -267,7 +274,7 @@ describe('Integration tests.', function () {
 
     var assertGoneToSession = (session, callback) => {
       assertSessionWindowFocused(session.window)
-      var expectedTabs = getTabsOrBookmarksInfo(session.window.id)
+      var expectedTabs = this.testDataCreator.getTabsOrBookmarksInfo(session.window.id)
       assertSessionWindowTabs(session.window, expectedTabs)
       callback()
     }
@@ -332,7 +339,7 @@ describe('Integration tests.', function () {
         var createBookmarks = (bookmarksFolder) => {
           this.expectedBookmarkFolderId = bookmarksFolder.id
           var asBookmarks = true
-          this.bookmarksInfo = getTabsOrBookmarksInfo(this.expectedBookmarkFolderId, asBookmarks)
+          this.bookmarksInfo = this.testDataCreator.getTabsOrBookmarksInfo(this.expectedBookmarkFolderId, asBookmarks)
 
           chrome.bookmarks.create(this.bookmarksInfo[0])
           chrome.bookmarks.create(this.bookmarksInfo[1])
@@ -341,7 +348,7 @@ describe('Integration tests.', function () {
         }
 
         var createWindow = (bookmarkTreeNode) => {
-          var tabUrls = getTabsOrBookmarksInfo(null, false, 1, true)
+          var tabUrls = this.testDataCreator.getTabsOrBookmarksInfo(null, false, 1, true)
           var createData = {url: tabUrls}
           chrome.windows.create(createData, callTest)
         }

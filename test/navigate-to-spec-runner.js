@@ -7,8 +7,6 @@
  *
  * Initially this was attempted using the Chrome Driver script but this resulted in an error.
  */
-var seshyFolderId
-
 chrome.tabs.query({}, navigateToSpecRunner)
 
 function navigateToSpecRunner (tabs) {
