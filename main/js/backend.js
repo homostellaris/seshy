@@ -75,12 +75,15 @@ function saveSessionIfNoPendingTabUpdatedListenerCalls (sessionWindow, bookmarkF
   })
 }
 
-function setBrowserActionIconToUnsaved () {
+export function setBrowserActionIconToUnsaved () {
   chrome.browserAction.setIcon({path: '../images/unsaved.png'})
 }
 
-function setBrowserActionIconToSaving () {
+export function setBrowserActionIconToSaving () {
   chrome.browserAction.setIcon({path: '../images/saving.png'})
+}
+export function setBrowserActionIconToSaved () {
+  chrome.browserAction.setIcon({path: '../images/saved.png'})
 }
 
 // TODO This may delete the mapping that was just stored by resuming a saved session. Need to move the storage from

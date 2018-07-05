@@ -157,14 +157,14 @@ export class BookmarkPersistenceManager {
    * Resumes a session. The callback has no parameters.
    */
   resumeSession (session, callback) {
-    function extractUrlsFromBookmarks (session) {
+    var extractUrlsFromBookmarks = (session) => {
       var sessionFolder = session.bookmarkFolder
       var bookmarks = sessionFolder.children
       var urls = bookmarks.map((bookmark) => { return bookmark.url })
       createWindowForSession(urls)
     }
 
-    function createWindowForSession (urls) {
+    var createWindowForSession = (urls) => {
       var createData = {
         'url': urls
       }
@@ -224,24 +224,19 @@ export class BookmarkPersistenceManager {
    * Check if the passed window is a saved session and if so callback with its bookmark folder.
    */
   getSession (windowToCheck, callback) {
-    var tabs
-
-    console.log('Checking if tab set is a saved session.')
-    getTabs(windowToCheck)
-
-    function getTabs (windowToCheck) {
+    var getTabs = (windowToCheck) => {
       if (windowToCheck.tabs) {
         tabs = windowToCheck.tabs
         this.getAllSessionFolders(compareWindowWithSessionFolders)
       } else {
-        chrome.tabs.getAllInWindow(windowToCheck.id, function (windowToCheckTabs) {
+        chrome.tabs.getAllInWindow(windowToCheck.id, (windowToCheckTabs) => {
           tabs = windowToCheckTabs
           this.getAllSessionFolders(compareWindowWithSessionFolders)
         })
       }
     }
 
-    function compareWindowWithSessionFolders (sessionFolders) {
+    var compareWindowWithSessionFolders = (sessionFolders) => {
       var matchingSessionFolder = null
 
       for (var i = 0; i < sessionFolders.length; i++) {
@@ -263,7 +258,7 @@ export class BookmarkPersistenceManager {
       if (isFunction(callback)) callback(matchingSessionFolder)
     }
 
-    function compareTabsToBookmarks (tabs, bookmarks) {
+    var compareTabsToBookmarks = (tabs, bookmarks) => {
       if (tabs.length !== bookmarks.length) {
         return false
       }
@@ -281,6 +276,11 @@ export class BookmarkPersistenceManager {
       }
       return true
     }
+
+    var tabs
+
+    console.log('Checking if tab set is a saved session.')
+    getTabs(windowToCheck)
   }
 
   // Private methods
@@ -402,6 +402,7 @@ export class BookmarkPersistenceManager {
     }
   }
 
+  // TODO Duplicate of the function in backend.js
   setBrowserActionIconToSaved () {
     chrome.browserAction.setIcon({path: '../images/saved.png'})
   }

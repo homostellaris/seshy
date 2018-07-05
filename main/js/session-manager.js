@@ -413,7 +413,7 @@ function focusSessionNameInput () {
   sessionNameInput.select()
 }
 
-function saveSelectedSession (callback) {
+export function saveSelectedSession (callback) {
   var updateSavedStateIcon = () => {
     session.setSavedIconState(true)
     if (isFunction(callback)) callback()

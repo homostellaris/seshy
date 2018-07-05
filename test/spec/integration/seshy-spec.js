@@ -10,6 +10,8 @@ renameSelectedSession renameSession startEditingSession finishEditingSession */
 import { getCurrentlyOpenSessionElements, isFunction } from '/js/util.js'
 import { BookmarkPersistenceManager } from '/js/persistence.js'
 import { TestDataCreator } from '/test/spec/integration/test-data-creator.js'
+import { setUp, saveSelectedSession } from '/js/session-manager.js'
+import { setBrowserActionIconToUnsaved, setBrowserActionIconToSaved, setBrowserActionIconToSaving } from '/js/backend.js'
 
 describe('Integration tests.', function () {
   beforeAll(function (done) {
@@ -70,7 +72,7 @@ describe('Integration tests.', function () {
 
       it('Saves an already saved session to the same session folder as before.', function (done) {
         var assertOneSessionFolder = (callback) => {
-          getAllSessionFolders((sessionFolders) => {
+          this.bookmarkPersistenceManager.getAllSessionFolders((sessionFolders) => {
             expect(sessionFolders.length).toBe(1)
             callback()
           })
@@ -125,7 +127,7 @@ describe('Integration tests.', function () {
 
     describe('Saving of \'saved\' sessions when their window is closed.', function () {
       beforeEach(function (done) {
-        createAndSaveTestSession((session) => {
+        this.testDataCreator.createAndSaveTestSession((session) => {
           this.session = session
           done()
         })
@@ -143,14 +145,14 @@ describe('Integration tests.', function () {
         }
 
         var resetSessionManager = () => {
-          resetTestContainer()
+          this.testDataCreator.resetTestContainer()
           setUp(() => {
             var savedSessionsList = document.getElementById('saved-sessions')
             var savedSessionElements = savedSessionsList.getElementsByClassName('session-card')
             expect(savedSessionElements.length).toEqual(1)
             this.sessionElement = savedSessionElements[0]
             // TODO call `resumeSelectedSession` session instead.
-            resumeSession(this.sessionElement.seshySession, assertTabs)
+            this.bookmarkPersistenceManager.resumeSession(this.sessionElement.seshySession, assertTabs)
           })
         }
 
@@ -194,42 +196,42 @@ describe('Integration tests.', function () {
             done()
           }
 
-          openUnsavedTestSession(captureSession)
+          this.testDataCreator.openUnsavedTestSession(captureSession)
         })
 
         it('Is an \'bookmark border\' icon when the currently focused session is unsaved.', function (done) {
           var assertBrowserActionIconSetToUnsavedState = () => {
-            expect(window.setBrowserActionIconToUnsaved).toHaveBeenCalled()
+            expect(chrome.browserAction.setIcon).toHaveBeenCalledWith({path: '../images/unsaved.png'})
             // TODO Assert icon is changed back to idle.
             done()
           }
 
-          spyOn(window, 'setBrowserActionIconToUnsaved').and.callThrough()
+          spyOn(chrome.browserAction, 'setIcon')
           setTimeout(assertBrowserActionIconSetToUnsavedState, 1000)
         })
 
         it('Is a \'sync\' icon whilst a session save is pending.', function (done) {
           var assertBrowserActionIconSetToSavingState = () => {
-            expect(window.setBrowserActionIconToSaving).toHaveBeenCalled()
+            expect(chrome.browserAction.setIcon).toHaveBeenCalledWith({path: '../images/saving.png'})
             // TODO Assert icon is changed back to idle.
             done()
           }
 
-          spyOn(window, 'setBrowserActionIconToSaving').and.callThrough()
+          spyOn(chrome.browserAction, 'setIcon')
           this.session.element.focus()
           saveSelectedSession(() => {
-            setTimeout(assertBrowserActionIconSetToSavingState, 1000)
+            setTimeout(assertBrowserActionIconSetToSavingState, 500)
           })
         })
 
         it('Is a \'bookmark\' icon when the currently focused session is saved.', function (done) {
           var assertBrowserActionIconSetToSavedState = () => {
-            expect(window.setBrowserActionIconToSaved).toHaveBeenCalled()
+            expect(chrome.browserAction.setIcon).toHaveBeenCalledWith({path: '../images/saved.png'})
             // TODO Assert icon is changed back to idle.
             done()
           }
 
-          spyOn(window, 'setBrowserActionIconToSaved').and.callThrough()
+          spyOn(chrome.browserAction, 'setIcon')
           this.session.element.focus()
           this.bookmarkPersistenceManager.saveSession(this.session, () => {
             setTimeout(assertBrowserActionIconSetToSavedState, 500)
@@ -243,7 +245,7 @@ describe('Integration tests.', function () {
             this.session = session
             done()
           }
-          openUnsavedTestSession(saveTestSessionAndCaptureSession)
+          this.testDataCreator.openUnsavedTestSession(saveTestSessionAndCaptureSession)
         })
 
         it('Displays a bookmark icon on the session card when it is saved.', function (done) {
