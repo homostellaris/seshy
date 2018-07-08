@@ -1,4 +1,4 @@
-var assertSessionWindowTabs = (sessionWindow, expectedTabs) => {
+export function assertSessionWindowTabs (sessionWindow, expectedTabs) {
   var actualTabs = sessionWindow.tabs
 
   var expectedTabsNumber = expectedTabs.length

@@ -272,7 +272,7 @@ function getSessionInnerHtml (title, tabsNumber, saved) {
   return innerHtml
 }
 
-function addKeyboardShortcuts (callback) {
+export function addKeyboardShortcuts (callback) {
   document.keydownEventListener = (event) => {
     switch (event.key) {
       case 'ArrowLeft':
@@ -460,7 +460,7 @@ function sessionIsBeingRenamed (element) {
   return Boolean(editIcon.textContent === 'done')
 }
 
-function deleteSelectedSession (callback) {
+export function deleteSelectedSession (callback) {
   var focusNextSessionCardThenCallback = () => {
     nextSessionCard.focus()
     if (isFunction(callback)) callback()
@@ -471,7 +471,7 @@ function deleteSelectedSession (callback) {
   bookmarkPersistenceManager.deleteSession(selectedSessionElement.seshySession, focusNextSessionCardThenCallback)
 }
 
-function startEditingSession (session, callback) {
+export function startEditingSession (session, callback) {
   session.element.removeEventListener('keydown', session.keydownEventListener)
   document.removeEventListener('keydown', document.keydownEventListener)
   var sessionNameInput = session.element.getElementsByClassName('session-name-input')[0]
@@ -482,7 +482,7 @@ function startEditingSession (session, callback) {
   if (isFunction(callback)) callback()
 }
 
-function finishEditingSession (session, callback) {
+export function finishEditingSession (session, callback) {
   var updateUiState = () => {
     session.element.addEventListener('keydown', session.keydownEventListener)
     document.addEventListener('keydown', document.keydownEventListener)

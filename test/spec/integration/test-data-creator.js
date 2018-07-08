@@ -76,7 +76,7 @@ export class TestDataCreator {
       chrome.bookmarks.create(bookmarksInfo[1])
       chrome.bookmarks.create(bookmarksInfo[2])
       chrome.bookmarks.create(bookmarksInfo[3], () => {
-        callback()
+        callback(bookmarksFolder)
       })
     }
 

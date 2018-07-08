@@ -7,11 +7,16 @@ deleteSelectedSession createAndSaveThreeTestSessions addKeyboardShortcuts saveSe
 getCurrentlyOpenSessionElements storeWindowToSessionFolderMapping asyncLoop resumeSelectedSession removeWindow
 renameSelectedSession renameSession startEditingSession finishEditingSession */
 
-import { getCurrentlyOpenSessionElements, isFunction } from '/js/util.js'
+import { getCurrentlyOpenSessionElements, isFunction, asyncLoop } from '/js/util.js'
 import { BookmarkPersistenceManager } from '/js/persistence.js'
 import { TestDataCreator } from '/test/spec/integration/test-data-creator.js'
-import { setUp, saveSelectedSession } from '/js/session-manager.js'
-import { setBrowserActionIconToUnsaved, setBrowserActionIconToSaved, setBrowserActionIconToSaving } from '/js/backend.js'
+import {
+  setUp, saveSelectedSession, deleteSelectedSession, addKeyboardShortcuts, startEditingSession, finishEditingSession
+} from '/js/session-manager.js'
+import {
+  setBrowserActionIconToUnsaved, setBrowserActionIconToSaved, setBrowserActionIconToSaving
+} from '/js/backend.js'
+import { assertSessionWindowTabs } from '/test/spec/assertions.js'
 
 describe('Integration tests.', function () {
   beforeAll(function (done) {
@@ -21,7 +26,7 @@ describe('Integration tests.', function () {
     setTimeout(done, 1000) // Wait for initialise() to create Seshy folder.
   })
 
-  fdescribe('Creating sessions.', function () {
+  describe('Creating sessions.', function () {
     beforeEach(function (done) {
       spyOn(chrome.storage.local, 'remove')
       this.testDataCreator.openUnsavedTestSession((session) => {
@@ -44,7 +49,7 @@ describe('Integration tests.', function () {
     })
   })
 
-  fdescribe('Saving sessions.', function () {
+  describe('Saving sessions.', function () {
     describe('Saves open sessions as they are updated.', function () {
       beforeEach(function (done) {
         this.assertBookmarks = function (expectedTabSetNumber, sessionFolderBookmarks) {
@@ -267,20 +272,6 @@ describe('Integration tests.', function () {
   })
 
   describe('Resuming sessions.', function () {
-    var assertSessionWindowFocused = (sessionWindow) => {
-      expect(chrome.windows.update.calls.count()).toBe(1)
-      var actualArgs = chrome.windows.update.calls.argsFor(0)
-      expect(actualArgs).toContain(sessionWindow.id)
-      expect(actualArgs).toContain({'focused': true})
-    }
-
-    var assertGoneToSession = (session, callback) => {
-      assertSessionWindowFocused(session.window)
-      var expectedTabs = this.testDataCreator.getTabsOrBookmarksInfo(session.window.id)
-      assertSessionWindowTabs(session.window, expectedTabs)
-      callback()
-    }
-
     beforeEach(function () {
       // The spy is needed to verify that the window is focused.
       // For some reason the testing of focusing other windows does not work in the spec runner.
@@ -288,35 +279,49 @@ describe('Integration tests.', function () {
       // the window is focused.
       // Happy to settle for verification that the chrome API is called in this instance.
       spyOn(chrome.windows, 'update').and.callThrough()
+
+      this.assertSessionWindowFocused = (sessionWindow) => {
+        expect(chrome.windows.update.calls.count()).toBe(1)
+        var actualArgs = chrome.windows.update.calls.argsFor(0)
+        expect(actualArgs).toContain(sessionWindow.id)
+        expect(actualArgs).toContain({'focused': true})
+      }
+
+      this.assertGoneToSession = (session, callback) => {
+        this.assertSessionWindowFocused(session.window)
+        var expectedTabs = this.testDataCreator.getTabsOrBookmarksInfo(session.window.id)
+        assertSessionWindowTabs(session.window, expectedTabs)
+        callback()
+      }
     })
 
     describe('User resumes a session from the session manager.', function () {
       beforeEach(function (done) {
-        createAndSaveTestSession((session) => {
+        this.testDataCreator.createAndSaveTestSession((session) => {
           this.session = session
           done()
         })
       })
 
       it('Resumes an unshelved session that is already focused by exiting the session manager.', function (done) {
-        resumeSession(this.session, () => {
-          assertGoneToSession(this.session, done)
+        this.bookmarkPersistenceManager.resumeSession(this.session, () => {
+          this.assertGoneToSession(this.session, done)
         })
       })
 
       it('Resumes an unshelved session that is not already focused by focusing it.', function (done) {
-        createAndSaveTestSession((session) => {
+        this.testDataCreator.createAndSaveTestSession((session) => {
           this.sessionTwo = session
-          resumeSession(this.session, () => {
-            assertGoneToSession(this.session, done)
+          this.bookmarkPersistenceManager.resumeSession(this.session, () => {
+            this.assertGoneToSession(this.session, done)
           })
         })
       })
 
       it('Resumes a shelved session by creating a window with session\'s tabs and focusing it.', function (done) {
         var resumeSessionThenAssert = () => {
-          resumeSession(this.session, () => {
-            assertGoneToSession(this.session, done)
+          this.bookmarkPersistenceManager.resumeSession(this.session, () => {
+            this.assertGoneToSession(this.session, done)
           })
         }
 
@@ -324,40 +329,24 @@ describe('Integration tests.', function () {
           chrome.windows.remove(this.session.window.id, resumeSessionThenAssert)
         }
 
-        createAndSaveTestSession(resumeSessionThenAssert)
+        this.testDataCreator.createAndSaveTestSession(resumeSessionThenAssert)
       })
 
       afterEach(function (done) {
-        cleanUp(done)
+        this.testDataCreator.cleanUp(done)
       })
     })
 
     describe('Identifying existing session and prompting to resume.', function () {
       beforeEach(function (done) {
-        var createSessionBookmarksFolderThenBookmarks = (bookmarkTreeNodes) => {
-          createSessionBookmarksFolder(bookmarkTreeNodes, createBookmarks)
+        var createTestSession = (sessionFolder) => {
+          this.expectedBookmarkFolderId = sessionFolder.id
+          this.testDataCreator.openUnsavedTestSession(callTest, 1)
         }
 
-        var createBookmarks = (bookmarksFolder) => {
-          this.expectedBookmarkFolderId = bookmarksFolder.id
-          var asBookmarks = true
-          this.bookmarksInfo = this.testDataCreator.getTabsOrBookmarksInfo(this.expectedBookmarkFolderId, asBookmarks)
-
-          chrome.bookmarks.create(this.bookmarksInfo[0])
-          chrome.bookmarks.create(this.bookmarksInfo[1])
-          chrome.bookmarks.create(this.bookmarksInfo[2])
-          chrome.bookmarks.create(this.bookmarksInfo[3], createWindow)
-        }
-
-        var createWindow = (bookmarkTreeNode) => {
-          var tabUrls = this.testDataCreator.getTabsOrBookmarksInfo(null, false, 1, true)
-          var createData = {url: tabUrls}
-          chrome.windows.create(createData, callTest)
-        }
-
-        var callTest = (testWindow) => {
-          this.window = testWindow
-          getSession(this.window, captureExistingSession) // Method under test.
+        var callTest = (session) => {
+          this.window = session.window
+          this.bookmarkPersistenceManager.getSession(this.window, captureExistingSession) // Method under test.
         }
 
         var captureExistingSession = (actualBookmarkFolder) => {
@@ -365,11 +354,11 @@ describe('Integration tests.', function () {
           done()
         }
 
-        getSeshyFolder(createSessionBookmarksFolderThenBookmarks)
+        this.testDataCreator.createSessionBookmarksFolderThenBookmarks(createTestSession)
       })
 
       afterEach(function (done) {
-        cleanUp(done)
+        this.testDataCreator.cleanUp(done)
       })
 
       it('Should recognise when a set of opened tabs represents an existing session.', function () {
@@ -408,13 +397,13 @@ describe('Integration tests.', function () {
         done()
       }
 
-      removeWindowToSessionFolderMapping(this.windowId, () => {
-        getAllLocalStorage(assertWindowToSessionFolderMappingRemoved)
+      this.bookmarkPersistenceManager.removeWindowToSessionFolderMapping(this.windowId, () => {
+        this.testDataCreator.getAllLocalStorage(assertWindowToSessionFolderMappingRemoved)
       }) // Method under test.
     })
 
     afterEach(function (done) {
-      cleanUp(done)
+      this.testDataCreator.cleanUp(done)
     })
   })
 
@@ -457,14 +446,14 @@ describe('Integration tests.', function () {
 
     describe('Unsaved sessions.', function () {
       beforeEach(function (done) {
-        openUnsavedTestSession((session) => {
+        this.testDataCreator.openUnsavedTestSession((session) => {
           this.session = session
           done()
         })
       })
 
       it('Deletes an unsaved session by removing its window.', function (done) {
-        deleteSession(this.session, () => {
+        this.bookmarkPersistenceManager.deleteSession(this.session, () => {
           assertSessionDeleted(this.session, done)
         })
       })
@@ -472,7 +461,7 @@ describe('Integration tests.', function () {
 
     describe('Saved sessions.', function () {
       beforeEach(function (done) {
-        createAndSaveTestSession((session) => {
+        this.testDataCreator.createAndSaveTestSession((session) => {
           this.session = session
           done()
         })
@@ -485,7 +474,7 @@ describe('Integration tests.', function () {
 
         chrome.windows.remove(this.session.window.id, () => {
           this.session.window = null
-          deleteSession(this.session, assertSessionDeletedThenDone)
+          this.bookmarkPersistenceManager.deleteSession(this.session, assertSessionDeletedThenDone)
         })
       })
 
@@ -494,13 +483,13 @@ describe('Integration tests.', function () {
           assertSessionDeleted(this.session, done)
         }
 
-        deleteSession(this.session, assertSessionDeletedThenDone)
+        this.bookmarkPersistenceManager.deleteSession(this.session, assertSessionDeletedThenDone)
       })
     })
 
     describe('Deleting a session with keyboard shortcuts.', function () {
       beforeEach(function (done) {
-        openThreeUnsavedTestSessions((sessions) => {
+        this.testDataCreator.openThreeUnsavedTestSessions((sessions) => {
           this.sessions = sessions
           this.sessionElements = document.getElementsByClassName('session-card')
           this.secondSessionElement = this.sessionElements[1]
@@ -523,7 +512,7 @@ describe('Integration tests.', function () {
     })
 
     afterEach(function (done) {
-      cleanUp(done)
+      this.testDataCreator.cleanUp(done)
     })
   })
 
@@ -540,13 +529,13 @@ describe('Integration tests.', function () {
         }
 
         var createSavedSecondSession = () => {
-          getSeshyFolder((seshyFolder) => {
-            createSessionBookmarksFolder(seshyFolder, storeWindowToBookmarkFolderMapping)
+          this.testDataCreator.getSeshyFolder((seshyFolder) => {
+            this.testDataCreator.createSessionBookmarksFolder(seshyFolder, storeWindowToBookmarkFolderMapping)
           })
         }
 
         var storeWindowToBookmarkFolderMapping = (bookmarkFolder) => {
-          storeWindowToSessionFolderMapping(this.windows[0].id, bookmarkFolder.id, initialiseSessionManager)
+          this.bookmarkPersistenceManager.storeWindowToSessionFolderMapping(this.windows[0].id, bookmarkFolder.id, initialiseSessionManager)
         }
 
         var initialiseSessionManager = () => {
@@ -601,7 +590,7 @@ describe('Integration tests.', function () {
       })
 
       afterEach(function (done) {
-        cleanUp(done)
+        this.testDataCreator.cleanUp(done)
       })
     })
 
@@ -610,8 +599,8 @@ describe('Integration tests.', function () {
         var callSetupThenDone = () => {
           setUp(done)
         }
-        createAndSaveTestSession((session) => {
-          resetTestContainer()
+        this.testDataCreator.createAndSaveTestSession((session) => {
+          this.testDataCreator.resetTestContainer()
           chrome.storage.local.remove(session.window.id.toString(), callSetupThenDone)
         })
       })
@@ -666,7 +655,7 @@ describe('Integration tests.', function () {
       })
 
       afterEach(function (done) {
-        cleanUp(done)
+        this.testDataCreator.cleanUp(done)
       })
     })
 
@@ -706,7 +695,7 @@ describe('Integration tests.', function () {
       })
 
       afterAll(function (done) {
-        cleanUp(done)
+        this.testDataCreator.cleanUp(done)
         console.log('FINISHED!')
       })
 
@@ -745,7 +734,7 @@ describe('Integration tests.', function () {
 
   describe('Renaming sessions.', function () {
     beforeEach(function (done) {
-      createAndSaveThreeTestSessions((sessions) => {
+      this.testDataCreator.createAndSaveThreeTestSessions((sessions) => {
         this.sessions = sessions
         this.secondSession = this.sessions[1]
         this.secondSessionEditIcon = this.secondSession.element.getElementsByClassName('edit-icon')[0]
@@ -818,7 +807,7 @@ describe('Integration tests.', function () {
     })
 
     afterEach(function (done) {
-      cleanUp(done)
+      this.testDataCreator.cleanUp(done)
     })
   })
 })
