@@ -1,7 +1,7 @@
 /* global chrome saveSession resumeSession tabEqualToBookmark getSession seshyFolderId
 removeWindowToSessionFolderMapping deleteSession isFunction initialise Session asyncLoop */
 
-import { Session } from '/js/session-manager.js'
+import { Session } from '/js/session.js'
 import { isFunction, asyncLoop, checkIfSeshyFolderExists } from '/js/util.js'
 
 export class TestDataCreator {

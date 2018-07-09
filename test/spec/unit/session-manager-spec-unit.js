@@ -1,6 +1,8 @@
 /* global setUp selectPreviousSession selectNextSession selectLastSessionInPreviousSessionList
 selectFirstSessionInNextSessionList resumeSelectedSession saveSelectedSession focusSessionNameInput */
 
+import { getPreviousSession } from '/js/session-manager.js'
+
 describe('Unit tests.', function () {
   describe('Session object.', function () {
     it('Throws an exception if an argument is not provided.', function () {

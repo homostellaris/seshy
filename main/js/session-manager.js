@@ -1,138 +1,12 @@
 /* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction done chrome saveSession deleteSession
 asyncLoop renameSession getSessionNameInput */
 
-import { BookmarkPersistenceManager } from './persistence.js'
-import { asyncLoop, isFunction, getSessionNameInput } from './util.js'
+import { BookmarkPersistenceManager } from '/js/persistence.js'
+import { asyncLoop, isFunction, getSessionNameInput } from '/js/util.js'
+import { Session } from '/js/session.js'
 
 var bookmarkPersistenceManager = new BookmarkPersistenceManager()
 
-// ---===~ Classes ~===-------------------------------------------------------------------------------------------------
-export function Session (aWindow, bookmarkFolder) {
-  if (!aWindow && !bookmarkFolder) {
-    throw Error('A session must have either a window or a bookmarks folder.')
-  }
-
-  this.name = bookmarkFolder ? bookmarkFolder.title : 'Unsaved Session'
-  this.window = aWindow || null
-  this.bookmarkFolder = bookmarkFolder || null
-  // this.tabs = aWindow ? aWindow.tabs : bookmarkFolder.children
-
-  var listId = aWindow ? 'currently-open-sessions' : 'saved-sessions'
-  var sessionList = document.getElementById(listId)
-
-  var sessionElement = document.createElement('li')
-  sessionElement.setAttribute('class', 'session-card mdc-list-item mdc-theme--background mdc-elevation--z2')
-  sessionElement.setAttribute('tabindex', '0') // Make `li` element focusable.
-
-  var tabsNumber = aWindow ? aWindow.tabs.length : bookmarkFolder.children.length
-  sessionElement.innerHTML = getSessionInnerHtml(this.name, tabsNumber, this.saved())
-  sessionList.appendChild(sessionElement)
-
-  sessionElement.seshySession = this // So this created instance is always easily accessible.
-  this.element = sessionElement
-
-  Session.prototype.addEventListeners.call(this)
-  // TODO Find out why this doesn't work. Throws syntax error because is not a function.
-  // this.addEventListeners()
-}
-
-Session.prototype.currentlyOpen = function () {
-  return Boolean(this.window)
-}
-
-Session.prototype.saved = function () {
-  return Boolean(this.bookmarkFolder)
-}
-
-Session.prototype.updateWindow = function (callback) {
-  var session = this
-  function setWindowAndCallback (updatedWindow) {
-    session.window = updatedWindow
-    callback(updatedWindow)
-  }
-
-  chrome.windows.get(this.window.id, {populate: true}, setWindowAndCallback)
-}
-
-Session.prototype.updateBookmarkFolder = function (callback) {
-  var setBookmarkFolderAndCallback = (bookmarkTreeNodes) => {
-    this.bookmarkFolder = bookmarkTreeNodes[0]
-    callback(this.bookmarkFolder)
-  }
-
-  chrome.bookmarks.getSubTree(this.bookmarkFolder.id, setBookmarkFolderAndCallback)
-}
-
-Session.prototype.addEventListeners = function () {
-  this.element.addEventListener('focus', (event) => {
-    console.log('Focus event handler triggered. Removing selected class from existing elements.')
-    var selectedSessions = document.getElementsByClassName('selected')
-    for (var i = 0; i < selectedSessions.length; i++) {
-      selectedSessions[i].classList.remove('selected')
-    }
-    console.log('Adding selected class to focused element.')
-    this.element.classList.add('selected')
-  })
-
-  this.element.addEventListener('click', (event) => {
-    var classList = event.target.classList
-    if (classList.contains('edit-icon')) {
-      if (sessionIsBeingRenamed(event.target)) {
-        finishEditingSession(this)
-      } else {
-        startEditingSession(this)
-      }
-    } else if (classList.contains('resume-icon')) {
-      resumeSession(this)
-    } else if (classList.contains('delete-icon')) {
-      deleteSelectedSession()
-    }
-  })
-
-  this.keydownEventListener = (event) => {
-    switch (event.key) {
-      case 'r':
-        startEditingSession(this)
-        break
-
-      case '#':
-        deleteSelectedSession()
-        break
-
-      default: return
-    }
-    event.preventDefault()
-  }
-
-  this.enterKeydownEventListener = (event) => {
-    if (event.key === 'Enter') {
-      if (sessionIsBeingRenamed(event.target)) {
-        finishEditingSession(this)
-        event.stopPropagation()
-      } else {
-        resumeSelectedSession()
-        event.stopPropagation()
-      }
-    }
-  }
-
-  this.element.addEventListener('keydown', this.enterKeydownEventListener)
-  this.element.addEventListener('keydown', this.keydownEventListener)
-}
-
-/**
- * Pass a truthy value to set saved state icon to 'saved' or a falsey value to set it to 'unsaved'.
- */
-Session.prototype.setSavedIconState = function (savedBoolean) {
-  var savedStateIcon = this.element.getElementsByClassName('saved-state-icon')[0]
-  if (savedBoolean) {
-    savedStateIcon.textContent = 'bookmark'
-  } else {
-    savedStateIcon.textContent = 'bookmark_border'
-  }
-}
-
-// ---===~ Functions ~===-----------------------------------------------------------------------------------------------
 export function setUp (callback) {
   var done = () => {
     if (isFunction(callback)) callback()
@@ -239,39 +113,6 @@ function focusCurrentlyOpenSession (callback) {
   chrome.windows.getCurrent(null, focusSessionElement)
 }
 
-/**
- * Get the HTML for a single session.
- */
-function getSessionInnerHtml (title, tabsNumber, saved) {
-  var savedStateIcon = saved ? 'bookmark' : 'bookmark_border'
-  var innerHtml = `
-    <span class="mdc-list-item__graphic">
-      <i class="saved-state-icon material-icons" title="saved state">${savedStateIcon}</i>
-    </span>
-    <span class="mdc-list-item__text">
-      <div class="session-name mdc-text-field mdc-text-field--dense mdc-text-field--fullwidth">
-        <input type="text" class="session-name-input mdc-text-field__input" value="${title}" readonly="true">
-        <div class="mdc-line-ripple"></div>
-      </div>
-      <span class="tabs-number mdc-list-item__secondary-text">
-        ${tabsNumber} tabs
-      </span>
-    </span>
-    <span class="mdc-list-item__meta">
-      <button class="edit-button" title="edit">
-        <i class="edit-icon material-icons">edit</i>
-      </button>
-      <button class="resume-button" title="resume">
-        <i class="resume-icon material-icons">open_in_new</i>
-      </button>
-      <button class="delete-button" title="delete">
-        <i class="delete-icon material-icons">delete</i>
-      </button>
-    </span>
-  `
-  return innerHtml
-}
-
 export function addKeyboardShortcuts (callback) {
   document.keydownEventListener = (event) => {
     switch (event.key) {
@@ -363,7 +204,7 @@ function getNextSession () {
   return sessionElement.nextElementSibling
 }
 
-function getPreviousSession () {
+export function getPreviousSession () {
   var sessionElement = getSelectedSession()
   return sessionElement.previousElementSibling
 }
@@ -411,108 +252,4 @@ function focusSessionNameInput () {
   var sessionElement = getSelectedSession()
   var sessionNameInput = getSessionNameInput(sessionElement.seshySession)
   sessionNameInput.select()
-}
-
-export function saveSelectedSession (callback) {
-  var updateSavedStateIcon = () => {
-    session.setSavedIconState(true)
-    if (isFunction(callback)) callback()
-  }
-
-  var selectedSessionElement = getSelectedSession()
-  var sessionNameInput = getSessionNameInput(selectedSessionElement.seshySession)
-  var session = selectedSessionElement.seshySession
-
-  session.name = sessionNameInput.value // Session instance was created before name input text changed so must update.
-  bookmarkPersistenceManager.saveSession(session, updateSavedStateIcon)
-}
-
-function renameSelectedSession (callback) {
-  var selectedSessionElement = getSelectedSession()
-  var sessionNameInput = getSessionNameInput(selectedSessionElement.seshySession)
-  var newName = sessionNameInput.value
-  var session = selectedSessionElement.seshySession
-
-  if (isFunction(callback)) {
-    bookmarkPersistenceManager.renameSession(session, newName, callback)
-  } else {
-    bookmarkPersistenceManager.renameSession(session, newName)
-  }
-}
-
-function resumeSelectedSession (callback) {
-  var selectedSessionElement = getSelectedSession()
-
-  if (isFunction(callback)) {
-    bookmarkPersistenceManager.resumeSession(selectedSessionElement.seshySession, callback)
-  } else {
-    bookmarkPersistenceManager.resumeSession(selectedSessionElement.seshySession)
-  }
-}
-
-function sessionIsBeingRenamed (element) {
-  var editIcon
-  if (element.classList.contains('edit-icon')) {
-    editIcon = element
-  } else {
-    editIcon = getSelectedSession().getElementsByClassName('edit-icon')[0]
-  }
-  return Boolean(editIcon.textContent === 'done')
-}
-
-export function deleteSelectedSession (callback) {
-  var focusNextSessionCardThenCallback = () => {
-    nextSessionCard.focus()
-    if (isFunction(callback)) callback()
-  }
-
-  var nextSessionCard = getNextSession()
-  var selectedSessionElement = getSelectedSession()
-  bookmarkPersistenceManager.deleteSession(selectedSessionElement.seshySession, focusNextSessionCardThenCallback)
-}
-
-export function startEditingSession (session, callback) {
-  session.element.removeEventListener('keydown', session.keydownEventListener)
-  document.removeEventListener('keydown', document.keydownEventListener)
-  var sessionNameInput = session.element.getElementsByClassName('session-name-input')[0]
-  sessionNameInput.readOnly = false
-  sessionNameInput.select()
-  var editIcon = session.element.getElementsByClassName('edit-icon')[0]
-  changeEditIconToConfirmEditIcon(editIcon)
-  if (isFunction(callback)) callback()
-}
-
-export function finishEditingSession (session, callback) {
-  var updateUiState = () => {
-    session.element.addEventListener('keydown', session.keydownEventListener)
-    document.addEventListener('keydown', document.keydownEventListener)
-    var sessionNameInput = session.element.getElementsByClassName('session-name-input')[0]
-    sessionNameInput.readOnly = true
-    var editIcon = session.element.getElementsByClassName('edit-icon')[0]
-    changeConfirmEditIconBackToEditIcon(editIcon)
-    if (isFunction(callback)) callback()
-  }
-
-  finishRenamingSession(session, updateUiState)
-}
-
-function finishRenamingSession (session, callback) {
-  if (session.saved()) {
-    console.warn('Renaming selected session.')
-    renameSelectedSession()
-  } else {
-    console.warn('Saving selected session.')
-    saveSelectedSession()
-  }
-  if (isFunction(callback)) callback()
-}
-
-function changeEditIconToConfirmEditIcon (editIcon) {
-  editIcon.textContent = 'done'
-  editIcon.style.color = '#4CAF50'
-}
-
-function changeConfirmEditIconBackToEditIcon (editIcon) {
-  editIcon.textContent = 'edit'
-  editIcon.style.color = '#000'
 }
