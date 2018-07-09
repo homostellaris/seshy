@@ -1,5 +1,4 @@
-/* global mdc getAllOpenWindows getAllSessionFolders resumeSession isFunction done chrome saveSession deleteSession
-asyncLoop renameSession getSessionNameInput */
+/* global chrome mdc */
 
 import { BookmarkPersistenceManager } from '/js/persistence.js'
 import { asyncLoop, isFunction, getSessionNameInput } from '/js/util.js'

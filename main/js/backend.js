@@ -1,5 +1,4 @@
-/* global chrome getSession removeWindowToSessionFolderMapping checkIfSeshyFolderExists saveWindowAsBookmarkFolder
-checkIfSavedSession setBrowserActionIconToSaved isFunction asyncLoop */
+/* global chrome */
 
 import { isFunction, asyncLoop } from './util.js'
 import { BookmarkPersistenceManager } from './persistence.js'

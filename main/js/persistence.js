@@ -1,4 +1,4 @@
-/* global chrome seshyFolderId:true isFunction getSessionNameInput */
+/* global chrome */
 
 import { isFunction, asyncLoop } from '/js/util.js'
 

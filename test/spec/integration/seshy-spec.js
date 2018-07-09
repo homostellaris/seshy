@@ -1,11 +1,4 @@
-// TODO Do something about all these.
-/* global chrome saveSession resumeSession tabEqualToBookmark getSession getTabsOrBookmarksInfo createTabs
-removeWindowToSessionFolderMapping deleteSession saveTestSession cleanUp getSeshyFolder getAllSessionFolders
-createSessionBookmarksFolder getAllLocalStorage openUnsavedTestSession getSessionFolderBookmarks
-assertSessionWindowTabs createAndSaveTestSession setUp resetTestContainer isFunction openThreeUnsavedTestSessions
-deleteSelectedSession createAndSaveThreeTestSessions addKeyboardShortcuts saveSelectedSession
-getCurrentlyOpenSessionElements storeWindowToSessionFolderMapping asyncLoop resumeSelectedSession removeWindow
-renameSelectedSession renameSession startEditingSession finishEditingSession */
+/* global chrome */
 
 import { getCurrentlyOpenSessionElements, isFunction, asyncLoop } from '/js/util.js'
 import { BookmarkPersistenceManager } from '/js/persistence.js'
@@ -675,9 +668,9 @@ describe('Integration tests.', function () {
 
         var openThreeUnsavedTestSessions = () => {
           for (var i = 0; i < 3; i++) {
-            openUnsavedTestSession((newWindowId) => {
+            this.testDataCreator.openUnsavedTestSession((newWindowId) => {
               this.windowIds.push(newWindowId)
-              this.tabsInfo = getTabsOrBookmarksInfo(this.windowId)
+              this.tabsInfo = this.testDataCreator.getTabsOrBookmarksInfo(this.windowId)
               if (this.windowIds.length === 3) {
                 createSessionManagerDom(() => {
                   setUp(() => {
