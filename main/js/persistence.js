@@ -1,6 +1,6 @@
 /* global chrome */
 
-import { isFunction, asyncLoop } from '/js/util.js'
+import { isFunction, asyncLoop, getSessionNameInput } from '/js/util.js'
 
 export class BookmarkPersistenceManager {
   // ---===~ Storage ~===-----------------------------------------------------------------------------------------------
@@ -144,7 +144,7 @@ export class BookmarkPersistenceManager {
     console.log(`Renaming session ${session.name} to ${newName}.`)
 
     var updateSessionElement = () => {
-      var sessionNameInput = this.getSessionNameInput(session)
+      var sessionNameInput = getSessionNameInput(session)
       sessionNameInput.value = newName
       if (isFunction(callback)) callback()
     }

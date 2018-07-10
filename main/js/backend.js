@@ -68,7 +68,7 @@ function saveSessionIfNoPendingTabUpdatedListenerCalls (sessionWindow, bookmarkF
   console.log('%d newer pending tab updated listener calls. Saving session to bookmark folder.',
     pendingTabUpdatedListenerCalls)
 
-  bookmarkPersistenceManager.saveWindowAsBookmarkFolder(sessionWindow, bookmarkFolderId, () => {
+  bookmarkPersistenceManager.saveWindowAsBookmarkFolder(sessionWindow, bookmarkFolderId.toString(), () => {
     console.log(`Session with window ID ${sessionWindow.id} saved to bookmark folder with ID ${bookmarkFolderId}`)
     setBrowserActionIconToSaved()
   })

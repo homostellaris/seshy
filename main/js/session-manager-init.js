@@ -1,3 +1,3 @@
-import { setUp } from './session-manager.js'
+import { SessionManager } from '/js/session-manager.js'
 
-setUp()
+new SessionManager().setup()

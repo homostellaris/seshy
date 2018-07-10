@@ -3,7 +3,7 @@
 import { getCurrentlyOpenSessionElements, isFunction, asyncLoop } from '/js/util.js'
 import { BookmarkPersistenceManager } from '/js/persistence.js'
 import { TestDataCreator } from '/test/spec/integration/test-data-creator.js'
-import { setUp, addKeyboardShortcuts } from '/js/session-manager.js'
+import { SessionManager } from '/js/session-manager.js'
 import {
   setBrowserActionIconToUnsaved, setBrowserActionIconToSaved, setBrowserActionIconToSaving
 } from '/js/backend.js'
@@ -12,6 +12,7 @@ import { assertSessionWindowTabs } from '/test/spec/assertions.js'
 describe('Integration tests.', function () {
   beforeAll(function (done) {
     this.bookmarkPersistenceManager = new BookmarkPersistenceManager()
+    this.sessionManager = new SessionManager()
     this.testDataCreator = new TestDataCreator()
     console.log('Waiting for seshyFolder variable to be populated.')
     setTimeout(done, 1000) // Wait for initialise() to create Seshy folder.
@@ -142,7 +143,7 @@ describe('Integration tests.', function () {
 
         var resetSessionManager = () => {
           this.testDataCreator.resetTestContainer()
-          setUp(() => {
+          this.sessionManager.setUp(() => {
             var savedSessionsList = document.getElementById('saved-sessions')
             var savedSessionElements = savedSessionsList.getElementsByClassName('session-card')
             expect(savedSessionElements.length).toEqual(1)
@@ -531,7 +532,7 @@ describe('Integration tests.', function () {
         }
 
         var initialiseSessionManager = () => {
-          setUp(done)
+          this.sessionManager.setUp(done)
         }
 
         asyncLoop([1, 2], createWindow, createSavedSecondSession)
@@ -589,8 +590,9 @@ describe('Integration tests.', function () {
     describe('Shelved sessions.', function () {
       beforeEach(function (done) {
         var callSetupThenDone = () => {
-          setUp(done)
+          this.sessionManager.setUp(done)
         }
+
         this.testDataCreator.createAndSaveTestSession((session) => {
           this.testDataCreator.resetTestContainer()
           chrome.storage.local.remove(session.window.id.toString(), callSetupThenDone)
@@ -673,7 +675,7 @@ describe('Integration tests.', function () {
               this.tabsInfo = this.testDataCreator.getTabsOrBookmarksInfo(this.windowId)
               if (this.windowIds.length === 3) {
                 createSessionManagerDom(() => {
-                  setUp(() => {
+                  this.sessionManager.setUp(() => {
                     setTimeout(done, 1000)
                   })
                 })
@@ -730,7 +732,7 @@ describe('Integration tests.', function () {
         this.sessions = sessions
         this.secondSession = this.sessions[1]
         this.secondSessionEditIcon = this.secondSession.element.getElementsByClassName('edit-icon')[0]
-        addKeyboardShortcuts()
+        this.sessionManager.addKeyboardShortcuts()
         this.secondSession.element.focus()
         done()
       })

@@ -1,9 +1,13 @@
 /* global setUp selectPreviousSession selectNextSession selectLastSessionInPreviousSessionList
 selectFirstSessionInNextSessionList resumeSelectedSession saveSelectedSession focusSessionNameInput */
 
-import { getPreviousSession } from '/js/session-manager.js'
+import { SessionManager } from '/js/session-manager.js'
 
 describe('Unit tests.', function () {
+  beforeAll(function () {
+    this.sessionManager = new SessionManager()
+  })
+
   describe('Session object.', function () {
     it('Throws an exception if an argument is not provided.', function () {
       console.log('Unimplemented test.')
@@ -16,111 +20,112 @@ describe('Unit tests.', function () {
       // spyOn(window, 'addKeyboardShortcuts')
       // spyOn(window 'mdc')
       var assertCalled = () => {
-        expect(window.focusCurrentlyOpenSession).toHaveBeenCalled()
+        expect(this.sessionManager.focusCurrentlyOpenSession).toHaveBeenCalled()
         done()
       }
-      spyOn(window, 'focusCurrentlyOpenSession').and.callThrough()
+      spyOn(this.sessionManager, 'focusCurrentlyOpenSession').and.callThrough()
 
-      setUp(assertCalled)
+      this.sessionManager.setUp(assertCalled)
     })
   })
 
   describe('Keyboard shortcuts.', function () {
     describe('Selecting sessions.', function () {
-      describe('Selects the session above the currently selected one when the `UP` arrow key is pressed.', () => {
-        xit('The `UP` arrow key calls `selectPreviousSession()`.', () => {
+      describe('Selects the session above the currently selected one when the `UP` arrow key is pressed.', function () {
+        xit('The `UP` arrow key calls `selectPreviousSession()`.', function () {
           // Not implemented.
         })
 
-        describe('The `selectPreviousSession` function.', () => {
-          it('Calls `focus` on the previous session if it is not null.', () => {
+        describe('The `selectPreviousSession` function.', function () {
+          it('Calls `focus` on the previous session if it is not null.', function () {
             var fakeSession = jasmine.createSpyObj('fakeSession', ['focus'])
-            spyOn(window, 'getPreviousSession').and.returnValue(fakeSession)
+            console.log('SESSION MANAGER IS ' + this.sessionManager)
+            spyOn(this.sessionManager, 'getPreviousSession').and.returnValue(fakeSession)
 
-            selectPreviousSession()
+            this.sessionManager.selectPreviousSession()
 
             expect(fakeSession.focus).toHaveBeenCalled()
           })
 
-          it('Calls `selectLastSessionInPreviousSessionList` if the previous session is null.', () => {
-            spyOn(window, 'getPreviousSession').and.returnValue(null)
-            spyOn(window, 'selectLastSessionInPreviousSessionList')
+          it('Calls `selectLastSessionInPreviousSessionList` if the previous session is null.', function () {
+            spyOn(this.sessionManager, 'getPreviousSession').and.returnValue(null)
+            spyOn(this.sessionManager, 'selectLastSessionInPreviousSessionList')
 
-            selectPreviousSession()
+            this.sessionManager.selectPreviousSession()
 
-            expect(window.selectLastSessionInPreviousSessionList).toHaveBeenCalled()
+            expect(this.sessionManager.selectLastSessionInPreviousSessionList).toHaveBeenCalled()
           })
         })
       })
 
-      describe('Selects the session below the currently selected one when the `DOWN` arrow key is pressed.', () => {
-        xit('The `DOWN` arrow key calls `selectPreviousSession()`.', () => {
+      describe('Selects the session below the currently selected one when the `DOWN` arrow key is pressed.', function () {
+        xit('The `DOWN` arrow key calls `selectPreviousSession()`.', function () {
           // Not implemented.
         })
 
-        describe('The `selectNextSession` function.', () => {
-          it('Calls `focus` on the next session if it is not null.', () => {
+        describe('The `selectNextSession` function.', function () {
+          it('Calls `focus` on the next session if it is not null.', function () {
             var fakeSession = jasmine.createSpyObj('fakeSession', ['focus'])
-            spyOn(window, 'getNextSession').and.returnValue(fakeSession)
+            spyOn(this.sessionManager, 'getNextSession').and.returnValue(fakeSession)
 
-            selectNextSession()
+            this.sessionManager.selectNextSession()
 
             expect(fakeSession.focus).toHaveBeenCalled()
           })
 
-          it('Calls `selectFirstSessionInNextSessionList` if the previous session is null.', () => {
-            spyOn(window, 'getNextSession').and.returnValue(null)
-            spyOn(window, 'selectFirstSessionInNextSessionList')
+          it('Calls `selectFirstSessionInNextSessionList` if the previous session is null.', function () {
+            spyOn(this.sessionManager, 'getNextSession').and.returnValue(null)
+            spyOn(this.sessionManager, 'selectFirstSessionInNextSessionList')
 
-            selectNextSession()
+            this.sessionManager.selectNextSession()
 
-            expect(window.selectFirstSessionInNextSessionList).toHaveBeenCalled()
+            expect(this.sessionManager.selectFirstSessionInNextSessionList).toHaveBeenCalled()
           })
         })
       })
 
-      describe('Selects the last session in the previous section when the `LEFT` arrow key is pressed.', () => {
-        xit('The `LEFT` arrow key calls `selectLastSessionInPreviousSessionList()`.', () => {
+      describe('Selects the last session in the previous section when the `LEFT` arrow key is pressed.', function () {
+        xit('The `LEFT` arrow key calls `selectLastSessionInPreviousSessionList()`.', function () {
           // Not implemented.
         })
 
-        describe('The `selectLastSessionInPreviousSessionList` function.', () => {
-          it('Calls `focus` on the last session returned from `getSessionsFromSessionList`.', () => {
+        describe('The `selectLastSessionInPreviousSessionList` function.', function () {
+          it('Calls `focus` on the last session returned from `getSessionsFromSessionList`.', function () {
             var fakePreviousSessionList = jasmine.createSpy('fakePreviousSessionList')
-            spyOn(window, 'getPreviousSessionList').and.returnValue(fakePreviousSessionList)
+            spyOn(this.sessionManager, 'getPreviousSessionList').and.returnValue(fakePreviousSessionList)
             var lastFakeSessionInList = jasmine.createSpyObj('lastFakeSessionInList', ['focus'])
             var fakeSessions = [
               jasmine.createSpy('firstFakeSessionInList'),
               jasmine.createSpy('middleFakeSessionInList'),
               lastFakeSessionInList
             ]
-            spyOn(window, 'getSessionsFromSessionList').and.returnValue(fakeSessions)
+            spyOn(this.sessionManager, 'getSessionsFromSessionList').and.returnValue(fakeSessions)
 
-            selectLastSessionInPreviousSessionList()
+            this.sessionManager.selectLastSessionInPreviousSessionList()
 
             expect(lastFakeSessionInList.focus).toHaveBeenCalled()
           })
         })
       })
 
-      describe('Selects the first session in the next section when the `RIGHT` arrow key is pressed.', () => {
-        xit('The `RIGHT` arrow key calls `selectFirstSessionInNextSessionList()`.', () => {
+      describe('Selects the first session in the next section when the `RIGHT` arrow key is pressed.', function () {
+        xit('The `RIGHT` arrow key calls `selectFirstSessionInNextSessionList()`.', function () {
           // Not implemented.
         })
 
-        describe('The `selectFirstSessionInNextSessionList` function.', () => {
-          it('Calls `focus` on the first session returned from `getSessionsFromSessionList`.', () => {
+        describe('The `selectFirstSessionInNextSessionList` function.', function () {
+          it('Calls `focus` on the first session returned from `getSessionsFromSessionList`.', function () {
             var fakeNextSessionList = jasmine.createSpy('fakeNextSessionList')
-            spyOn(window, 'getNextSessionList').and.returnValue(fakeNextSessionList)
+            spyOn(this.sessionManager, 'getNextSessionList').and.returnValue(fakeNextSessionList)
             var firstFakeSessionInList = jasmine.createSpyObj('firstFakeSessionInList', ['focus'])
             var fakeSessions = [
               firstFakeSessionInList,
               jasmine.createSpy('firstFakeSessionInList'),
               jasmine.createSpy('firstFakeSessionInList')
             ]
-            spyOn(window, 'getSessionsFromSessionList').and.returnValue(fakeSessions)
+            spyOn(this.sessionManager, 'getSessionsFromSessionList').and.returnValue(fakeSessions)
 
-            selectFirstSessionInNextSessionList()
+            this.sessionManager.selectFirstSessionInNextSessionList()
 
             expect(firstFakeSessionInList.focus).toHaveBeenCalled()
           })
@@ -132,12 +137,12 @@ describe('Unit tests.', function () {
       describe('The `resumeSelectedSession` function.', function () {
         xit('Calls `getSelectedSession` function.', function () {
           var fakeSessionElement = jasmine.createSpyObj('fakeSessionElement', ['seshySession'])
-          spyOn(window, 'getSelectedSession').and.returnValue(fakeSessionElement)
-          spyOn(window, 'resumeSelectedSession')
+          spyOn(this.sessionManager, 'getSelectedSession').and.returnValue(fakeSessionElement)
+          spyOn(this.sessionManager, 'resumeSelectedSession')
 
-          resumeSelectedSession()
+          this.sessionManager.resumeSelectedSession()
 
-          expect(window.getSelectedSession).toHaveBeenCalled()
+          expect(this.sessionManager.getSelectedSession).toHaveBeenCalled()
         })
 
         xit('Calls `closeSessionManager` if the session is focused.', function () {
@@ -160,14 +165,14 @@ describe('Unit tests.', function () {
         describe('The `saveSelectedSession` function.', function () {
           xit('Calls `getSelectedSession` function.', function () {
             var fakeSessionElement = jasmine.createSpyObj('fakeSessionElement', ['seshySession'])
-            spyOn(window, 'getSelectedSession').and.returnValue(fakeSessionElement)
+            spyOn(this.sessionManager, 'getSelectedSession').and.returnValue(fakeSessionElement)
             var fakeSessionNameInput = jasmine.createSpy('fakeSessionNameInput')
-            spyOn(window, 'getSessionNameInput').and.returnValue(fakeSessionNameInput)
-            spyOn(window, 'saveSession')
+            spyOn(this.sessionManager, 'getSessionNameInput').and.returnValue(fakeSessionNameInput)
+            spyOn(this.sessionManager, 'saveSession')
 
-            saveSelectedSession()
+            this.sessionManager.saveSelectedSession()
 
-            expect(window.getSelectedSession).toHaveBeenCalled()
+            expect(this.sessionManager.getSelectedSession).toHaveBeenCalled()
           })
         })
       })
