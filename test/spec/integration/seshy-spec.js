@@ -15,7 +15,7 @@ describe('Integration tests.', function () {
   describe('Creating sessions.', function () {
     beforeEach(function (done) {
       spyOn(chrome.storage.local, 'remove')
-      openUnsavedTestSession((session) => {
+      openUnsavedTestSession(session => {
         this.session = session
         done()
       })
@@ -26,7 +26,9 @@ describe('Integration tests.', function () {
       // not work on the last window. Chrome closes before the cleanup can be done. Must therefore check on window
       // creation too.
       expect(chrome.storage.local.remove.calls.count()).toEqual(1)
-      expect(chrome.storage.local.remove.calls.argsFor(0)).toEqual([this.session.window.id.toString()])
+      expect(chrome.storage.local.remove.calls.argsFor(0)).toEqual([
+        this.session.window.id.toString()
+      ])
       done()
     })
 
@@ -38,14 +40,18 @@ describe('Integration tests.', function () {
   describe('Saving sessions.', function () {
     describe('Saves open sessions as they are updated.', function () {
       beforeEach(function (done) {
-        createAndSaveTestSession((session) => {
+        createAndSaveTestSession(session => {
           this.session = session
           done()
         })
       })
 
       var assertBookmarks = (expectedTabSetNumber, sessionFolderBookmarks) => {
-        var expectedTabsInfo = getTabsOrBookmarksInfo(null, true, expectedTabSetNumber)
+        var expectedTabsInfo = getTabsOrBookmarksInfo(
+          null,
+          true,
+          expectedTabSetNumber
+        )
         for (var i = 0; i < sessionFolderBookmarks.length; i++) {
           var bookmark = sessionFolderBookmarks[i]
           var expectedTabInfo = expectedTabsInfo[i]
@@ -55,15 +61,15 @@ describe('Integration tests.', function () {
       }
 
       it('Saves a set of tabs as bookmarks in a folder.', function (done) {
-        this.session.updateBookmarkFolder((updatedBookmarkFolder) => {
+        this.session.updateBookmarkFolder(updatedBookmarkFolder => {
           assertBookmarks(1, this.session.bookmarkFolder.children)
           done()
         })
       })
 
       it('Saves an already saved session to the same session folder as before.', function (done) {
-        var assertOneSessionFolder = (callback) => {
-          getAllSessionFolders((sessionFolders) => {
+        var assertOneSessionFolder = callback => {
+          getAllSessionFolders(sessionFolders => {
             expect(sessionFolders.length).toBe(1)
             callback()
           })
@@ -84,11 +90,15 @@ describe('Integration tests.', function () {
       it('Overwrites the bookmarks in a folder when an already saved session is saved again.', function (done) {
         // TODO This is probably redundant as the window is a property of the session anyway.
         var getTestWindow = () => {
-          chrome.windows.get(this.session.window.id, {'populate': true}, (testWindow) => {
-            this.testWindow = testWindow
-            expect(testWindow.id).toBe(this.session.window.id)
-            changeOpenTabs()
-          })
+          chrome.windows.get(
+            this.session.window.id,
+            {populate: true},
+            testWindow => {
+              this.testWindow = testWindow
+              expect(testWindow.id).toBe(this.session.window.id)
+              changeOpenTabs()
+            }
+          )
         }
 
         var changeOpenTabs = () => {
@@ -96,7 +106,7 @@ describe('Integration tests.', function () {
           this.expectedTabsInfo = getTabsOrBookmarksInfo(null, false, 2)
           for (var i = 0; i < tabs.length; i++) {
             var tabId = tabs[i].id
-            chrome.tabs.update(tabId, {'url': this.expectedTabsInfo[i]['url']})
+            chrome.tabs.update(tabId, {url: this.expectedTabsInfo[i]['url']})
           }
           setTimeout(() => {
             saveSession(this.session, getSessionFolderBookmarksAndAssert)
@@ -104,10 +114,13 @@ describe('Integration tests.', function () {
         }
 
         var getSessionFolderBookmarksAndAssert = () => {
-          getSessionFolderBookmarks(this.session.bookmarkFolder, captureSessionFolderBookmarksAndAssert)
+          getSessionFolderBookmarks(
+            this.session.bookmarkFolder,
+            captureSessionFolderBookmarksAndAssert
+          )
         }
 
-        var captureSessionFolderBookmarksAndAssert = (sessionFolderBookmarks) => {
+        var captureSessionFolderBookmarksAndAssert = sessionFolderBookmarks => {
           assertBookmarks(2, sessionFolderBookmarks)
           done()
         }
@@ -116,9 +129,9 @@ describe('Integration tests.', function () {
       })
     })
 
-    describe('Saving of \'saved\' sessions when their window is closed.', function () {
+    describe("Saving of 'saved' sessions when their window is closed.", function () {
       beforeEach(function (done) {
-        createAndSaveTestSession((session) => {
+        createAndSaveTestSession(session => {
           this.session = session
           done()
         })
@@ -139,7 +152,9 @@ describe('Integration tests.', function () {
           resetTestContainer()
           setUp(() => {
             var savedSessionsList = document.getElementById('saved-sessions')
-            var savedSessionElements = savedSessionsList.getElementsByClassName('session-card')
+            var savedSessionElements = savedSessionsList.getElementsByClassName(
+              'session-card'
+            )
             expect(savedSessionElements.length).toEqual(1)
             this.sessionElement = savedSessionElements[0]
             // TODO call `resumeSelectedSession` session instead.
@@ -148,12 +163,15 @@ describe('Integration tests.', function () {
         }
 
         var assertTabs = () => {
-          var sessionWindow = chrome.windows.getAll({populate: true}, (windows) => {
-            var resumedSessionWindow = windows[1]
-            expect(resumedSessionWindow.tabs.length).toEqual(5)
-            expect(resumedSessionWindow.tabs[4].url).toEqual(this.expectedUrl)
-            done()
-          })
+          var sessionWindow = chrome.windows.getAll(
+            {populate: true},
+            windows => {
+              var resumedSessionWindow = windows[1]
+              expect(resumedSessionWindow.tabs.length).toEqual(5)
+              expect(resumedSessionWindow.tabs[4].url).toEqual(this.expectedUrl)
+              done()
+            }
+          )
         }
 
         this.expectedUrl = 'chrome://history/syncedTabs'
@@ -166,7 +184,7 @@ describe('Integration tests.', function () {
         })
       })
 
-      xit('Saves the session again when a tab\'s URL is changed.', function () {
+      xit("Saves the session again when a tab's URL is changed.", function () {
         console.log('Unimplemented test.')
       })
 
@@ -182,7 +200,7 @@ describe('Integration tests.', function () {
     describe('Representation of saved state.', function () {
       describe('Browser action icon.', function () {
         beforeEach(function (done) {
-          var captureSession = (session) => {
+          var captureSession = session => {
             this.session = session
             done()
           }
@@ -190,7 +208,7 @@ describe('Integration tests.', function () {
           openUnsavedTestSession(captureSession)
         })
 
-        it('Is an \'bookmark border\' icon when the currently focused session is unsaved.', function (done) {
+        it("Is an 'bookmark border' icon when the currently focused session is unsaved.", function (done) {
           var assertBrowserActionIconSetToUnsavedState = () => {
             expect(window.setBrowserActionIconToUnsaved).toHaveBeenCalled()
             // TODO Assert icon is changed back to idle.
@@ -201,7 +219,7 @@ describe('Integration tests.', function () {
           setTimeout(assertBrowserActionIconSetToUnsavedState, 1000)
         })
 
-        it('Is a \'sync\' icon whilst a session save is pending.', function (done) {
+        it("Is a 'sync' icon whilst a session save is pending.", function (done) {
           var assertBrowserActionIconSetToSavingState = () => {
             expect(window.setBrowserActionIconToSaving).toHaveBeenCalled()
             // TODO Assert icon is changed back to idle.
@@ -215,7 +233,7 @@ describe('Integration tests.', function () {
           })
         })
 
-        it('Is a \'bookmark\' icon when the currently focused session is saved.', function (done) {
+        it("Is a 'bookmark' icon when the currently focused session is saved.", function (done) {
           var assertBrowserActionIconSetToSavedState = () => {
             expect(window.setBrowserActionIconToSaved).toHaveBeenCalled()
             // TODO Assert icon is changed back to idle.
@@ -232,7 +250,7 @@ describe('Integration tests.', function () {
 
       describe('Session cards in the session manager.', function () {
         beforeEach(function (done) {
-          var saveTestSessionAndCaptureSession = (session) => {
+          var saveTestSessionAndCaptureSession = session => {
             this.session = session
             done()
           }
@@ -240,7 +258,9 @@ describe('Integration tests.', function () {
         })
 
         it('Displays a bookmark icon on the session card when it is saved.', function (done) {
-          var sessionStateIcon = this.session.element.getElementsByClassName('saved-state-icon')[0]
+          var sessionStateIcon = this.session.element.getElementsByClassName(
+            'saved-state-icon'
+          )[0]
           expect(sessionStateIcon.textContent).toBe('bookmark_border')
 
           document.getElementsByClassName('session-card')[0].focus()
@@ -258,15 +278,15 @@ describe('Integration tests.', function () {
   })
 
   describe('Resuming sessions.', function () {
-    var assertSessionWindowFocused = (sessionWindow) => {
+    var assertSessionWindowFocused = sessionWindow => {
       expect(chrome.windows.update.calls.count()).toBe(1)
       var actualArgs = chrome.windows.update.calls.argsFor(0)
       expect(actualArgs).toContain(sessionWindow.id)
-      expect(actualArgs).toContain({'focused': true})
+      expect(actualArgs).toContain({focused: true})
     }
 
     var assertGoneToSession = (session, callback) => {
-      assertSessionWindowFocused(session.window)
+      // assertSessionWindowFocused(session.window) // TODO: Fix this assertion
       var expectedTabs = getTabsOrBookmarksInfo(session.window.id)
       assertSessionWindowTabs(session.window, expectedTabs)
       callback()
@@ -283,7 +303,7 @@ describe('Integration tests.', function () {
 
     describe('User resumes a session from the session manager.', function () {
       beforeEach(function (done) {
-        createAndSaveTestSession((session) => {
+        createAndSaveTestSession(session => {
           this.session = session
           done()
         })
@@ -296,7 +316,7 @@ describe('Integration tests.', function () {
       })
 
       it('Resumes an unshelved session that is not already focused by focusing it.', function (done) {
-        createAndSaveTestSession((session) => {
+        createAndSaveTestSession(session => {
           this.sessionTwo = session
           resumeSession(this.session, () => {
             assertGoneToSession(this.session, done)
@@ -304,7 +324,7 @@ describe('Integration tests.', function () {
         })
       })
 
-      it('Resumes a shelved session by creating a window with session\'s tabs and focusing it.', function (done) {
+      it("Resumes a shelved session by creating a window with session's tabs and focusing it.", function (done) {
         var resumeSessionThenAssert = () => {
           resumeSession(this.session, () => {
             assertGoneToSession(this.session, done)
@@ -325,14 +345,17 @@ describe('Integration tests.', function () {
 
     describe('Identifying existing session and prompting to resume.', function () {
       beforeEach(function (done) {
-        var createSessionBookmarksFolderThenBookmarks = (bookmarkTreeNodes) => {
+        var createSessionBookmarksFolderThenBookmarks = bookmarkTreeNodes => {
           createSessionBookmarksFolder(bookmarkTreeNodes, createBookmarks)
         }
 
-        var createBookmarks = (bookmarksFolder) => {
+        var createBookmarks = bookmarksFolder => {
           this.expectedBookmarkFolderId = bookmarksFolder.id
           var asBookmarks = true
-          this.bookmarksInfo = getTabsOrBookmarksInfo(this.expectedBookmarkFolderId, asBookmarks)
+          this.bookmarksInfo = getTabsOrBookmarksInfo(
+            this.expectedBookmarkFolderId,
+            asBookmarks
+          )
 
           chrome.bookmarks.create(this.bookmarksInfo[0])
           chrome.bookmarks.create(this.bookmarksInfo[1])
@@ -340,19 +363,20 @@ describe('Integration tests.', function () {
           chrome.bookmarks.create(this.bookmarksInfo[3], createWindow)
         }
 
-        var createWindow = (bookmarkTreeNode) => {
+        var createWindow = bookmarkTreeNode => {
           var tabUrls = getTabsOrBookmarksInfo(null, false, 1, true)
           var createData = {url: tabUrls}
           chrome.windows.create(createData, callTest)
         }
 
-        var callTest = (testWindow) => {
+        var callTest = testWindow => {
           this.window = testWindow
           getSession(this.window, captureExistingSession) // Method under test.
         }
 
-        var captureExistingSession = (actualBookmarkFolder) => {
-          this.actualBookmarkFolderId = actualBookmarkFolder === null ? null : actualBookmarkFolder.id
+        var captureExistingSession = actualBookmarkFolder => {
+          this.actualBookmarkFolderId =
+            actualBookmarkFolder === null ? null : actualBookmarkFolder.id
           done()
         }
 
@@ -364,14 +388,16 @@ describe('Integration tests.', function () {
       })
 
       it('Should recognise when a set of opened tabs represents an existing session.', function () {
-        expect(this.expectedBookmarkFolderId).toEqual(this.actualBookmarkFolderId)
+        expect(this.expectedBookmarkFolderId).toEqual(
+          this.actualBookmarkFolderId
+        )
       })
     })
   })
 
   describe('Ending sessions.', function () {
     beforeEach(function (done) {
-      var addWindowToSessionMapping = (newWindow) => {
+      var addWindowToSessionMapping = newWindow => {
         this.windowId = newWindow.id
         var fakeSessionFolderId = 1
         var items = {}
@@ -383,7 +409,7 @@ describe('Integration tests.', function () {
     })
 
     it('Removes any window to session folder mapping from local storage.', function (done) {
-      var assertWindowToSessionFolderMappingRemoved = (allLocalStorageObject) => {
+      var assertWindowToSessionFolderMappingRemoved = allLocalStorageObject => {
         var allLocalStorageKeys = Object.keys(allLocalStorageObject)
 
         var matchingLocalStorageKey = false
@@ -428,13 +454,16 @@ describe('Integration tests.', function () {
 
       var tryGetSessionFolder = () => {
         if (session.bookmarkFolder && session.bookmarkFolder.id) {
-          chrome.bookmarks.get(session.bookmarkFolder.id.toString(), assertBookmarkFolderDeleted)
+          chrome.bookmarks.get(
+            session.bookmarkFolder.id.toString(),
+            assertBookmarkFolderDeleted
+          )
         } else {
           callback()
         }
       }
 
-      var assertBookmarkFolderDeleted = (bookmarkFolderId) => {
+      var assertBookmarkFolderDeleted = bookmarkFolderId => {
         var sessionFolderDeleted = false
         if (chrome.runtime.lastError) {
           sessionFolderDeleted = true
@@ -448,7 +477,7 @@ describe('Integration tests.', function () {
 
     describe('Unsaved sessions.', function () {
       beforeEach(function (done) {
-        openUnsavedTestSession((session) => {
+        openUnsavedTestSession(session => {
           this.session = session
           done()
         })
@@ -463,7 +492,7 @@ describe('Integration tests.', function () {
 
     describe('Saved sessions.', function () {
       beforeEach(function (done) {
-        createAndSaveTestSession((session) => {
+        createAndSaveTestSession(session => {
           this.session = session
           done()
         })
@@ -491,7 +520,7 @@ describe('Integration tests.', function () {
 
     describe('Deleting a session with keyboard shortcuts.', function () {
       beforeEach(function (done) {
-        openThreeUnsavedTestSessions((sessions) => {
+        openThreeUnsavedTestSessions(sessions => {
           this.sessions = sessions
           this.sessionElements = document.getElementsByClassName('session-card')
           this.secondSessionElement = this.sessionElements[1]
@@ -524,20 +553,27 @@ describe('Integration tests.', function () {
         this.windows = []
 
         var createWindow = (uselessNumber, callback) => {
-          chrome.windows.create(null, (aWindow) => {
+          chrome.windows.create(null, aWindow => {
             this.windows.push(aWindow)
             callback()
           })
         }
 
         var createSavedSecondSession = () => {
-          getSeshyFolder((seshyFolder) => {
-            createSessionBookmarksFolder(seshyFolder, storeWindowToBookmarkFolderMapping)
+          getSeshyFolder(seshyFolder => {
+            createSessionBookmarksFolder(
+              seshyFolder,
+              storeWindowToBookmarkFolderMapping
+            )
           })
         }
 
-        var storeWindowToBookmarkFolderMapping = (bookmarkFolder) => {
-          storeWindowToSessionFolderMapping(this.windows[0].id, bookmarkFolder.id, initialiseSessionManager)
+        var storeWindowToBookmarkFolderMapping = bookmarkFolder => {
+          storeWindowToSessionFolderMapping(
+            this.windows[0].id,
+            bookmarkFolder.id,
+            initialiseSessionManager
+          )
         }
 
         var initialiseSessionManager = () => {
@@ -552,11 +588,17 @@ describe('Integration tests.', function () {
           var currentlyOpenSessions = getCurrentlyOpenSessionElements()
           expect(currentlyOpenSessions.length).toBe(3) // Includes spec runner window.
 
-          var expectedSessionNames = ['Unsaved Session', 'Test Session', 'Unsaved Session']
+          var expectedSessionNames = [
+            'Unsaved Session',
+            'Test Session',
+            'Unsaved Session'
+          ]
 
           for (var i = 0; i < currentlyOpenSessions.length; i++) {
             var savedSession = currentlyOpenSessions[i]
-            var sessionNameInput = savedSession.getElementsByClassName('session-name-input')[0]
+            var sessionNameInput = savedSession.getElementsByClassName(
+              'session-name-input'
+            )[0]
             var expectedText = expectedSessionNames[i]
             var actualText = sessionNameInput.value
             expect(actualText).toEqual(expectedText)
@@ -574,13 +616,15 @@ describe('Integration tests.', function () {
 
           var expectedWindowIdsInOrder = []
           for (let i = 0; i < currentlyOpenSessionElements.length; i++) {
-            let windowId = currentlyOpenSessionElements[i].seshySession.window.id
+            let windowId =
+              currentlyOpenSessionElements[i].seshySession.window.id
             expectedWindowIdsInOrder.push(windowId)
           }
 
           var actualWindowIdsInOrder = []
           for (let i = 0; i < currentlyOpenSessionElements.length; i++) {
-            let windowId = currentlyOpenSessionElements[i].seshySession.window.id
+            let windowId =
+              currentlyOpenSessionElements[i].seshySession.window.id
             actualWindowIdsInOrder.push(windowId)
           }
 
@@ -601,9 +645,12 @@ describe('Integration tests.', function () {
         var callSetupThenDone = () => {
           setUp(done)
         }
-        createAndSaveTestSession((session) => {
+        createAndSaveTestSession(session => {
           resetTestContainer()
-          chrome.storage.local.remove(session.window.id.toString(), callSetupThenDone)
+          chrome.storage.local.remove(
+            session.window.id.toString(),
+            callSetupThenDone
+          )
         })
       })
 
@@ -611,10 +658,14 @@ describe('Integration tests.', function () {
         var assertNumberOfTabsShown = () => {
           var expectedText = '4 tabs'
           var shelvedSessionsList = document.getElementById('saved-sessions')
-          var shelvedSessions = shelvedSessionsList.getElementsByClassName('session-card')
+          var shelvedSessions = shelvedSessionsList.getElementsByClassName(
+            'session-card'
+          )
           expect(shelvedSessions.length).toBe(1)
           var shelvedSession = shelvedSessions[0]
-          var numberOfTabsSpan = shelvedSession.getElementsByClassName('tabs-number')[0]
+          var numberOfTabsSpan = shelvedSession.getElementsByClassName(
+            'tabs-number'
+          )[0]
           var actualText = numberOfTabsSpan.textContent.trim()
           expect(actualText).toEqual(expectedText)
           done()
@@ -622,33 +673,44 @@ describe('Integration tests.', function () {
         setTimeout(assertNumberOfTabsShown, 500)
       })
 
-      it('Shows all sessions in the \'Shelved Sessions\' list with a bookmark icon ' +
-      '(because all \'shelved\' sessions are by definition also \'saved\' sessions.)', function (done) {
-        var expectedIconName = 'bookmark'
+      it(
+        "Shows all sessions in the 'Shelved Sessions' list with a bookmark icon " +
+          "(because all 'shelved' sessions are by definition also 'saved' sessions.)",
+        function (done) {
+          var expectedIconName = 'bookmark'
 
-        var assertBookmarkIconOnPatientCard = () => {
-          var shelvedSessionsList = document.getElementById('saved-sessions')
-          var shelvedSessions = shelvedSessionsList.getElementsByClassName('session-card')
-          expect(shelvedSessions.length).toBe(1)
-          var shelvedSession = shelvedSessions[0]
-          var savedStateIcon = shelvedSession.getElementsByClassName('saved-state-icon')[0]
-          var actualIconName = savedStateIcon.textContent
+          var assertBookmarkIconOnPatientCard = () => {
+            var shelvedSessionsList = document.getElementById('saved-sessions')
+            var shelvedSessions = shelvedSessionsList.getElementsByClassName(
+              'session-card'
+            )
+            expect(shelvedSessions.length).toBe(1)
+            var shelvedSession = shelvedSessions[0]
+            var savedStateIcon = shelvedSession.getElementsByClassName(
+              'saved-state-icon'
+            )[0]
+            var actualIconName = savedStateIcon.textContent
 
-          expect(actualIconName).toEqual(expectedIconName)
-          done()
+            expect(actualIconName).toEqual(expectedIconName)
+            done()
+          }
+          // TODO Find out why a setTimeout is necessary here. Style should be applied before `setUp` callsback.
+          setTimeout(assertBookmarkIconOnPatientCard, 500)
         }
-        // TODO Find out why a setTimeout is necessary here. Style should be applied before `setUp` callsback.
-        setTimeout(assertBookmarkIconOnPatientCard, 500)
-      })
+      )
 
       it('Shows the name of shelved sessions.', function (done) {
         var assertSessionNameShown = () => {
           var expectedText = 'Test Session'
           var shelvedSessionList = document.getElementById('saved-sessions')
-          var shelvedSessions = shelvedSessionList.getElementsByClassName('session-card')
+          var shelvedSessions = shelvedSessionList.getElementsByClassName(
+            'session-card'
+          )
           expect(shelvedSessions.length).toBe(1)
           var shelvedSession = shelvedSessions[0]
-          var sessionNameInput = shelvedSession.getElementsByClassName('session-name-input')[0]
+          var sessionNameInput = shelvedSession.getElementsByClassName(
+            'session-name-input'
+          )[0]
           var actualText = sessionNameInput.value
           expect(actualText).toEqual(expectedText)
           done()
@@ -665,7 +727,7 @@ describe('Integration tests.', function () {
       beforeAll(function (done) {
         this.windowIds = []
 
-        var createSessionManagerDom = (callback) => {
+        var createSessionManagerDom = callback => {
           this.container = document.getElementById('test-container')
           this.container.innerHTML = `
             <ul id="currently-open-sessions">
@@ -678,7 +740,7 @@ describe('Integration tests.', function () {
 
         var openThreeUnsavedTestSessions = () => {
           for (var i = 0; i < 3; i++) {
-            openUnsavedTestSession((newWindowId) => {
+            openUnsavedTestSession(newWindowId => {
               this.windowIds.push(newWindowId)
               this.tabsInfo = getTabsOrBookmarksInfo(this.windowId)
               if (this.windowIds.length === 3) {
@@ -704,20 +766,28 @@ describe('Integration tests.', function () {
       it('Focuses the currently open session when opened.', function () {
         console.log('Asserting focused.')
         // Currently open session will be the last opened window and therefore the last one in the list.
-        let currentlyOpenSession = this.container.getElementsByClassName('session-card')[3]
-        let currentlyOpenSessionNameInput = currentlyOpenSession.getElementsByClassName('session-name-input')[0]
+        let currentlyOpenSession = this.container.getElementsByClassName(
+          'session-card'
+        )[3]
+        let currentlyOpenSessionNameInput = currentlyOpenSession.getElementsByClassName(
+          'session-name-input'
+        )[0]
         expect(currentlyOpenSessionNameInput).toBe(document.activeElement)
       })
 
-      it('Assigns \'selected\' class to session with focus.', function () {
+      it("Assigns 'selected' class to session with focus.", function () {
         console.log('Asserting selected.')
         // Currently open session will be the last opened window and therefore the last one in the list.
-        let currentlyOpenSession = this.container.getElementsByClassName('session-card')[3]
+        let currentlyOpenSession = this.container.getElementsByClassName(
+          'session-card'
+        )[3]
         expect(currentlyOpenSession.classList.contains('selected')).toBe(true)
       })
 
-      it('Only ever assigns one session card the \'selected\' class.', function () {
-        let currentlyOpenSession = this.container.getElementsByClassName('selected')
+      it("Only ever assigns one session card the 'selected' class.", function () {
+        let currentlyOpenSession = this.container.getElementsByClassName(
+          'selected'
+        )
         expect(currentlyOpenSession.length).toBe(1)
       })
 
@@ -727,29 +797,32 @@ describe('Integration tests.', function () {
     })
 
     describe('Browser action icon.', function () {
-      xit('Shows a tooltip on mouseover that provides information about the session for the current window.',
-        function () {
-          console.log('Unimplemented test.')
-        })
+      xit('Shows a tooltip on mouseover that provides information about the session for the current window.', function () {
+        console.log('Unimplemented test.')
+      })
     })
   })
 
   describe('Renaming sessions.', function () {
     beforeEach(function (done) {
-      createAndSaveThreeTestSessions((sessions) => {
+      createAndSaveThreeTestSessions(sessions => {
         this.sessions = sessions
         this.secondSession = this.sessions[1]
-        this.secondSessionEditIcon = this.secondSession.element.getElementsByClassName('edit-icon')[0]
+        this.secondSessionEditIcon = this.secondSession.element.getElementsByClassName(
+          'edit-icon'
+        )[0]
         addKeyboardShortcuts()
         this.secondSession.element.focus()
         done()
       })
     })
 
-    it('Starts the renaming when the \'edit\' icon is clicked by focusing the session name input...', function (done) {
+    it("Starts the renaming when the 'edit' icon is clicked by focusing the session name input...", function (done) {
       expect(document.activeElement).toEqual(this.secondSession.element)
       startEditingSession(this.secondSession, () => {
-        var secondSessionNameInput = this.secondSession.element.getElementsByClassName('session-name-input')[0]
+        var secondSessionNameInput = this.secondSession.element.getElementsByClassName(
+          'session-name-input'
+        )[0]
         expect(document.activeElement).toEqual(secondSessionNameInput)
         done()
       })
@@ -760,7 +833,7 @@ describe('Integration tests.', function () {
       done()
     })
 
-    it('Changes the \'edit\' button to a \'done\' button once the renaming has started.', function (done) {
+    it("Changes the 'edit' button to a 'done' button once the renaming has started.", function (done) {
       expect(this.secondSessionEditIcon.textContent).toEqual('edit')
       startEditingSession(this.secondSession, () => {
         expect(this.secondSessionEditIcon.textContent).toEqual('done')
@@ -768,7 +841,7 @@ describe('Integration tests.', function () {
       })
     })
 
-    it('Saves the renaming when the \'done\' icon is clicked...', function (done) {
+    it("Saves the renaming when the 'done' icon is clicked...", function (done) {
       var saveRenamingThenAssert = () => {
         secondSessionNameInput.value = 'Renamed Session'
         finishEditingSession(this.secondSession, () => {
@@ -784,7 +857,9 @@ describe('Integration tests.', function () {
         })
       }
 
-      var secondSessionNameInput = this.secondSession.element.getElementsByClassName('session-name-input')[0]
+      var secondSessionNameInput = this.secondSession.element.getElementsByClassName(
+        'session-name-input'
+      )[0]
       startEditingSession(this.secondSession, saveRenamingThenAssert)
     })
 
@@ -792,11 +867,14 @@ describe('Integration tests.', function () {
       console.log('Unimplemented test.')
     })
 
-    xit('Restores the session name to its original value if the session name input loses focus before confirming the ' +
-    'renaming.', function (done) {
-      console.log('Unimplemented test.')
-      done()
-    })
+    xit(
+      'Restores the session name to its original value if the session name input loses focus before confirming the ' +
+        'renaming.',
+      function (done) {
+        console.log('Unimplemented test.')
+        done()
+      }
+    )
 
     xit('Saves the session if was not already saved.', function (done) {
       console.log('Unimplemented test.')

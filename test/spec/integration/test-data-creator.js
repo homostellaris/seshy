@@ -7,12 +7,12 @@ removeWindowToSessionFolderMapping deleteSession isFunction initialise Session a
 function createAndSaveTestSession (callback) {
   var testSession = null
 
-  var captureTestSessionThenSave = (session) => {
+  var captureTestSessionThenSave = session => {
     testSession = session
     saveTestSession(session, captureBookmarkFolderThenCallback)
   }
 
-  var captureBookmarkFolderThenCallback = (bookmarkFolder) => {
+  var captureBookmarkFolderThenCallback = bookmarkFolder => {
     callback(testSession)
   }
 
@@ -23,7 +23,7 @@ function createAndSaveThreeTestSessions (callback) {
   var sessions = []
 
   var callCreateAndSaveTestSession = (iterableItem, callback) => {
-    createAndSaveTestSession((session) => {
+    createAndSaveTestSession(session => {
       sessions.push(session)
       callback()
     })
@@ -42,12 +42,16 @@ function createAndSaveThreeTestSessions (callback) {
 function saveTestSession (session, callback) {
   var expectedSessionFolderId
 
-  var createBookmarksThenSaveMapping = (sessionBookmarksFolder) => {
+  var createBookmarksThenSaveMapping = sessionBookmarksFolder => {
     session.bookmarkFolder = sessionBookmarksFolder
     expectedSessionFolderId = sessionBookmarksFolder.id
 
     createBookmarks(sessionBookmarksFolder, () => {
-      addWindowToSessionMapping(session.window.id, expectedSessionFolderId, returnSessionFolderId)
+      addWindowToSessionMapping(
+        session.window.id,
+        expectedSessionFolderId,
+        returnSessionFolderId
+      )
     })
   }
 
@@ -55,13 +59,13 @@ function saveTestSession (session, callback) {
     callback(expectedSessionFolderId)
   }
 
-  getSeshyFolder((seshyFolder) => {
+  getSeshyFolder(seshyFolder => {
     createSessionBookmarksFolder(seshyFolder, createBookmarksThenSaveMapping)
   })
 }
 
-var createSessionBookmarksFolderThenBookmarks = (callback) => {
-  var createBookmarks = (bookmarksFolder) => {
+var createSessionBookmarksFolderThenBookmarks = callback => {
+  var createBookmarks = bookmarksFolder => {
     var asBookmarks = true
     var bookmarksInfo = getTabsOrBookmarksInfo(bookmarksFolder.id, asBookmarks)
 
@@ -73,14 +77,14 @@ var createSessionBookmarksFolderThenBookmarks = (callback) => {
     })
   }
 
-  getSeshyFolder((bookmarkTreeNodes) => {
+  getSeshyFolder(bookmarkTreeNodes => {
     createSessionBookmarksFolder(bookmarkTreeNodes, createBookmarks)
   })
 }
 
 function openUnsavedTestSession (callback, tabSetNumber) {
   tabSetNumber = tabSetNumber || 1
-  var createSession = (testWindow) => {
+  var createSession = testWindow => {
     var session = new Session(testWindow)
     if (isFunction(callback)) callback(session)
   }
@@ -100,7 +104,7 @@ function openThreeUnsavedTestSessions (callback) {
   var sessions = []
 
   var callOpenUnsavedTestSession = (iterableItem, callback) => {
-    openUnsavedTestSession((session) => {
+    openUnsavedTestSession(session => {
       sessions.push(session)
       callback()
     })
@@ -123,7 +127,12 @@ function createTabs (tabsInfo, callback) {
   }
 }
 
-function getTabsOrBookmarksInfo (windowOrParentId, asBookmarks, tabSetNumber, urlsOnly) {
+function getTabsOrBookmarksInfo (
+  windowOrParentId,
+  asBookmarks,
+  tabSetNumber,
+  urlsOnly
+) {
   tabSetNumber = tabSetNumber || 1
   var tabSetIndex = tabSetNumber - 1
 
@@ -131,13 +140,13 @@ function getTabsOrBookmarksInfo (windowOrParentId, asBookmarks, tabSetNumber, ur
     'chrome://extensions/',
     'chrome://settings/',
     'chrome://about/',
-    'chrome://newtab/'
+    'chrome://accessibility/'
   ]
   var tabUrls2 = [
     'chrome://apps/',
     'chrome://downloads/',
     'chrome://history/',
-    'chrome://newtab/'
+    'chrome://accessibility/'
   ]
   var tabUrls = [tabUrls1, tabUrls2]
 
@@ -165,8 +174,8 @@ function getTabsOrBookmarksInfo (windowOrParentId, asBookmarks, tabSetNumber, ur
 function createSessionBookmarksFolder (bookmarkTreeNodes, callback) {
   var seshyFolder = bookmarkTreeNodes[0]
   var options = {
-    'parentId': seshyFolder.id, // From seshy.js
-    'title': 'Test Session'
+    parentId: seshyFolder.id, // From seshy.js
+    title: 'Test Session'
   }
   chrome.bookmarks.create(options, callback)
 }
@@ -183,7 +192,11 @@ function createBookmarks (sessionBookmarksFolder, callback) {
   asyncLoop(bookmarksInfo, createBookmark, callback)
 }
 
-function addWindowToSessionMapping (windowId, expectedSessionFolderId, callback) {
+function addWindowToSessionMapping (
+  windowId,
+  expectedSessionFolderId,
+  callback
+) {
   var items = {}
   items[windowId.toString()] = expectedSessionFolderId
   chrome.storage.local.set(items, () => {
@@ -200,7 +213,7 @@ function cleanUp (callback) {
   }
 
   var callGetSessionFolders = () => {
-    getSessionFolders((bookmarkFolders) => {
+    getSessionFolders(bookmarkFolders => {
       removeBookmarkFolders(bookmarkFolders, callback)
     })
   }
@@ -227,12 +240,12 @@ function getSessionFolders (callback) {
 }
 
 function getSessionFolderBookmarks (bookmarkFolder, callback) {
-  var getSessionFolderChildren = (bookmarkTreeNodes) => {
+  var getSessionFolderChildren = bookmarkTreeNodes => {
     var sessionFolder = bookmarkTreeNodes[0]
     chrome.bookmarks.getChildren(sessionFolder.id, returnChildren)
   }
 
-  var returnChildren = (bookmarkTreeNodes) => {
+  var returnChildren = bookmarkTreeNodes => {
     callback(bookmarkTreeNodes)
   }
 
@@ -247,7 +260,7 @@ function removeBookmarkFolders (bookmarkTreeNodes, callback) {
 }
 
 function removeAllWindows (callback) {
-  chrome.windows.getAll({}, (windows) => {
+  chrome.windows.getAll({}, windows => {
     removeWindows(windows, callback)
   })
 }
@@ -262,7 +275,7 @@ function removeWindows (windows, callback) {
 
 function getSeshyFolder (callback) {
   var query = {
-    'title': 'Seshy'
+    title: 'Seshy'
   }
   chrome.bookmarks.search(query, callback)
 }

@@ -1,0 +1,30 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug extension",
+      "url": "",
+      "webRoot": "${workspaceFolder}/main",
+      "runtimeArgs": ["--load-extension=${workspaceFolder}/main"]
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug tests",
+      "url": "",
+      "webRoot": "${workspaceFolder}/output",
+      "runtimeArgs": ["--load-extension=${workspaceFolder}/output"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug test launcher",
+      "program": "${workspaceFolder}/output/test/run-tests.js"
+    }
+  ]
+}
