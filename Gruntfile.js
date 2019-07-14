@@ -1,13 +1,8 @@
 module.exports = function (grunt) {
   grunt.initConfig({
-    eslint: {
-      target: ['main/js/*', 'test/*.js', 'test/spec/**/*.js']
-    },
-
     clean: {
       output: 'output/**'
     },
-
     copy: {
       main: {
         files: [
@@ -51,19 +46,36 @@ module.exports = function (grunt) {
         ]
       }
     },
-
-    exec: {
-      test: {
-        cmd: 'node output/test/run-tests.js'
-      },
-      run: {
-        cmd:
-          'google-chrome-stable --load-extension="output/" --user-data-dir=/tmp/chrome-test-data-dir --no-first-run --disable-gpu'
-      }
-    },
-
     crx: {
-      createTestArtefact: {
+      main: {
+        files: [
+          {
+            src: [
+              {
+                expand: true,
+                cwd: 'main/',
+                src: ['**']
+              },
+              {
+                src: [
+                  'node_modules/material-components-web/dist/material-components-web.js'
+                ]
+              },
+              {
+                expand: true,
+                src: [
+                  'node_modules/material-components-web/dist/material-components-web.css'
+                ]
+              }
+            ],
+            dest: 'output/seshy.crx'
+          }
+        ],
+        options: {
+          privateKey: 'seshy-development.pem'
+        }
+      },
+      test: {
         files: [
           {
             src: ['output/**'],
@@ -75,7 +87,18 @@ module.exports = function (grunt) {
         }
       }
     },
-
+    eslint: {
+      target: ['main/js/*', 'test/*.js', 'test/spec/**/*.js']
+    },
+    exec: {
+      test: {
+        cmd: 'node output/test/run-tests.js'
+      },
+      run: {
+        cmd:
+          'google-chrome-stable --load-extension="output/" --user-data-dir=/tmp/chrome-test-data-dir --no-first-run --disable-gpu'
+      }
+    },
     compress: {
       main: {
         files: [
@@ -101,25 +124,51 @@ module.exports = function (grunt) {
           mode: 'zip'
         }
       }
+    },
+    update_json: {
+      options: {
+        src: 'package.json',
+        indent: '\t'
+      },
+      manifest: {
+        dest: 'main/manifest.json',
+        fields: 'version, description'
+      }
+    },
+    webstore_upload: {
+      accounts: {
+        default: {
+          publish: true,
+          client_id: process.env.SESHY_CLIENT_ID,
+          client_secret: process.env.SESHY_CLIENT_SECRET,
+          refresh_token: process.env.SESHY_REFRESH_TOKEN
+        }
+      },
+      extensions: {
+        seshy: {
+          appID: 'noeieddjehppejohbbchbcmheecaneac',
+          zip: 'output/seshy.zip'
+        }
+      }
     }
   })
 
-  grunt.loadNpmTasks('grunt-eslint')
   grunt.loadNpmTasks('grunt-contrib-clean')
-  grunt.loadNpmTasks('grunt-contrib-copy')
-  grunt.loadNpmTasks('grunt-exec')
-  grunt.loadNpmTasks('grunt-crx')
   grunt.loadNpmTasks('grunt-contrib-compress')
+  grunt.loadNpmTasks('grunt-contrib-copy')
+  grunt.loadNpmTasks('grunt-crx')
+  grunt.loadNpmTasks('grunt-eslint')
+  grunt.loadNpmTasks('grunt-exec')
+  grunt.loadNpmTasks('grunt-update-json')
+  grunt.loadNpmTasks('grunt-webstore-upload')
 
   grunt.registerTask('lint', ['eslint'])
-  grunt.registerTask('test', [
-    'lint',
-    'clean',
-    'copy',
-    'crx:createTestArtefact',
-    'exec:test'
-  ])
+  grunt.registerTask('test', ['lint', 'clean', 'copy', 'crx:test', 'exec:test'])
   // TODO Can selectively copy files into CRX so earlier copy and clean tasks may be unnecessary.
   grunt.registerTask('run', ['clean', 'copy:main', 'exec:run'])
-  grunt.registerTask('publish', ['clean', 'lint', 'compress:main'])
+  grunt.registerTask('publish', [
+    'update_json',
+    'compress:main',
+    'webstore_upload'
+  ])
 }
