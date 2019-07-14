@@ -10,6 +10,7 @@ To **Seshy**, every Chrome window is a *session*. If a *session* is marked as *s
 The best way to get acquainted with Seshy development is to run the tests so that you can read the Jasmine specs that will be visible when the tests complete. Reading them will help you understand the concepts and Seshy's existing behaviour.
 1. `[sudo] npm install`
 2. `npm test`
+3. Make sure that the version of Chrome you are using is compatible with the chromedriver version installed.
 
 ### Methodology
 The way the tests work is a little wacky but allow me to explain.
@@ -25,4 +26,4 @@ The difficulty with this is that there is no easy way to get the test results an
 The key here is that Chrome Driver has greater access to the host system than a browser does so it is much easier to return the exit code Travis needs.
 
 # Contributing
-_Coming soon..._
+Just raise a PR :)

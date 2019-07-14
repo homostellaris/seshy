@@ -24,7 +24,8 @@
   },
   "scripts": {
     "test": "grunt test",
-    "start": "grunt run"
+    "start": "grunt run",
+    "postinstall": "npm install -g grunt-cli"
   },
   "repository": {
     "type": "git",
