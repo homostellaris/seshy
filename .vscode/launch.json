@@ -18,7 +18,10 @@
       "name": "Debug tests",
       "url": "",
       "webRoot": "${workspaceFolder}/output",
-      "runtimeArgs": ["--load-extension=${workspaceFolder}/output"]
+      "runtimeArgs": [
+        "--load-extension=${workspaceFolder}/output",
+        "--auto-open-devtools-for-tabs"
+      ]
     },
     {
       "type": "node",
