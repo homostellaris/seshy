@@ -12,7 +12,7 @@ before_install:
 script:
   - xvfb-run npm test
 after_success:
-  - grunt publish
+  - test $TRAVIS_BRANCH = "master" && test $TRAVIS_PULL_REQUEST = "false" && grunt publish
 env:
   global:
     - secure: Elj2VC4h5MsggCa0I9lVleM7PyRwEl7aqb9bzUHQefxIdbK2pANdVeTGcp0Bi72UM6v9ZeEKlNT2pIi7R1FrqHDB4OHUIi0sUUDnhcoqZwpU7Jnm4VXwX2RVBPvc16giHoSJbTyNMFz25Mm9knQytBchsTJscYdrIvBKYfx8y510BOH2n1BfJDhhFDrG6AawMPdyKg8fkfkQS/wTD3JNEfVVemsfPG8Wyo8qHzyOKw5QUTHHggN2IRA5mGnQYsc2VTT/vnCg1gKudqKNe/wnOc4DGNxtHGbv0GDmVkjYw1LQo/yz/ToOETuRd3zA4d6JNBiSEsxQeQqqxke9urUm49YLYzwjdB/seCHuTQrb0nUwzUiJdj4SuNjs4NVwpl9cY/esKoK7VElnTQmZe9wcYIYulwrbqgMU8X+3JWH7QRSNngEIjX4IfhwhmKaGtyNuIOsybCfpnPH1j6hCpNg8wpB+GfdAyR1M/6PoH+tj6GXVuu0L/p10Gz1RHYPJnicAj64fVwcAffVBDDBbMl8T9rUfR2MkYYUxTvlEnS7ikN/bUQbmg/ZM9t1nZpGI5TsCGm5NdI3YddXmHDNP8k80L+uz2IhuLfpmNix8N06/NzwQQG4+E9IYaUiKTYYVxug3fAb/Y0nbVlKIQEfBoQHrDXxIUwAABdLeBMrO5v4B0K8=
