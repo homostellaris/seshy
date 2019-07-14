@@ -4,6 +4,9 @@ addons:
 language: node_js
 node_js:
   - '6'
+stages:
+  - name: after_success
+    if: type = push AND branch = master
 before_install:
   - npm install -g grunt-cli
 script:
