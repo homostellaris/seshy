@@ -5,21 +5,21 @@
   "devDependencies": {
     "chromedriver": "^75.1.0",
     "eslint-config-standard": "^10.2.1",
-    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-import": "^2.18.0",
     "eslint-plugin-node": "^5.1.1",
-    "eslint-plugin-promise": "^3.5.0",
-    "eslint-plugin-standard": "^3.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0",
     "grunt": "~0.4.5",
     "grunt-contrib-clean": "^1.1.0",
-    "grunt-contrib-compress": "^1.4.3",
+    "grunt-contrib-compress": "^1.5.0",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-uglify": "~0.5.0",
     "grunt-crx": "^1.0.5",
-    "grunt-eslint": "^20.0.0",
+    "grunt-eslint": "^20.2.0",
     "grunt-exec": "^2.0.0",
     "grunt-update-json": "^0.2.2",
     "grunt-webstore-upload": "^0.9.24",
-    "jasmine-core": "^3.0.0",
+    "jasmine-core": "^3.4.0",
     "selenium-webdriver": "^3.5.0"
   },
   "scripts": {
@@ -46,7 +46,6 @@
   },
   "homepage": "https://github.com/moderatemisbehaviour/seshy#readme",
   "dependencies": {
-    "material-components-web": "^0.33.0",
-    "mousetrap": "^1.6.1"
+    "material-components-web": "^0.33.0"
   }
 }
