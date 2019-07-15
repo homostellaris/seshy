@@ -19,7 +19,6 @@ module.exports = function (grunt) {
             dest: 'output/'
           },
           {
-            expand: true,
             src: [
               'node_modules/material-components-web/dist/material-components-web.css'
             ],
@@ -48,40 +47,19 @@ module.exports = function (grunt) {
     },
     crx: {
       main: {
-        files: [
-          {
-            src: [
-              {
-                expand: true,
-                cwd: 'main/',
-                src: ['**']
-              },
-              {
-                src: [
-                  'node_modules/material-components-web/dist/material-components-web.js'
-                ]
-              },
-              {
-                expand: true,
-                src: [
-                  'node_modules/material-components-web/dist/material-components-web.css'
-                ]
-              }
-            ],
-            dest: 'output/seshy.crx'
-          }
+        src: [
+          'main/**',
+          'node_modules/material-components-web/dist/material-components-web.js',
+          'node_modules/material-components-web/dist/material-components-web.css'
         ],
+        dest: 'output/seshy.crx',
         options: {
           privateKey: 'seshy-development.pem'
         }
       },
       test: {
-        files: [
-          {
-            src: ['output/**'],
-            dest: 'output/test.crx'
-          }
-        ],
+        src: 'output/**',
+        dest: 'output/test.crx',
         options: {
           privateKey: 'seshy-development.pem'
         }
@@ -94,9 +72,9 @@ module.exports = function (grunt) {
       test: {
         cmd: 'node output/test/run-tests.js'
       },
-      run: {
+      main: {
         cmd:
-          'google-chrome-stable --load-extension="output/" --user-data-dir=/tmp/chrome-test-data-dir --no-first-run --disable-gpu'
+          'google-chrome-stable --load-extension="output/seshy.crx" --user-data-dir=/tmp/seshy/chrome-development-user-profile --no-first-run --disable-gpu'
       }
     },
     compress: {
@@ -113,7 +91,6 @@ module.exports = function (grunt) {
             ]
           },
           {
-            expand: true,
             src: [
               'node_modules/material-components-web/dist/material-components-web.css'
             ]
@@ -165,7 +142,7 @@ module.exports = function (grunt) {
   grunt.registerTask('lint', ['eslint'])
   grunt.registerTask('test', ['lint', 'clean', 'copy', 'crx:test', 'exec:test'])
   // TODO Can selectively copy files into CRX so earlier copy and clean tasks may be unnecessary.
-  grunt.registerTask('run', ['clean', 'copy:main', 'exec:run'])
+  grunt.registerTask('start', ['clean', 'copy:main', 'exec:main'])
   grunt.registerTask('publish', [
     'update_json',
     'compress:main',

@@ -8,7 +8,7 @@
       "type": "chrome",
       "request": "launch",
       "name": "Debug extension",
-      "url": "",
+      "url": "chrome://extensions/",
       "webRoot": "${workspaceFolder}/main",
       "runtimeArgs": ["--load-extension=${workspaceFolder}/main"]
     },
