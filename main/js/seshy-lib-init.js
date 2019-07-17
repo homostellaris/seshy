@@ -1,7 +1,9 @@
 /* global chrome getSession removeWindowToSessionFolderMapping checkIfSeshyFolderExists saveWindowAsBookmarkFolder
 checkIfSavedSession setBrowserActionIconToSaved isFunction asyncLoop debounceWaitTimeOverride */
-
-const debounceWaitTime = debounceWaitTimeOverride || 300
+const debounceWaitTime =
+  typeof debounceWaitTimeOverride === 'undefined'
+    ? 300
+    : debounceWaitTimeOverride
 
 function debounce (func, wait, immediate) {
   var timeout
