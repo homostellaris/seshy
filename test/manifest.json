@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "version": "1.0",
+  "version": "development",
 
   "name": "Seshy Test",
   "description": "Test Seshy using Jasmine.",
@@ -16,11 +16,5 @@
     "default_popup": "html/session-manager.html"
   },
 
-  "permissions": [
-    "bookmarks",
-    "windows",
-    "tabs",
-    "storage",
-    "browserAction"
-  ]
+  "permissions": ["bookmarks", "windows", "tabs", "storage", "browserAction"]
 }
