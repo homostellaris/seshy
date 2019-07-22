@@ -31,18 +31,10 @@ chrome.runtime.onSuspend.addListener(() => {
 
 // TODO Break these methods up into multiple independent listeners.
 chrome.windows.onCreated.addListener(
-  debounce(
-    removePotentiallyReusedWindowIdFromInternalMappingOfOpenSessions,
-    debounceWaitTime,
-    false
-  )
+  removePotentiallyReusedWindowIdFromInternalMappingOfOpenSessions
 )
 chrome.windows.onRemoved.addListener(
-  debounce(
-    removeClosedSessionFromInternalMappingOfOpenSessions,
-    debounceWaitTime,
-    false
-  )
+  removeClosedSessionFromInternalMappingOfOpenSessions
 )
 chrome.windows.onFocusChanged.addListener(setBrowserActionIcon)
 chrome.tabs.onUpdated.addListener(
