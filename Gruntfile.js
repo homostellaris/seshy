@@ -107,8 +107,12 @@ module.exports = function (grunt) {
         src: 'package.json',
         indent: '\t'
       },
-      manifest: {
+      main: {
         dest: 'main/manifest.json',
+        fields: 'version, description'
+      },
+      test: {
+        dest: 'test/manifest.json',
         fields: 'version, description'
       }
     },
