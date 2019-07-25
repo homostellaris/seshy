@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="128"
+   height="128"
+   viewBox="0 0 33.866665 33.866667"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="seshy - app icon.svg"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
+   inkscape:export-filename="/Users/dan/repos/seshy/brand/seshy - app icon.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
+  <defs
+     id="defs2">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 37.041668 : 1"
+       inkscape:vp_y="0 : 999.99999 : 0"
+       inkscape:vp_z="116.41666 : 37.041668 : 1"
+       inkscape:persp3d-origin="58.20833 : 24.694445 : 1"
+       id="perspective43" />
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath1082">
+      <rect
+         style="fill:#00ff00;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         id="rect1084"
+         width="116.41666"
+         height="74.083336"
+         x="5.0862632e-06"
+         y="-1.2715658e-06"
+         rx="0"
+         ry="0" />
+    </clipPath>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="3.959798"
+     inkscape:cx="73.774083"
+     inkscape:cy="86.05941"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer2"
+     showgrid="false"
+     units="px"
+     showguides="false"
+     inkscape:guide-bbox="true"
+     inkscape:lockguides="false"
+     inkscape:window-width="1680"
+     inkscape:window-height="1005"
+     inkscape:window-x="0"
+     inkscape:window-y="1"
+     inkscape:window-maximized="1"
+     scale-x="5.8"
+     inkscape:measure-start="-59.599,297.995"
+     inkscape:measure-end="0,0">
+    <sodipodi:guide
+       position="93.945237,50.380305"
+       orientation="1,0"
+       inkscape:locked="false"
+       id="guide854" />
+    <inkscape:grid
+       type="xygrid"
+       id="grid864" />
+    <sodipodi:guide
+       position="-10.824416,111.74941"
+       orientation="0,1"
+       id="guide4555"
+       inkscape:locked="false"
+       inkscape:label=""
+       inkscape:color="rgb(0,0,255)" />
+    <sodipodi:guide
+       position="-17.372518,55.592063"
+       orientation="0,1"
+       id="guide1951"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Background"
+     style="display:none"
+     transform="translate(0,-40.21667)">
+    <rect
+       style="display:inline;fill:#1a1a1a;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       id="rect3223"
+       width="25.4"
+       height="25.4"
+       x="4.2333336"
+       y="44.450005" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Main text"
+     style="display:inline"
+     transform="translate(0,-40.21667)">
+    <g
+       id="g990"
+       transform="matrix(0.43682235,0,0,0.38832355,-21.986057,74.774574)">
+      <path
+         sodipodi:nodetypes="cccccc"
+         inkscape:connector-curvature="0"
+         id="rect853"
+         d="m 75.29505,-78.09099 h 27.60312 v 65.409374 l -13.438008,-9.366428 -14.165112,9.366428 z"
+         style="display:inline;fill:#ff7f2a;fill-opacity:1;stroke:none;stroke-width:0.61027968" />
+      <g
+         aria-label="Seshy"
+         transform="matrix(0.5566881,0,0,0.66903045,44.372185,-117.06278)"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:86.66667175px;line-height:1.25;font-family:Boogaloo;-inkscape-font-specification:'Boogaloo, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:5.55000019px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1"
+         id="flowRoot68">
+        <path
+           d="m 86.27685,93.906572 q 1.126667,-4.246667 1.126667,-7.106667 0,-2.86 -1.56,-4.68 -1.56,-1.906667 -4.073333,-1.906667 -2.426667,0 -4.073334,2.426667 -1.646667,2.426667 -1.646667,5.546667 0,6.066667 6.933334,10.4 6.933334,4.506668 9.446667,6.499998 2.513334,1.99334 3.553334,3.64 2.6,4.24667 2.6,8.75334 0,7.8 -5.286667,12.48 -5.2,4.59333 -11.786667,4.59333 -7.800001,0 -13.086668,-6.58667 -3.813333,-4.76666 -7.02,-11.87333 l 8.406667,-4.07333 q 1.993333,5.2 4.94,8.84 3.033334,3.55333 6.413334,3.55333 2.166667,0 3.9,-1.38667 1.733334,-1.38666 1.733334,-4.16 0,-2.86 -2.166667,-5.28666 -2.166667,-2.42667 -5.806667,-4.94 -3.64,-2.51334 -5.633334,-4.07334 -1.993333,-1.64666 -4.42,-4.16 -4.593334,-4.853331 -4.593334,-12.393332 0,-7.626667 5.286667,-12.74 5.286667,-5.200001 12.566668,-5.200001 7.28,0 12.22,5.633334 5.026667,5.633334 5.026667,11.613334 0,5.893334 -2.253333,10.140001 z"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:86.66667175px;font-family:Boogaloo;-inkscape-font-specification:'Boogaloo, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:5.5px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;stroke:none;stroke-width:1"
+           id="path2532"
+           inkscape:connector-curvature="0" />
+      </g>
+    </g>
+  </g>
+</svg>
