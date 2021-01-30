@@ -3,7 +3,7 @@
   "version": "0.1.10",
   "description": "Chrome extension for effortlessly syncing browsing sessions.",
   "devDependencies": {
-    "chromedriver": "^75.1.0",
+    "chromedriver": "^88.0.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.18.0",
     "eslint-plugin-node": "^5.1.1",

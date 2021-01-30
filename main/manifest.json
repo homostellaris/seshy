@@ -26,6 +26,7 @@
 			}
 		}
 	},
+	"content_security_policy": "default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' https://unpkg.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;",
 	"icons": {
 		"16": "images/seshy-logo-16.png",
 		"48": "images/seshy-logo-48.png",
