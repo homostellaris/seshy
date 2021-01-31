@@ -297,7 +297,7 @@ function getAllSessionFolders (callback) {
 }
 
 function getAllOpenWindows (callback) {
-  chrome.windows.getAll({populate: true}, callback)
+  chrome.windows.getAll({populate: true, windowTypes: ['normal']}, callback)
 }
 
 function checkIfSavedSession (windowToCheckId, callback) {
