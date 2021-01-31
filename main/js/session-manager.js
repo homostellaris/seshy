@@ -493,10 +493,10 @@ function finishEditingSession (session, callback) {
 
 function finishRenamingSession (session, callback) {
   if (session.saved()) {
-    console.warn('Renaming selected session.')
+    console.info('Renaming selected session.')
     renameSelectedSession()
   } else {
-    console.warn('Saving selected session.')
+    console.info('Saving selected session.')
     saveSelectedSession()
   }
   if (isFunction(callback)) callback()
