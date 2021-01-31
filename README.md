@@ -7,6 +7,8 @@ To **Seshy**, every Chrome window is a *session*. If a *session* is marked as *s
 
 # Testing
 ### Running the tests.
+Note: Tests are currently being migrated to Jest and Playwright but there is an [outstanding bug](https://github.com/microsoft/playwright/issues/2676) blocking the use of Playwright.
+
 The best way to get acquainted with Seshy development is to run the tests so that you can read the Jasmine specs that will be visible when the tests complete. Reading them will help you understand the concepts and Seshy's existing behaviour.
 1. `[sudo] npm install`
 2. `npm test`

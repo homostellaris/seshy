@@ -7,7 +7,7 @@ const promise = require('selenium-webdriver/lib/promise')
 var chromeOptions = new chrome.Options()
 chromeOptions.addArguments('--no-sandbox')
 chromeOptions.addArguments('start-maximized')
-chromeOptions.addExtensions('output/test.crx')
+chromeOptions.addArguments('--load-extension=test/')
 
 var driver = new Builder()
   .forBrowser('chrome')
