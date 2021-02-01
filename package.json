@@ -26,9 +26,11 @@
     "selenium-webdriver": "^3.5.0"
   },
   "scripts": {
-    "test": "jest **/*.spec.js",
+    "e2e": "node src/index.test.js",
+    "postinstall": "npm install -g grunt-cli",
+    "test": "npm run unit",
     "start": "grunt run",
-    "postinstall": "npm install -g grunt-cli"
+    "unit": "jest **/*.spec.js"
   },
   "repository": {
     "type": "git",

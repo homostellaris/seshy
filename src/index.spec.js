@@ -1,5 +1,5 @@
 describe('When things happen', () => {
   it('it is good', () => {
-    console.log('Yo')
+    expect(chrome.bookmarks).not.toBeNull()
   })
 })
