@@ -297,7 +297,7 @@ function getAllSessionFolders (callback) {
 }
 
 function getAllOpenWindows (callback) {
-  chrome.windows.getAll({populate: true}, callback)
+  chrome.windows.getAll({populate: true, windowTypes: ['normal']}, callback)
 }
 
 function checkIfSavedSession (windowToCheckId, callback) {
@@ -348,9 +348,9 @@ function saveWindowAsBookmarkFolder (window, bookmarkFolderId, callback) {
 }
 
 function saveTabsAsBookmarks (tabs, bookmarkFolderId, callback) {
-  console.warn('Creating %d bookmarks.', tabs.length)
+  console.info('Creating %d bookmarks.', tabs.length)
   for (var i = 0; i < tabs.length; i++) {
-    console.warn('Creating bookmark %d', i + 1)
+    console.info('Creating bookmark %d', i + 1)
     var tab = tabs[i]
 
     var createProperties = {
@@ -369,9 +369,9 @@ function saveTabsAsBookmarks (tabs, bookmarkFolderId, callback) {
 }
 
 function removeBookmarks (bookmarkTreeNodes, callback) {
-  console.warn('Removing %d tabs.', bookmarkTreeNodes.length)
+  console.info('Removing %d tabs.', bookmarkTreeNodes.length)
   for (var i = 0; i < bookmarkTreeNodes.length; i++) {
-    console.warn('Removing tab %d', i + 1)
+    console.info('Removing tab %d', i + 1)
     var bookmarkTreeNode = bookmarkTreeNodes[i]
     chrome.bookmarks.remove(bookmarkTreeNode.id)
 
