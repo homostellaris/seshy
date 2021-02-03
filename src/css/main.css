@@ -1,36 +1,13 @@
-* {
-  margin: 0;
-  padding: 0;
-}
-
 body {
   width: 600px;
   padding-bottom: 0.5em;
-  background-color: #f1f1f1;
-}
-
-button {
-  padding: 0;
-  margin: 0 8px;
-  border: none;
-  background-color: transparent;
-  cursor: pointer;
-}
-
-a {
-  text-decoration: none;
+  background-color: #F1F1F1;
 }
 
 #keyboard-shortcuts table {
   border-spacing: 1em;
 }
 
-#title {
-  font-family: 'Boogaloo', cursive;
-  font-size: 2rem;
-}
-
-/* TODO: Use material components theming instead. */
-.mdc-top-app-bar__section {
-  background-color: #ff7f2a;
+.placeholder:not(:only-child) {
+  display: none;
 }
