@@ -40,7 +40,7 @@ export class SessionManager {
    */
   createSessionElements (callback) {
     var createCurrentlyOpenSessions = (storageObject) => {
-      chrome.windows.getAll({'populate': true}, (windows) => {
+      chrome.windows.getAll({'populate': true, windowTypes: ['normal']}, (windows) => {
         createSessionsFromWindows(windows, storageObject)
       })
     }

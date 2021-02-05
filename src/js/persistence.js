@@ -306,7 +306,7 @@ export class BookmarkPersistenceManager {
   }
 
   getAllOpenWindows (callback) {
-    chrome.windows.getAll({'populate': true}, callback)
+    chrome.windows.getAll({populate: true, windowTypes: ['normal']}, callback)
   }
 
   checkIfSavedSession (windowToCheckId, callback) {
@@ -339,7 +339,7 @@ export class BookmarkPersistenceManager {
 
     var removeBookmarksInFolder = (bookmarkTreeNodes) => {
       if (chrome.runtime.lastError) {
-        console.warn('Tried to save but bookmark folder was not found. Must have been removed since the tab updated ' +
+        console.info('Tried to save but bookmark folder was not found. Must have been removed since the tab updated ' +
         'handler was called.')
         callback()
       } else {
@@ -355,9 +355,9 @@ export class BookmarkPersistenceManager {
   }
 
   saveTabsAsBookmarks (tabs, bookmarkFolderId, callback) {
-    console.warn('Creating %d bookmarks.', tabs.length)
+    console.info('Creating %d bookmarks.', tabs.length)
     for (var i = 0; i < tabs.length; i++) {
-      console.warn('Creating bookmark %d', i + 1)
+      console.info('Creating bookmark %d', i + 1)
       var tab = tabs[i]
 
       var createProperties = {
@@ -376,9 +376,9 @@ export class BookmarkPersistenceManager {
   }
 
   removeBookmarks (bookmarkTreeNodes, callback) {
-    console.warn('Removing %d tabs.', bookmarkTreeNodes.length)
+    console.info('Removing %d tabs.', bookmarkTreeNodes.length)
     for (var i = 0; i < bookmarkTreeNodes.length; i++) {
-      console.warn('Removing tab %d', i + 1)
+      console.info('Removing tab %d', i + 1)
       var bookmarkTreeNode = bookmarkTreeNodes[i]
       chrome.bookmarks.remove(bookmarkTreeNode.id)
 

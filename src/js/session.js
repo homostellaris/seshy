@@ -157,10 +157,10 @@ Session.prototype.finishEditingSession = function (session, callback) {
 
 Session.prototype.finishRenamingSession = function (session, callback) {
   if (session.saved()) {
-    console.warn('Renaming selected session.')
+    console.info('Renaming selected session.')
     this.renameSession()
   } else {
-    console.warn('Saving selected session.')
+    console.info('Saving selected session.')
     this.saveSession()
   }
   if (isFunction(callback)) callback()
