@@ -1,6 +1,6 @@
 /* global chrome */
 
-import { isFunction, asyncLoop } from './util.js'
+import { isFunction, asyncLoop } from '../util.js'
 import { BookmarkPersistenceManager } from './persistence.js'
 
 /* global chrome getSession removeWindowToSessionFolderMapping checkIfSeshyFolderExists saveWindowAsBookmarkFolder
@@ -115,14 +115,14 @@ function saveSessionIfNoPendingTabUpdatedListenerCalls (
 }
 
 export function setBrowserActionIconToUnsaved () {
-  chrome.browserAction.setIcon({path: '../images/unsaved.png'})
+  chrome.browserAction.setIcon({path: '../status/unsaved.png'})
 }
 
 export function setBrowserActionIconToSaving () {
-  chrome.browserAction.setIcon({path: '../images/saving.png'})
+  chrome.browserAction.setIcon({path: '../status/saving.png'})
 }
 export function setBrowserActionIconToSaved () {
-  chrome.browserAction.setIcon({path: '../images/saved.png'})
+  chrome.browserAction.setIcon({path: '../status/saved.png'})
 }
 
 // TODO: This may delete the mapping that was just stored by resuming a saved session. Need to move the storage from

@@ -1,6 +1,6 @@
 /* global chrome */
 
-import { isFunction, asyncLoop, getSessionNameInput } from '/js/util.js'
+import { isFunction, asyncLoop, getSessionNameInput } from '/util.js'
 
 export class BookmarkPersistenceManager {
   // ---===~ Storage ~===-----------------------------------------------------------------------------------------------
@@ -402,8 +402,8 @@ export class BookmarkPersistenceManager {
     }
   }
 
-  // TODO Duplicate of the function in backend.js
+  // TODO Duplicate of the function in api.js
   setBrowserActionIconToSaved () {
-    chrome.browserAction.setIcon({path: '../images/saved.png'})
+    chrome.browserAction.setIcon({path: '../status/saved.png'})
   }
 }

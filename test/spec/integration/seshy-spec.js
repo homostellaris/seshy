@@ -6,7 +6,7 @@ import { TestDataCreator } from '/test/spec/integration/test-data-creator.js'
 import { SessionManager } from '/js/session-manager.js'
 import {
   setBrowserActionIconToUnsaved, setBrowserActionIconToSaved, setBrowserActionIconToSaving
-} from '/js/backend.js'
+} from '/js/api.js'
 import { assertSessionWindowTabs } from '/test/spec/assertions.js'
 
 describe('Integration tests.', function () {
@@ -209,7 +209,7 @@ describe('Integration tests.', function () {
 
         it("Is an 'bookmark border' icon when the currently focused session is unsaved.", function (done) {
           var assertBrowserActionIconSetToUnsavedState = () => {
-            expect(chrome.browserAction.setIcon).toHaveBeenCalledWith({path: '../images/unsaved.png'})
+            expect(chrome.browserAction.setIcon).toHaveBeenCalledWith({path: '../status/unsaved.png'})
             // TODO Assert icon is changed back to idle.
             done()
           }
@@ -220,7 +220,7 @@ describe('Integration tests.', function () {
 
         it("Is a 'sync' icon whilst a session save is pending.", function (done) {
           var assertBrowserActionIconSetToSavingState = () => {
-            expect(chrome.browserAction.setIcon).toHaveBeenCalledWith({path: '../images/saving.png'})
+            expect(chrome.browserAction.setIcon).toHaveBeenCalledWith({path: '../status/saving.png'})
             // TODO Assert icon is changed back to idle.
             done()
           }
@@ -234,7 +234,7 @@ describe('Integration tests.', function () {
 
         it("Is a 'bookmark' icon when the currently focused session is saved.", function (done) {
           var assertBrowserActionIconSetToSavedState = () => {
-            expect(chrome.browserAction.setIcon).toHaveBeenCalledWith({path: '../images/saved.png'})
+            expect(chrome.browserAction.setIcon).toHaveBeenCalledWith({path: '../status/saved.png'})
             // TODO Assert icon is changed back to idle.
             done()
           }

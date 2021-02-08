@@ -1,7 +1,7 @@
 /* global chrome */
 
-import { BookmarkPersistenceManager } from '/js/persistence.js'
-import { isFunction, getSessionNameInput } from '/js/util.js'
+import { BookmarkPersistenceManager } from '/persistence/index.js'
+import { isFunction, getSessionNameInput } from '/util.js'
 
 var bookmarkPersistenceManager = new BookmarkPersistenceManager()
 

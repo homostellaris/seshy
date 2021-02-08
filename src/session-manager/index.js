@@ -1,8 +1,8 @@
 /* global chrome mdc */
 
-import { BookmarkPersistenceManager } from '/js/persistence.js'
-import { asyncLoop, isFunction, getSessionNameInput } from '/js/util.js'
-import { Session } from '/js/session.js'
+import { BookmarkPersistenceManager } from '/persistence/index.js'
+import { asyncLoop, isFunction, getSessionNameInput } from '/util.js'
+import { Session } from '/session.js'
 
 var bookmarkPersistenceManager = new BookmarkPersistenceManager()
 
