@@ -210,7 +210,7 @@ Session.prototype.sessionIsBeingRenamed = function (element) {
   if (element.classList.contains('edit-icon')) {
     editIcon = element
   } else {
-    editIcon = this.getElementsByClassName('edit-icon')[0]
+    editIcon = this.element.getElementsByClassName('edit-icon')[0]
   }
   return Boolean(editIcon.textContent === 'done')
 }
