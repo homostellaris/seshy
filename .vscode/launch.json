@@ -8,9 +8,10 @@
       "name": "Launch Chrome",
       "request": "launch",
       "type": "pwa-chrome",
-      "url": "chrome-extension://eofmjdpbknpodfmdfpkcneiialiodobm/html/session-manager.html",
+      "url": "chrome-extension://eofmjdpbknpodfmdfpkcneiialiodobm/session-manager/index.html",
       "webRoot": "${workspaceFolder}/src",
       "runtimeArgs": ["--load-extension=${workspaceFolder}/src"],
+      "userDataDir": false
       // "urlFilter": "chrome-extension://*"
     },
   ]
