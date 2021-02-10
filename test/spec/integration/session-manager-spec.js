@@ -1,4 +1,5 @@
-/* global chrome cleanUp */
+/* global chrome */
+
 xdescribe('Session manager.', function () {
   function navigateToSessionManager (callback) {
     var extensionId = chrome.runtime.id
@@ -27,7 +28,7 @@ xdescribe('Session manager.', function () {
       })
 
       afterEach(function (done) {
-        cleanUp(done)
+        this.testDataCreator.cleanUp(done)
       })
     })
   })

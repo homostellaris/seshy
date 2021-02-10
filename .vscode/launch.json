@@ -5,29 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "chrome",
+      "name": "Launch Chrome",
       "request": "launch",
-      "name": "Debug extension",
-      "url": "chrome://extensions/",
-      "webRoot": "${workspaceFolder}/main",
-      "runtimeArgs": ["--load-extension=${workspaceFolder}/main"]
+      "type": "pwa-chrome",
+      "url": "chrome-extension://eofmjdpbknpodfmdfpkcneiialiodobm/session-manager/index.html",
+      "webRoot": "${workspaceFolder}/src",
+      "runtimeArgs": ["--load-extension=${workspaceFolder}/src"],
+      "userDataDir": false
+      // "urlFilter": "chrome-extension://*"
     },
-    {
-      "type": "chrome",
-      "request": "launch",
-      "name": "Debug tests",
-      "url": "",
-      "webRoot": "${workspaceFolder}/output",
-      "runtimeArgs": [
-        "--load-extension=${workspaceFolder}/output",
-        "--auto-open-devtools-for-tabs"
-      ]
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Debug test launcher",
-      "program": "${workspaceFolder}/output/test/run-tests.js"
-    }
   ]
 }

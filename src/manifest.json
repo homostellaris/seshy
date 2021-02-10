@@ -4,17 +4,13 @@
 	"version": "0.1.10",
 	"description": "Chrome extension for effortlessly syncing browsing sessions.",
 	"background": {
-		"scripts": [
-			"js/util.js",
-			"js/seshy-lib.js",
-			"js/seshy-lib-init.js"
-		],
+    "page": "api/index.html",
 		"persistent": false
 	},
 	"browser_action": {
-		"default_icon": "images/unsaved.png",
+		"default_icon": "/status/unsaved.png",
 		"default_title": "Manage your sessions.",
-		"default_popup": "html/session-manager.html"
+		"default_popup": "/session-manager/index.html"
 	},
 	"commands": {
 		"_execute_browser_action": {
@@ -28,9 +24,9 @@
 	},
 	"content_security_policy": "default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' https://unpkg.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;",
 	"icons": {
-		"16": "images/seshy-logo-16.png",
-		"48": "images/seshy-logo-48.png",
-		"128": "images/seshy-logo-128.png"
+		"16": "icons/seshy-logo-16.png",
+		"48": "icons/seshy-logo-48.png",
+		"128": "icons/seshy-logo-128.png"
 	},
 	"permissions": [
 		"bookmarks",

@@ -8,7 +8,6 @@
       rel="stylesheet"
       href="../node_modules/jasmine-core/lib/jasmine-core/jasmine.css"
     />
-
     <link
       rel="stylesheet"
       href="../node_modules/material-components-web/dist/material-components-web.css"
@@ -101,18 +100,18 @@
   <script src="../node_modules/material-components-web/dist/material-components-web.js"></script>
 
   <!-- Source files. -->
-  <script src="setupTests.js"></script>
-  <script src="../js/util.js"></script>
-  <script src="../js/seshy-lib.js"></script>
-  <script src="../js/session-manager.js"></script>
-  <script src="../js/seshy-lib-init.js"></script>
+  <script type="module" src="/js/session.js"></script>
+  <script type="module" src="/js/util.js"></script>
+  <script type="module" src="/js/persistence.js"></script>
+  <script type="module" src="/js/api.js"></script>
+  <script type="module" src="/js/session-manager.js"></script>
   <!-- Helper files. -->
-  <script src="spec/assertions.js"></script>
+  <script type="module" src="/test/spec/assertions.js"></script>
   <!-- Unit tests. -->
-  <script src="spec/unit/session-manager-spec-unit.js"></script>
+  <script type="module" src="/test/spec/unit/session-manager-spec-unit.js"></script>
   <!-- Integration tests. -->
-  <script src="spec/integration/test-data-creator.js"></script>
-  <script src="spec/integration/seshy-spec.js"></script>
-  <!-- <script src="spec/integration/session-manager-spec.js"></script> -->
-  <!-- <script src="spec/integration/more-information-spec.js"></script> -->
+  <script type="module" src="/test/spec/integration/test-data-creator.js"></script>
+  <script type="module" src="/test/spec/integration/seshy-spec.js"></script>
+  <script src="/test/spec/integration/session-manager-spec.js"></script>
+  <script src="/test/spec/integration/more-information-spec.js"></script>
 </html>
