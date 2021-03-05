@@ -5,7 +5,7 @@
   "scripts": {
     "postinstall": "npm install -g grunt-cli",
     "test": "ava --timeout=2m **/*.test.js",
-    "start": "grunt run",
+    "start": "grunt run"
   },
   "type": "module",
   "repository": {

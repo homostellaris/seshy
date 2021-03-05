@@ -34,13 +34,9 @@ test.beforeEach(async t => {
   await page.goto(`chrome-extension://${extensionId}/session-manager/index.html`)
 })
 
-// test.afterEach(async t => {
-//   await t.context.browserContext.close();
-// })
-
-// test.after(_ => {
-//   fs.rmdirSync('/tmp/seshy-development/', { recursive: true });
-// })
+test.afterEach(async t => {
+  await t.context.browserContext.close();
+})
 
 test('Saving and re-opening sessions', async t => {
   const {sessionManagerPage} = t.context
@@ -90,15 +86,12 @@ test('Deleting sessions', async t => {
 
   await createTabs(sessionManagerPage, window.id, urls)
   await closeNewTab(sessionManagerPage, window)
-  await sessionManagerPage.waitForTimeout(2000)
 
   const savedSessionName = 'Test session'
   await updateSessionName(sessionManagerPage, savedSessionName)
   await assertSessionName(t, sessionManagerPage, savedSessionName)
-  await sessionManagerPage.waitForTimeout(2000)
 
   await closeWindow(sessionManagerPage, window.id)
-  await sessionManagerPage.waitForTimeout(2000)
   // Assert in shelved sessions list
 
   await sessionManagerPage.reload()

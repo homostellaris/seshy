@@ -185,7 +185,11 @@ export class BookmarkPersistenceManager {
     } else if (session.currentlyOpen()) {
       var updateInfo = {'focused': true}
       chrome.windows.update(session.window.id, updateInfo, () => {
-        session.updateWindow(callback)
+        if (isFunction(callback)) {
+          session.updateWindow(callback)
+        } else {
+          session.updateWindow()
+        }
       })
     } else {
       extractUrlsFromBookmarks(session)
