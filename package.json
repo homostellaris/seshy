@@ -3,11 +3,9 @@
   "version": "0.1.10",
   "description": "Chrome extension for effortlessly syncing browsing sessions.",
   "scripts": {
-    "e2e": "jest .*.test.js",
     "postinstall": "npm install -g grunt-cli",
-    "test": "ava src/session-persistence.test.js",
+    "test": "ava --timeout=2m **/*.test.js",
     "start": "grunt run",
-    "unit": "jest .*.spec.js"
   },
   "type": "module",
   "repository": {

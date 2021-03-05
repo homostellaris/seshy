@@ -1,6 +1,7 @@
-// process.on('unhandledRejection', up => { throw up })
+process.on('unhandledRejection', up => undefined)
 import test from 'ava'
 import {chromium} from 'playwright'
+import fs from 'fs'
 
 const exampleDotCom = 'http://example.com/'
 const githubDotCom = 'https://github.com/'
@@ -14,7 +15,7 @@ const urls = [
 
 test.beforeEach(async t => {
   const pathToExtension = 'src/'
-  const userDataDir = `/tmp/seshy-development/test-runs/${Date.now()}`
+  const userDataDir = `/tmp/seshy-development/test-runs/${parseInt(Math.random() * 1000000)}`
   console.log(userDataDir)
 
   const browserContext = t.context.browserContext = await chromium.launchPersistentContext(userDataDir,{
@@ -33,9 +34,13 @@ test.beforeEach(async t => {
   await page.goto(`chrome-extension://${extensionId}/session-manager/index.html`)
 })
 
-test.afterEach(async t => {
-  await t.context.browserContext.close();
-})
+// test.afterEach(async t => {
+//   await t.context.browserContext.close();
+// })
+
+// test.after(_ => {
+//   fs.rmdirSync('/tmp/seshy-development/', { recursive: true });
+// })
 
 test('Saving and re-opening sessions', async t => {
   const {sessionManagerPage} = t.context
@@ -60,7 +65,7 @@ test('Saving and re-opening sessions', async t => {
   // Assert in shelved sessions list
 
   await sessionManagerPage.reload()
-  const [page, _] = await Promise.all([
+  await Promise.all([
     t.context.browserContext.waitForEvent('page'),
     openShelvedSession(sessionManagerPage, savedSessionName)
   ])
@@ -71,7 +76,42 @@ test('Saving and re-opening sessions', async t => {
   await assertWindowTabUrls(t, unshelvedSessionWindow, urls)
 })
 
-test.todo('Deleting sessions')
+test('Deleting sessions', async t => {
+  const {sessionManagerPage} = t.context
+
+  /* This is breaking the fourth wall a bit because its actually a window with the session manager
+   * that we're making assertions against.
+   */ 
+  await assertOneUnsavedSession(t, sessionManagerPage)
+
+  const window = await createWindow(sessionManagerPage)
+  await sessionManagerPage.reload()
+  await assertTwoUnsavedSessions(t, sessionManagerPage)
+
+  await createTabs(sessionManagerPage, window.id, urls)
+  await closeNewTab(sessionManagerPage, window)
+  await sessionManagerPage.waitForTimeout(2000)
+
+  const savedSessionName = 'Test session'
+  await updateSessionName(sessionManagerPage, savedSessionName)
+  await assertSessionName(t, sessionManagerPage, savedSessionName)
+  await sessionManagerPage.waitForTimeout(2000)
+
+  await closeWindow(sessionManagerPage, window.id)
+  await sessionManagerPage.waitForTimeout(2000)
+  // Assert in shelved sessions list
+
+  await sessionManagerPage.reload()
+  await Promise.all([
+    t.context.browserContext.waitForEvent('page'),
+    openShelvedSession(sessionManagerPage, savedSessionName)
+  ])
+
+  await sessionManagerPage.reload()
+  await assertInCurrentlyOpenSessionList(t, sessionManagerPage, savedSessionName)
+  const unshelvedSessionWindow = await getCurrentWindow(sessionManagerPage)
+  await assertWindowTabUrls(t, unshelvedSessionWindow, urls)
+})
 
 async function assertOneUnsavedSession(t, sessionManagerPage) {
   const sessions = await sessionManagerPage.$$('.session-card')
