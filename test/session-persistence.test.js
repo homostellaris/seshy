@@ -1,7 +1,5 @@
-process.on('unhandledRejection', up => undefined)
 import test from 'ava'
 import {chromium} from 'playwright'
-import fs from 'fs'
 
 // TODO: Move to separate files.
 const unsavedSessionName = 'Unsaved Session'
@@ -157,6 +155,7 @@ async function closeWindow(sessionManagerPage, windowId) {
 
 async function resumeSession(sessionManagerPage, sessionName) {
   const resumeButton = await sessionManagerPage.$(`.session-card:has(.session-name-input[value="${sessionName}"]) .resume-button`)
+  console.log(await sessionManagerPage.innerHTML('body'))
   await resumeButton.click()
 }
 
