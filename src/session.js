@@ -46,6 +46,7 @@ Session.prototype.updateWindow = function (callback) {
   var session = this
   function setWindowAndCallback (updatedWindow) {
     session.window = updatedWindow
+    console.log(callback)
     callback(updatedWindow)
   }
 

@@ -4,7 +4,7 @@
 	"version": "0.1.10",
 	"description": "Chrome extension for effortlessly syncing browsing sessions.",
 	"background": {
-    "page": "api/index.html",
+    "page": "worker/index.html",
 		"persistent": false
 	},
 	"browser_action": {

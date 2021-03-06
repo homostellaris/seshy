@@ -43,7 +43,7 @@ chrome.windows.onRemoved.addListener(
 )
 chrome.windows.onFocusChanged.addListener(setBrowserActionIcon)
 chrome.tabs.onUpdated.addListener(
-  debounce(scheduleSaveSessionIfNecessary, debounceWaitTime, false)
+  scheduleSaveSessionIfNecessary
 )
 
 var pendingTabUpdatedListenerCalls = 0

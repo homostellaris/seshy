@@ -185,7 +185,11 @@ export class BookmarkPersistenceManager {
     } else if (session.currentlyOpen()) {
       var updateInfo = {'focused': true}
       chrome.windows.update(session.window.id, updateInfo, () => {
-        session.updateWindow(callback)
+        if (isFunction(callback)) {
+          session.updateWindow(callback)
+        } else {
+          session.updateWindow()
+        }
       })
     } else {
       extractUrlsFromBookmarks(session)
@@ -356,6 +360,8 @@ export class BookmarkPersistenceManager {
 
   saveTabsAsBookmarks (tabs, bookmarkFolderId, callback) {
     console.info('Creating %d bookmarks.', tabs.length)
+    // TODO: Validate bookmarks have URLs otherwise they become folders
+    // From the docs: "If url is NULL or missing, it will be a folder."
     for (var i = 0; i < tabs.length; i++) {
       console.info('Creating bookmark %d', i + 1)
       var tab = tabs[i]
