@@ -1,7 +1,7 @@
 /* global chrome */
 
-import { isFunction, asyncLoop } from '../util.js'
-import { BookmarkPersistenceManager } from '../persistence/index.js'
+importScripts('./util.js');
+importScripts('./persistence/index.js');
 
 /* global chrome getSession removeWindowToSessionFolderMapping checkIfSeshyFolderExists saveWindowAsBookmarkFolder
 checkIfSavedSession setBrowserActionIconToSaved isFunction asyncLoop debounceWaitTimeOverride */
