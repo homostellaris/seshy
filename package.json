@@ -3,9 +3,7 @@
   "version": "0.1.10",
   "description": "Chrome extension for effortlessly syncing browsing sessions.",
   "scripts": {
-    "postinstall": "npm install -g grunt-cli",
-    "test": "ava --timeout=2m **/*.test.js",
-    "start": "grunt run"
+    "test": "ava --timeout=2m **/*.test.js"
   },
   "type": "module",
   "repository": {
@@ -30,16 +28,13 @@
     "material-components-web": "^0.33.0"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.20",
     "ava": "^3.15.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.18.0",
     "eslint-plugin-node": "^5.1.1",
     "eslint-plugin-promise": "^3.8.0",
     "eslint-plugin-standard": "^3.1.0",
-    "jasmine-core": "^3.4.0",
-    "jest": "^26.6.3",
-    "jest-chrome": "^0.7.0",
-    "playwright": "^1.8.0"
+    "playwright": "^1.8.0",
+    "snowpack": "^3.0.13"
   }
 }
