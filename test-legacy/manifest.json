@@ -19,6 +19,6 @@
 		"windows",
 		"tabs",
 		"storage",
-		"browserAction"
+		"action"
 	]
 }

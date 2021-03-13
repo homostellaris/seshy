@@ -4,7 +4,7 @@
 	"version": "0.1.10",
 	"description": "Chrome extension for effortlessly syncing browsing sessions.",
 	"background": {
-    	"service_worker": "worker.js"
+    	"service_worker": "worker-wrapper.js"
 	},
 	"action": {
 		"default_icon": "/status/unsaved.png",

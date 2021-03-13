@@ -1,5 +1,6 @@
 /* global chrome mdc */
 
+import * as mdc from 'material-components-web';
 import { BookmarkPersistenceManager } from '/persistence/index.js'
 import { asyncLoop, isFunction, getSessionNameInput } from '/util.js'
 import { Session } from '/session.js'

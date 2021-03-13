@@ -1,16 +1,16 @@
 /* global chrome */
-var openNewTabThenExitBrowserActionPopup = (url) => {
+var openNewTabThenExitActionPopup = (url) => {
   var createProperties = {url}
   chrome.tabs.create(createProperties)
   window.close()
 }
 
 var submitAFeatureRequest = () => {
-  openNewTabThenExitBrowserActionPopup('https://github.com/moderatemisbehaviour/seshy/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement')
+  openNewTabThenExitActionPopup('https://github.com/moderatemisbehaviour/seshy/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement')
 }
 
 var reportABug = () => {
-  openNewTabThenExitBrowserActionPopup('https://github.com/moderatemisbehaviour/seshy/issues?q=is%3Aopen+is%3Aissue+label%3Abug')
+  openNewTabThenExitActionPopup('https://github.com/moderatemisbehaviour/seshy/issues?q=is%3Aopen+is%3Aissue+label%3Abug')
 }
 
 var seeOpenSourceCredits = () => {

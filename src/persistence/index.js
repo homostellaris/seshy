@@ -130,7 +130,7 @@ export class BookmarkPersistenceManager {
 
     var callStoreWindowToSessionFolderMapping = () => {
       this.storeWindowToSessionFolderMapping(session.window.id, session.bookmarkFolder.id, () => {
-        this.setBrowserActionIconToSaved()
+        this.setActionIconToSaved()
         callback()
       })
     }
@@ -409,7 +409,7 @@ export class BookmarkPersistenceManager {
   }
 
   // TODO Duplicate of the function in api.js
-  setBrowserActionIconToSaved () {
-    chrome.browserAction.setIcon({path: '../status/saved.png'})
+  setActionIconToSaved () {
+    chrome.action.setIcon({path: '../status/saved.png'})
   }
 }

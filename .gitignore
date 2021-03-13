@@ -2,4 +2,6 @@
 .env
 node_modules/
 output/
-src/lib/vendor/
+
+# Snowpack
+build/

@@ -1,5 +1,5 @@
 /* global chrome */
-var openNewTabThenExitBrowserActionPopup = (url) => {
+var openNewTabThenExitActionPopup = (url) => {
   var createProperties = {url}
   chrome.tabs.create(createProperties)
   window.close()
@@ -59,7 +59,7 @@ function getCreditInnerHtml (name, description, copyright, license) {
 function createWebsiteLinkClickListener (creditElement, websiteUrl) {
   var goToWebsiteButton = creditElement.getElementsByClassName('go-to-website-button')[0]
   goToWebsiteButton.addEventListener('click', (event) => {
-    openNewTabThenExitBrowserActionPopup(websiteUrl)
+    openNewTabThenExitActionPopup(websiteUrl)
   })
 }
 

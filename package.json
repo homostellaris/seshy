@@ -3,6 +3,7 @@
   "version": "0.1.10",
   "description": "Chrome extension for effortlessly syncing browsing sessions.",
   "scripts": {
+    "build": "snowpack build",
     "test": "ava --timeout=2m **/*.test.js"
   },
   "type": "module",
@@ -25,7 +26,8 @@
   },
   "homepage": "https://github.com/moderatemisbehaviour/seshy#readme",
   "dependencies": {
-    "material-components-web": "^0.33.0"
+    "material-components-web": "^0.33.0",
+    "material-icons": "^0.5.4"
   },
   "devDependencies": {
     "ava": "^3.15.0",
