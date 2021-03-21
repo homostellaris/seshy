@@ -1,3 +1,8 @@
+@font-face {
+  font-family: 'Boogaloo';
+  src: url('/fonts/Boogaloo/Boogaloo-Regular.ttf');
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -33,4 +38,18 @@ a {
 /* TODO: Use material components theming instead. */
 .mdc-top-app-bar__section {
   background-color: #ff7f2a;
+}
+
+.session-card {
+  /* There is no guttering between session cards by default, add some. */
+  margin: 0.5rem;
+}
+
+.session-name {
+  height: auto !important;
+}
+
+.mdc-list-item__text {
+  /* Allows full width text input. */
+  width: 65%;
 }

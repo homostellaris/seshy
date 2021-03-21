@@ -3,7 +3,7 @@
 import { getCurrentlyOpenSessionElements, isFunction, asyncLoop } from '/js/util.js'
 import { BookmarkPersistenceManager } from '/js/persistence.js'
 import { TestDataCreator } from '/test/spec/integration/test-data-creator.js'
-import { SessionManager } from '/js/session-manager.js'
+import { SessionManager } from '/js/index.js'
 import {
   setActionIconToUnsaved, setActionIconToSaved, setActionIconToSaving
 } from '/js/api.js'

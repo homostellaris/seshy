@@ -1,6 +1,7 @@
 /* global chrome */
 
 import { isFunction, asyncLoop, getSessionNameInput } from '/util.js'
+import chrome from '/chrome.js'
 
 export class BookmarkPersistenceManager {
   // ---===~ Storage ~===-----------------------------------------------------------------------------------------------

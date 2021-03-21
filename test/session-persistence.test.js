@@ -32,7 +32,7 @@ test.beforeEach(async t => {
   await page.goto('chrome://extensions');
   await page.click('#devMode')
   const extensionId = (await page.innerText('#extension-id')).substring(4)
-  await page.goto(`chrome-extension://${extensionId}/session-manager/index.html`)
+  await page.goto(`chrome-extension://${extensionId}/index.html`)
 })
 
 test.afterEach(async t => {

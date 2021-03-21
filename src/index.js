@@ -1,6 +1,9 @@
 /* global chrome mdc */
 
+import '/index.css'
 import * as mdc from 'material-components-web';
+import 'material-components-web/dist/material-components-web.css';
+import chrome from '/chrome.js'
 import { BookmarkPersistenceManager } from '/persistence/index.js'
 import { asyncLoop, isFunction, getSessionNameInput } from '/util.js'
 import { Session } from '/session.js'
@@ -18,7 +21,7 @@ export class SessionManager {
     }
 
     var initialiseMaterialComponents = () => {
-      window.mdc.autoInit()
+      mdc.autoInit()
       this.initialiseKeyboardShortcutsDialog(done)
     }
 

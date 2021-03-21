@@ -22,7 +22,7 @@
       "name": "Launch Chrome",
       "request": "launch",
       "type": "pwa-chrome",
-      "url": "chrome-extension://eofmjdpbknpodfmdfpkcneiialiodobm/session-manager/index.html",
+      "url": "chrome-extension://eofmjdpbknpodfmdfpkcneiialiodobm/index.html",
       "webRoot": "${workspaceFolder}/src",
       "runtimeArgs": ["--load-extension=${workspaceFolder}/src"],
       "userDataDir": false

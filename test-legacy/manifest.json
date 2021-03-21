@@ -12,7 +12,7 @@
 	"browser_action": {
 		"default_icon": "/status/unsaved.png",
 		"default_title": "Manage your sessions.",
-		"default_popup": "/session-manager/index.html"
+		"default_popup": "/index.html"
 	},
 	"permissions": [
 		"bookmarks",

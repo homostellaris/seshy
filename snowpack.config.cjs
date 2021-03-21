@@ -16,10 +16,9 @@ module.exports = {
     /* ... */
   },
   buildOptions: {
-    'metaUrlPath': 'snowpack',
+    metaUrlPath: 'snowpack',
   },
   optimize: {
     bundle: true,
-    entrypoints: ['worker.js'],
   },
 };

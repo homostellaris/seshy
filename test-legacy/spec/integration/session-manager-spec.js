@@ -3,7 +3,7 @@
 xdescribe('Session manager.', function () {
   function navigateToSessionManager (callback) {
     var extensionId = chrome.runtime.id
-    this.specRunnerUrl = 'chrome-extension://' + extensionId + '/html/session-manager.html'
+    this.specRunnerUrl = 'chrome-extension://' + extensionId + '/html/index.html'
     var createData = {url: this.specRunnerUrl}
     chrome.windows.create(createData, callback)
   }

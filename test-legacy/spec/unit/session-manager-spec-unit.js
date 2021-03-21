@@ -1,7 +1,7 @@
 /* global setUp selectPreviousSession selectNextSession selectLastSessionInPreviousSessionList
 selectFirstSessionInNextSessionList resumeSelectedSession saveSelectedSession focusSessionNameInput */
 
-import { SessionManager } from '/js/session-manager.js'
+import { SessionManager } from '/js/index.js'
 
 describe('Unit tests.', function () {
   beforeAll(function () {
