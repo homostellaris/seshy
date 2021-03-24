@@ -4,7 +4,8 @@
   "description": "Chrome extension for effortlessly syncing browsing sessions.",
   "scripts": {
     "build": "snowpack build",
-    "dev": "snowpack build --watch",
+    "build:watch": "snowpack build --watch",
+    "dev": "snowpack dev",
     "test": "ava **/*.test.js",
     "test:dev": "PWDEBUG=1 npm test -- --timeout=2m "
   },
@@ -39,6 +40,6 @@
     "eslint-plugin-promise": "^3.8.0",
     "eslint-plugin-standard": "^3.1.0",
     "playwright": "^1.9.0",
-    "snowpack": "^3.0.13"
+    "snowpack": "^3.1.2"
   }
 }
