@@ -1,19 +1,34 @@
-// TODO: Return a bunch of test data and consider using a mock Chrome library.
-const fakeChrome = {
-    bookmarks: {
-        search: () => null
-    },
-    storage: {
-        local: {
-            get: () => null
-        }       
-    }
-}
+let chromeRealOrFake
 
-if (window.chrome.bookmarks === undefined) {
-    console.info('In a Node env so using a fake chrome object for basic checking that the extension hangs together.')
+if (chrome && chrome.bookmarks) {
+    console.info('In an extension page env so using real chrome object.')
+    chromeRealOrFake = chrome
 } else {
-    console.info('Exporting real Chrome object found on window.')
+    console.info('In a Node env so using a fake chrome object for basic checking that the extension hangs together.')
+    // TODO: Return a bunch of test data and consider using a mock Chrome library.
+    const fakeChrome = {
+        bookmarks: {
+            search: (query, callback) => {
+                if (query.title === 'Seshy') {
+                    callback([{id: '1'}])
+                }
+            },
+            getSubTree: (bookmarkFolderId, callback) => {
+                callback([{
+                    id: '2',
+                    children: [
+                        {title: 'yo'}
+                    ]
+                }])
+            }
+        },
+        storage: {
+            local: {
+                get: () => null
+            }       
+        }
+    }
+    chromeRealOrFake = fakeChrome
 }
 
-export default window.chrome.bookmarks === undefined ? fakeChrome : window.chrome
+export default chromeRealOrFake

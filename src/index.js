@@ -1,8 +1,9 @@
 /* global chrome mdc */
-
-import '/index.css'
 import * as mdc from 'material-components-web';
 import 'material-components-web/dist/material-components-web.css';
+
+import './material-icons/index.css'
+import '/index.css'
 import chrome from '/chrome.js'
 import { BookmarkPersistenceManager } from '/persistence/index.js'
 import { asyncLoop, isFunction, getSessionNameInput } from '/util.js'
@@ -10,7 +11,7 @@ import { Session } from '/session.js'
 
 var bookmarkPersistenceManager = new BookmarkPersistenceManager()
 
-export class SessionManager {
+class SessionManager {
   setUp (callback) {
     var done = () => {
       if (isFunction(callback)) callback()
@@ -258,3 +259,5 @@ export class SessionManager {
     sessionNameInput.select()
   }
 }
+
+new SessionManager().setUp()
