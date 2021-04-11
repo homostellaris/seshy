@@ -2,3 +2,6 @@
 .env
 node_modules/
 output/
+
+# Snowpack
+build/

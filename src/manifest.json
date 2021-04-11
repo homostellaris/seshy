@@ -1,28 +1,26 @@
 {
-	"manifest_version": 2,
+	"manifest_version": 3,
 	"name": "Seshy",
 	"version": "0.1.10",
 	"description": "Chrome extension for effortlessly syncing browsing sessions.",
 	"background": {
-    "page": "worker/index.html",
-		"persistent": false
+    	"service_worker": "worker-wrapper.js"
 	},
-	"browser_action": {
+	"action": {
 		"default_icon": "/status/unsaved.png",
 		"default_title": "Manage your sessions.",
-		"default_popup": "/session-manager/index.html"
+		"default_popup": "/index.html"
 	},
 	"commands": {
-		"_execute_browser_action": {
+		"_execute_action": {
 			"suggested_key": {
 				"windows": "Ctrl+Shift+S",
-				"mac": "Command+Shift+S",
+				"mac": "Ctrl+Shift+S",
 				"chromeos": "Ctrl+Shift+S",
 				"linux": "Ctrl+Shift+S"
 			}
 		}
 	},
-	"content_security_policy": "default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' https://unpkg.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;",
 	"icons": {
 		"16": "icons/seshy-logo-16.png",
 		"48": "icons/seshy-logo-48.png",

@@ -1,10 +1,10 @@
 /* global chrome */
 
-import { isFunction, asyncLoop } from '../util.js'
-import { BookmarkPersistenceManager } from '../persistence/index.js'
+import { isFunction, asyncLoop } from './util.js'
+import { BookmarkPersistenceManager } from './persistence/index.js'
 
 /* global chrome getSession removeWindowToSessionFolderMapping checkIfSeshyFolderExists saveWindowAsBookmarkFolder
-checkIfSavedSession setBrowserActionIconToSaved isFunction asyncLoop debounceWaitTimeOverride */
+checkIfSavedSession setActionIconToSaved isFunction asyncLoop debounceWaitTimeOverride */
 const debounceWaitTime =
   typeof debounceWaitTimeOverride === 'undefined'
     ? 300
@@ -41,7 +41,7 @@ chrome.windows.onCreated.addListener(
 chrome.windows.onRemoved.addListener(
   removeClosedSessionFromInternalMappingOfOpenSessions
 )
-chrome.windows.onFocusChanged.addListener(setBrowserActionIcon)
+chrome.windows.onFocusChanged.addListener(setActionIcon)
 chrome.tabs.onUpdated.addListener(
   scheduleSaveSessionIfNecessary
 )
@@ -66,11 +66,13 @@ function scheduleSaveSessionIfNecessary (tabId, changeInfo, tab) {
   console.log('Tab %d is %s.', tabId, changeInfo.status)
 
   var sessionWindowId = tab.windowId
+  console.debug(sessionWindowId)
   var bookmarkFolderId
   chrome.windows.get(sessionWindowId, {populate: true}, sessionWindow => {
     if (chrome.runtime.lastError) {
       // If tab is changed and then window removed quickly this listener can fire after the window is removed.
       bookmarkPersistenceManager.removeWindowToSessionFolderMapping(sessionWindowId)
+      return
     }
 
     console.log('Tab %d caused window %d to be retrieved with %d tabs.', tab.id, sessionWindowId, sessionWindow.tabs.length)
@@ -79,7 +81,7 @@ function scheduleSaveSessionIfNecessary (tabId, changeInfo, tab) {
       bookmarkFolderId = storageObject[sessionWindowId]
       // `bookmarkFolderId` will be undefined and therefore falsey if no window-to-bookmark-folder-mapping exists.
       if (bookmarkFolderId) {
-        setBrowserActionIconToSaving()
+        setActionIconToSaving()
         pendingTabUpdatedListenerCalls++
         setTimeout(() => {
           saveSessionIfNoPendingTabUpdatedListenerCalls(
@@ -110,19 +112,19 @@ function saveSessionIfNoPendingTabUpdatedListenerCalls (
 
   bookmarkPersistenceManager.saveWindowAsBookmarkFolder(sessionWindow, bookmarkFolderId.toString(), () => {
     console.log(`Session with window ID ${sessionWindow.id} saved to bookmark folder with ID ${bookmarkFolderId}`)
-    setBrowserActionIconToSaved()
+    setActionIconToSaved()
   })
 }
 
-export function setBrowserActionIconToUnsaved () {
-  chrome.browserAction.setIcon({path: '../status/unsaved.png'})
+function setActionIconToUnsaved () {
+  chrome.action.setIcon({path: '../status/unsaved.png'})
 }
 
-export function setBrowserActionIconToSaving () {
-  chrome.browserAction.setIcon({path: '../status/saving.png'})
+function setActionIconToSaving () {
+  chrome.action.setIcon({path: '../status/saving.png'})
 }
-export function setBrowserActionIconToSaved () {
-  chrome.browserAction.setIcon({path: '../status/saved.png'})
+function setActionIconToSaved () {
+  chrome.action.setIcon({path: '../status/saved.png'})
 }
 
 // TODO: This may delete the mapping that was just stored by resuming a saved session. Need to move the storage from
@@ -152,17 +154,17 @@ function removeClosedSessionFromInternalMappingOfOpenSessions (windowId) {
   bookmarkPersistenceManager.removeWindowToSessionFolderMapping(windowId)
 }
 
-function setBrowserActionIcon (windowId) {
-  var setBrowserActionIconToSavedOrUnsaved = storageObject => {
+function setActionIcon (windowId) {
+  var setActionIconToSavedOrUnsaved = storageObject => {
     var bookmarkFolderId = storageObject[windowId]
     if (bookmarkFolderId) {
-      setBrowserActionIconToSaved()
+      setActionIconToSaved()
     } else {
-      setBrowserActionIconToUnsaved()
+      setActionIconToUnsaved()
     }
   }
 
-  bookmarkPersistenceManager.checkIfSavedSession(windowId.toString(), setBrowserActionIconToSavedOrUnsaved)
+  bookmarkPersistenceManager.checkIfSavedSession(windowId.toString(), setActionIconToSavedOrUnsaved)
 }
 
 // ---===~ Initialisation ~===------------------------------------------------------------------------------------------

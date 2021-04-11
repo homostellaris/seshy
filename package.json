@@ -3,9 +3,11 @@
   "version": "0.1.10",
   "description": "Chrome extension for effortlessly syncing browsing sessions.",
   "scripts": {
-    "postinstall": "npm install -g grunt-cli",
-    "test": "ava --timeout=2m **/*.test.js",
-    "start": "grunt run"
+    "build": "snowpack build",
+    "build:watch": "snowpack build --watch",
+    "dev": "snowpack dev",
+    "test": "ava **/*.test.js",
+    "test:dev": "PWDEBUG=1 npm test -- --timeout=2m"
   },
   "type": "module",
   "repository": {
@@ -27,19 +29,17 @@
   },
   "homepage": "https://github.com/moderatemisbehaviour/seshy#readme",
   "dependencies": {
-    "material-components-web": "^0.33.0"
+    "material-components-web": "^10.0.0",
+    "material-design-icons": "^3.0.1"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.20",
     "ava": "^3.15.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.18.0",
     "eslint-plugin-node": "^5.1.1",
     "eslint-plugin-promise": "^3.8.0",
     "eslint-plugin-standard": "^3.1.0",
-    "jasmine-core": "^3.4.0",
-    "jest": "^26.6.3",
-    "jest-chrome": "^0.7.0",
-    "playwright": "^1.8.0"
+    "playwright": "^1.9.0",
+    "snowpack": "^3.1.2"
   }
 }

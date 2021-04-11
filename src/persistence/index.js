@@ -1,6 +1,7 @@
 /* global chrome */
 
 import { isFunction, asyncLoop, getSessionNameInput } from '/util.js'
+import chrome from '/chrome.js'
 
 export class BookmarkPersistenceManager {
   // ---===~ Storage ~===-----------------------------------------------------------------------------------------------
@@ -13,9 +14,9 @@ export class BookmarkPersistenceManager {
    * Callback has no args.
    */
   storeWindowToSessionFolderMapping (windowId, sessionFolderId, callback) {
-    console.log('Storing window to session folder mapping.')
     var windowToSessionFolderMapping = {}
     windowToSessionFolderMapping[windowId] = sessionFolderId
+    console.debug(`Storing window to session folder mapping: ${windowToSessionFolderMapping}`)
 
     if (isFunction(callback)) {
       chrome.storage.local.set(windowToSessionFolderMapping, callback)
@@ -130,7 +131,7 @@ export class BookmarkPersistenceManager {
 
     var callStoreWindowToSessionFolderMapping = () => {
       this.storeWindowToSessionFolderMapping(session.window.id, session.bookmarkFolder.id, () => {
-        this.setBrowserActionIconToSaved()
+        this.setActionIconToSaved()
         callback()
       })
     }
@@ -169,13 +170,15 @@ export class BookmarkPersistenceManager {
         'url': urls
       }
       chrome.windows.create(createData, (newWindow) => {
-        if (isFunction(callback)) {
-          this.storeWindowToSessionFolderMapping(newWindow.id, session.bookmarkFolder.id, () => {
-            callback(newWindow)
-          })
-        } else {
-          this.storeWindowToSessionFolderMapping(newWindow.id, session.bookmarkFolder.id)
-        }
+        setTimeout(() => {
+          if (isFunction(callback)) {
+            this.storeWindowToSessionFolderMapping(newWindow.id, session.bookmarkFolder.id, () => {
+              callback(newWindow)
+            })
+          } else {
+            this.storeWindowToSessionFolderMapping(newWindow.id, session.bookmarkFolder.id)
+          }
+        }, 1000) // TODO: Horrible hack for the bug that means that window created listener can sometimes remove the window ID from the mapping created by.
       })
     }
 
@@ -223,7 +226,7 @@ export class BookmarkPersistenceManager {
     callback()
   }
 
-  // TODO Is this method necessary?
+  // TODO: Is this method necessary?
   /**
    * Check if the passed window is a saved session and if so callback with its bookmark folder.
    */
@@ -233,7 +236,7 @@ export class BookmarkPersistenceManager {
         tabs = windowToCheck.tabs
         this.getAllSessionFolders(compareWindowWithSessionFolders)
       } else {
-        chrome.tabs.getAllInWindow(windowToCheck.id, (windowToCheckTabs) => {
+        chrome.tabs.query({windowId: windowToCheck.id}, (windowToCheckTabs) => {
           tabs = windowToCheckTabs
           this.getAllSessionFolders(compareWindowWithSessionFolders)
         })
@@ -409,7 +412,7 @@ export class BookmarkPersistenceManager {
   }
 
   // TODO Duplicate of the function in api.js
-  setBrowserActionIconToSaved () {
-    chrome.browserAction.setIcon({path: '../status/saved.png'})
+  setActionIconToSaved () {
+    chrome.action.setIcon({path: '../status/saved.png'})
   }
 }

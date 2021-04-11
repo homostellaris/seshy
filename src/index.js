@@ -1,12 +1,17 @@
 /* global chrome mdc */
+import * as mdc from 'material-components-web';
+import 'material-components-web/dist/material-components-web.css';
 
+import './material-icons/index.css'
+import '/index.css'
+import chrome from '/chrome.js'
 import { BookmarkPersistenceManager } from '/persistence/index.js'
 import { asyncLoop, isFunction, getSessionNameInput } from '/util.js'
 import { Session } from '/session.js'
 
 var bookmarkPersistenceManager = new BookmarkPersistenceManager()
 
-export class SessionManager {
+class SessionManager {
   setUp (callback) {
     var done = () => {
       if (isFunction(callback)) callback()
@@ -17,7 +22,7 @@ export class SessionManager {
     }
 
     var initialiseMaterialComponents = () => {
-      window.mdc.autoInit()
+      mdc.autoInit()
       this.initialiseKeyboardShortcutsDialog(done)
     }
 
@@ -74,12 +79,12 @@ export class SessionManager {
 
     var createShelvedSessions = (storageObject) => {
       bookmarkPersistenceManager.getAllSessionFolders((bookmarkFolders) => {
-        var shelvedSessionBookmarkFolderIds = Object.values(storageObject)
+        var currentlyOpenSessionBookmarkFolderIds = Object.values(storageObject)
 
         var createShelvedSession = (bookmarkFolder, callback) => {
           // If the bookmarkFolderId is in the winow to bookmark folder mapping then it is a currently open session and
           // we do not want to duplicate it.
-          if (!shelvedSessionBookmarkFolderIds.includes(bookmarkFolder.id)) {
+          if (!currentlyOpenSessionBookmarkFolderIds.includes(bookmarkFolder.id)) {
             /* eslint-disable no-new */
             new Session(null, bookmarkFolder)
             /* eslint-enable no-new */
@@ -181,6 +186,9 @@ export class SessionManager {
   getSelectedSession () {
     // Check if focused element is a session-card. Could be a session-name-input for example.
     var element = document.activeElement
+    // if (element.tagName === 'BODY') {
+    //   return document.querySelector('.session-card');
+    // }
     if (element.classList.contains('session-card')) {
       return document.activeElement
     }
@@ -254,3 +262,5 @@ export class SessionManager {
     sessionNameInput.select()
   }
 }
+
+new SessionManager().setUp()
