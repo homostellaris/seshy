@@ -7,7 +7,7 @@
     "build:watch": "snowpack build --watch",
     "dev": "snowpack dev",
     "test": "ava **/*.test.js",
-    "test:dev": "PWDEBUG=1 npm test -- --timeout=2m "
+    "test:dev": "PWDEBUG=1 npm test -- --timeout=2m"
   },
   "type": "module",
   "repository": {

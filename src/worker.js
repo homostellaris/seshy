@@ -66,11 +66,13 @@ function scheduleSaveSessionIfNecessary (tabId, changeInfo, tab) {
   console.log('Tab %d is %s.', tabId, changeInfo.status)
 
   var sessionWindowId = tab.windowId
+  console.debug(sessionWindowId)
   var bookmarkFolderId
   chrome.windows.get(sessionWindowId, {populate: true}, sessionWindow => {
     if (chrome.runtime.lastError) {
       // If tab is changed and then window removed quickly this listener can fire after the window is removed.
       bookmarkPersistenceManager.removeWindowToSessionFolderMapping(sessionWindowId)
+      return
     }
 
     console.log('Tab %d caused window %d to be retrieved with %d tabs.', tab.id, sessionWindowId, sessionWindow.tabs.length)

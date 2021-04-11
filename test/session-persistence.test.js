@@ -15,7 +15,7 @@ const urls = [
 ]
 
 test.beforeEach(async t => {
-  const pathToExtension = 'src/'
+  const pathToExtension = 'build/'
   const userDataDir = `/tmp/seshy-development/test-runs/${parseInt(Math.random() * 1000000)}`
   console.log(userDataDir)
 
@@ -29,13 +29,15 @@ test.beforeEach(async t => {
   });
   const page = t.context.sessionManagerPage = await browserContext.pages()[0]
 
-  await page.goto('chrome://extensions');
+  await page.goto('chrome://extensions')
   await page.click('#devMode')
   const extensionId = (await page.innerText('#extension-id')).substring(4)
   await page.goto(`chrome-extension://${extensionId}/index.html`)
+
+  page.setDefaultTimeout(5000) // Otherwise failed tests hang for ages if waitForEvent is never satisfied.
 })
 
-test.afterEach(async t => {
+test.afterEach.always(async t => {
   await t.context.browserContext.close();
 })
 
@@ -45,11 +47,11 @@ test('Saving, re-opening, then deleting sessions', async t => {
   /* This is breaking the fourth wall a bit because its actually a window with the session manager
    * that we're making assertions against.
    */ 
-  await assertOneUnsavedSession(t, sessionManagerPage)
+  await assertOpenSessions(t, sessionManagerPage, [unsavedSessionName])
 
-  const window = await createWindow(sessionManagerPage)
+  const window = await createWindow(t, sessionManagerPage)
   await sessionManagerPage.reload()
-  await assertTwoUnsavedSessions(t, sessionManagerPage)
+  await assertOpenSessions(t, sessionManagerPage, [unsavedSessionName, unsavedSessionName])
 
   await createTabs(sessionManagerPage, window.id, urls)
   await closeNewTab(sessionManagerPage, window)
@@ -59,7 +61,9 @@ test('Saving, re-opening, then deleting sessions', async t => {
   await assertSessionName(t, sessionManagerPage, sessionName)
 
   await closeWindow(sessionManagerPage, window.id)
-  // Assert in shelved sessions list
+  await sessionManagerPage.reload()
+  await assertOpenSessions(t, sessionManagerPage, [unsavedSessionName])
+  await assertShelvedSessions(t, sessionManagerPage, [sessionName])
 
   await sessionManagerPage.reload()
   const [page, _] = await Promise.all([
@@ -67,38 +71,34 @@ test('Saving, re-opening, then deleting sessions', async t => {
     resumeSession(sessionManagerPage, sessionName)
   ])
 
+  await sessionManagerPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
   await sessionManagerPage.reload()
-  await assertInCurrentlyOpenSessionList(t, sessionManagerPage, sessionName)
+  await assertOpenSessions(t, sessionManagerPage, [unsavedSessionName, sessionName])
+  await assertShelvedSessions(t, sessionManagerPage, [])
   const unshelvedSessionWindow = await getCurrentWindow(sessionManagerPage)
   await assertWindowTabUrls(t, unshelvedSessionWindow, urls)
 
-  let windows
-  windows = await getWindows(sessionManagerPage)
-  t.is(windows.length, 2)
+  t.is((await getWindows(sessionManagerPage)).length, 2)
   await Promise.all([
-    page.waitForEvent('close'),
-    await deleteSession(sessionManagerPage, sessionName)
+    page.waitForEvent('close'), // This isn't picking up the default timeout for some reason >:[
+    deleteSession(sessionManagerPage, sessionName)
   ])
-  windows = await getWindows(sessionManagerPage)
-  t.is(windows.length, 1)
+  t.is((await getWindows(sessionManagerPage)).length, 1)
   const sessions = await getSessionNames(sessionManagerPage)
   t.deepEqual(sessions, [unsavedSessionName])
 })
 
-async function assertOneUnsavedSession(t, sessionManagerPage) {
-  const sessions = await sessionManagerPage.$$('.session-card')
-  t.is(sessions.length, 1)
-  const sessionName = await (await sessions[0].$('.session-name-input')).getAttribute('value')
-  t.is(sessionName, unsavedSessionName)
-  return { sessions, sessionName }
+test.todo('Saving, re-opening, then deleting sessions (with keyboard shortcuts)')
+
+// TODO: Create a SesssionManagerPageAsserter or something like that to avoid passing it as an arg all the time.
+async function assertOpenSessions(t, sessionManagerPage, expectedUnsavedSessionNames) {
+  const unsavedSessionNames = await sessionManagerPage.$$eval('#currently-open-sessions .session-card input', inputs => inputs.map(input => input.value))
+  t.deepEqual(unsavedSessionNames, expectedUnsavedSessionNames)
 }
 
-async function assertTwoUnsavedSessions(t, sessionManagerPage) {
-  const sessions = await sessionManagerPage.$$('.session-card')
-  t.is(sessions.length, 2)
-  const sessionName = await (await sessions[1].$('.session-name-input')).getAttribute('value')
-  t.is(sessionName, unsavedSessionName)
-  return { sessions, sessionName }
+async function assertShelvedSessions(t, sessionManagerPage, expectedShelvedSessionNames) {
+  const shelvedSessionNames = await sessionManagerPage.$$eval('#saved-sessions .session-card input', inputs => inputs.map(input => input.value))
+  t.deepEqual(shelvedSessionNames, expectedShelvedSessionNames)
 }
 
 async function assertSessionName(t, sessionManagerPage, name) {
@@ -107,12 +107,16 @@ async function assertSessionName(t, sessionManagerPage, name) {
   t.is(sessionName, name)
 }
 
-async function createWindow(sessionManagerPage) {
-  return await sessionManagerPage.evaluate(() => new Promise(resolve => {
-    chrome.windows.create(window => {
-      resolve(window)
-    })
-  }))
+async function createWindow(t, sessionManagerPage) {
+  const [_, window] = await Promise.all([
+    t.context.browserContext.waitForEvent('page'),
+    sessionManagerPage.evaluate(() => new Promise(resolve => {
+      chrome.windows.create(window => {
+        resolve(window)
+      })
+    })),
+  ])
+  return window
 }
 
 async function createTab(sessionManagerPage, createProperties) {
@@ -155,7 +159,6 @@ async function closeWindow(sessionManagerPage, windowId) {
 
 async function resumeSession(sessionManagerPage, sessionName) {
   const resumeButton = await sessionManagerPage.$(`.session-card:has(.session-name-input[value="${sessionName}"]) .resume-button`)
-  console.log(await sessionManagerPage.innerHTML('body'))
   await resumeButton.click()
 }
 
@@ -178,11 +181,6 @@ async function getWindows(sessionManagerPage) {
 async function assertWindowTabUrls(t, window, urls) {
   const windowTabUrls = window.tabs.map(tab => tab.url)
   t.deepEqual(urls, windowTabUrls)
-}
-
-async function assertInCurrentlyOpenSessionList(t, sessionManagerPage, sessionName) {
-  const currentlyOpenSession = await sessionManagerPage.$(`.session-card .session-name-input[value="${sessionName}"]`)
-  t.truthy(currentlyOpenSession)
 }
 
 async function deleteSession(sessionManagerPage, sessionName) {

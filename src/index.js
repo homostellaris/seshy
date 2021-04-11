@@ -79,12 +79,12 @@ class SessionManager {
 
     var createShelvedSessions = (storageObject) => {
       bookmarkPersistenceManager.getAllSessionFolders((bookmarkFolders) => {
-        var shelvedSessionBookmarkFolderIds = Object.values(storageObject)
+        var currentlyOpenSessionBookmarkFolderIds = Object.values(storageObject)
 
         var createShelvedSession = (bookmarkFolder, callback) => {
           // If the bookmarkFolderId is in the winow to bookmark folder mapping then it is a currently open session and
           // we do not want to duplicate it.
-          if (!shelvedSessionBookmarkFolderIds.includes(bookmarkFolder.id)) {
+          if (!currentlyOpenSessionBookmarkFolderIds.includes(bookmarkFolder.id)) {
             /* eslint-disable no-new */
             new Session(null, bookmarkFolder)
             /* eslint-enable no-new */
@@ -186,6 +186,9 @@ class SessionManager {
   getSelectedSession () {
     // Check if focused element is a session-card. Could be a session-name-input for example.
     var element = document.activeElement
+    // if (element.tagName === 'BODY') {
+    //   return document.querySelector('.session-card');
+    // }
     if (element.classList.contains('session-card')) {
       return document.activeElement
     }

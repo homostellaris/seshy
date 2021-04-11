@@ -24,6 +24,5 @@ module.exports = {
       'worker.js',
       'index.js', // TODO: See if CSS bundling starts working with only specific parts of the app bundled.
     ],
-    sourcemap: false,
   },
 };

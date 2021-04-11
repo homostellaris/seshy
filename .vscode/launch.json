@@ -17,16 +17,16 @@
       ],
       "type": "pwa-node"
     },
-    
     {
-      "name": "Launch Chrome",
+      "name": "Debug implementation",
       "request": "launch",
       "type": "pwa-chrome",
-      "url": "chrome-extension://eofmjdpbknpodfmdfpkcneiialiodobm/index.html",
+      "url": "chrome-extension://jeolgmmombbnpdpplbipfmmfhjocfjpl/index.html",
       "webRoot": "${workspaceFolder}/src",
-      "runtimeArgs": ["--load-extension=${workspaceFolder}/src"],
-      "userDataDir": false
-      // "urlFilter": "chrome-extension://*"
+      "runtimeArgs": ["--load-extension=${workspaceFolder}/build"],
+      // "userDataDir": false,
+      // "urlFilter": "chrome-extension://*",
+      "sourceMaps": true,
     },
   ]
 }

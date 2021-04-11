@@ -53,3 +53,7 @@ a {
   /* Allows full width text input. */
   width: 65%;
 }
+
+.selected {
+  background-color: gainsboro !important;
+}
