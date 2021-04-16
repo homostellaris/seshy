@@ -234,13 +234,15 @@ Session.prototype.saveSession = function (callback) {
 Session.prototype.getSessionInnerHtml = function (title, tabsNumber, saved) {
   var savedStateIcon = saved ? 'bookmark' : 'bookmark_border'
   var innerHtml = `
+    <span class="mdc-list-item__ripple"></span>
     <span class="mdc-list-item__graphic">
       <i class="saved-state-icon material-icons" title="saved state">${savedStateIcon}</i>
     </span>
     <span class="mdc-list-item__text">
       <div class="session-name mdc-text-field mdc-text-field--dense mdc-text-field--fullwidth">
+        <span class="mdc-text-field__ripple"></span>
         <input type="text" class="session-name-input mdc-text-field__input" value="${title}" readonly="true">
-        <div class="mdc-line-ripple"></div>
+        <span class="mdc-line-ripple"></span>
       </div>
       <span class="tabs-number mdc-list-item__secondary-text">
         ${tabsNumber} tabs

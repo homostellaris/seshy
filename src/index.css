@@ -47,11 +47,12 @@ a {
 
 .session-name {
   height: auto !important;
+  width: 100%; /* Allows full width text input. */
 }
 
 .mdc-list-item__text {
-  /* Allows full width text input. */
-  width: 65%;
+  width: 65%; /* Allows full width text input. */
+  padding-top: 3px; /* Horrible hack to vertically centre the card content. Might be fixed if we stop using a text field within a list item which is not officially supported. */
 }
 
 .selected {
