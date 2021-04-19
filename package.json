@@ -6,8 +6,8 @@
     "build": "snowpack build",
     "build:watch": "snowpack build --watch",
     "dev": "snowpack dev",
-    "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix",
+    "lint": "eslint src/ test/",
+    "lint:fix": "npm run lint -- --fix",
     "test": "ava **/*.test.js",
     "test:dev": "PWDEBUG=1 npm test -- --timeout=2m"
   },
