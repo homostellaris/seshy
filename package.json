@@ -6,6 +6,8 @@
     "build": "snowpack build",
     "build:watch": "snowpack build --watch",
     "dev": "snowpack dev",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
     "test": "ava **/*.test.js",
     "test:dev": "PWDEBUG=1 npm test -- --timeout=2m"
   },
@@ -34,11 +36,7 @@
   },
   "devDependencies": {
     "ava": "^3.15.0",
-    "eslint-config-standard": "^10.2.1",
-    "eslint-plugin-import": "^2.18.0",
-    "eslint-plugin-node": "^5.1.1",
-    "eslint-plugin-promise": "^3.8.0",
-    "eslint-plugin-standard": "^3.1.0",
+    "eslint": "^7.24.0",
     "playwright": "^1.9.0",
     "snowpack": "^3.1.2"
   }
