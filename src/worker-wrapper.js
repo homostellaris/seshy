@@ -1,5 +1,5 @@
 try {
-    importScripts("worker.js");
+	importScripts('worker.js')
 } catch (e) {
-    console.error(e);
+	console.error(e)
 }

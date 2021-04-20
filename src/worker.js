@@ -1,50 +1,49 @@
-/* global chrome */
-
 import { isFunction, asyncLoop } from './util.js'
 import { BookmarkPersistenceManager } from './persistence/index.js'
 
-/* global chrome getSession removeWindowToSessionFolderMapping checkIfSeshyFolderExists saveWindowAsBookmarkFolder
-checkIfSavedSession setActionIconToSaved isFunction asyncLoop debounceWaitTimeOverride */
-const debounceWaitTime =
-  typeof debounceWaitTimeOverride === 'undefined'
-    ? 300
-    : debounceWaitTimeOverride
+// const debounceWaitTime =
+//   typeof debounceWaitTimeOverride === 'undefined'
+//   	? 300
+//   	: debounceWaitTimeOverride
 
-function debounce (func, wait, immediate) {
-  var timeout
-  return function () {
-    var context = this
-    var args = arguments
-    var later = function () {
-      timeout = null
-      if (!immediate) func.apply(context, args)
-    }
-    var callNow = immediate && !timeout
-    clearTimeout(timeout)
-    timeout = setTimeout(later, wait)
-    if (callNow) func.apply(context, args)
-  }
-}
+// function debounce (func, wait, immediate) {
+// 	var timeout
+// 	return function () {
+// 		var context = this
+// 		var args = arguments
+// 		var later = function () {
+// 			timeout = null
+// 			if (!immediate) func.apply(context, args)
+// 		}
+// 		var callNow = immediate && !timeout
+// 		clearTimeout(timeout)
+// 		timeout = setTimeout(later, wait)
+// 		if (callNow) func.apply(context, args)
+// 	}
+// }
 
 // ---===~ Add listeners. ~===------------------------------------------------------------------------------------------
 chrome.runtime.onStartup.addListener(() => {
-  console.log('Startup event fired.')
+	console.debug('Startup event fired.')
 })
 chrome.runtime.onSuspend.addListener(() => {
-  console.log('Suspend event fired.')
+	console.debug('Suspend event fired.')
 })
 
 // TODO Break these methods up into multiple independent listeners.
 chrome.windows.onCreated.addListener(
-  removePotentiallyReusedWindowIdFromInternalMappingOfOpenSessions
+	removePotentiallyReusedWindowIdFromInternalMappingOfOpenSessions
 )
 chrome.windows.onRemoved.addListener(
-  removeClosedSessionFromInternalMappingOfOpenSessions
+	removeClosedSessionFromInternalMappingOfOpenSessions
 )
 chrome.windows.onFocusChanged.addListener(setActionIcon)
-chrome.tabs.onUpdated.addListener(
-  scheduleSaveSessionIfNecessary
-)
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+	console.debug('tab updated', changeInfo)
+	scheduleSaveSessionIfNecessary(tabId, changeInfo, tab)
+})
+chrome.tabs.onCreated(tab => console.debug('tab created', tab))
+chrome.tabs.onRemoved(tab => console.debug('tab removed', tab))
 
 var pendingTabUpdatedListenerCalls = 0
 
@@ -63,68 +62,68 @@ var pendingTabUpdatedListenerCalls = 0
  * "can't find bookmark for id" error.
  */
 function scheduleSaveSessionIfNecessary (tabId, changeInfo, tab) {
-  console.log('Tab %d is %s.', tabId, changeInfo.status)
+	console.log('Tab %d is %s.', tabId, changeInfo.status)
 
-  var sessionWindowId = tab.windowId
-  console.debug(sessionWindowId)
-  var bookmarkFolderId
-  chrome.windows.get(sessionWindowId, {populate: true}, sessionWindow => {
-    if (chrome.runtime.lastError) {
-      // If tab is changed and then window removed quickly this listener can fire after the window is removed.
-      bookmarkPersistenceManager.removeWindowToSessionFolderMapping(sessionWindowId)
-      return
-    }
+	var sessionWindowId = tab.windowId
+	console.debug(sessionWindowId)
+	var bookmarkFolderId
+	chrome.windows.get(sessionWindowId, {populate: true}, sessionWindow => {
+		if (chrome.runtime.lastError) {
+			// If tab is changed and then window removed quickly this listener can fire after the window is removed.
+			bookmarkPersistenceManager.removeWindowToSessionFolderMapping(sessionWindowId)
+			return
+		}
 
-    console.log('Tab %d caused window %d to be retrieved with %d tabs.', tab.id, sessionWindowId, sessionWindow.tabs.length)
+		console.log('Tab %d caused window %d to be retrieved with %d tabs.', tab.id, sessionWindowId, sessionWindow.tabs.length)
 
-    bookmarkPersistenceManager.checkIfSavedSession(sessionWindowId.toString(), (storageObject) => {
-      bookmarkFolderId = storageObject[sessionWindowId]
-      // `bookmarkFolderId` will be undefined and therefore falsey if no window-to-bookmark-folder-mapping exists.
-      if (bookmarkFolderId) {
-        setActionIconToSaving()
-        pendingTabUpdatedListenerCalls++
-        setTimeout(() => {
-          saveSessionIfNoPendingTabUpdatedListenerCalls(
-            sessionWindow,
-            bookmarkFolderId
-          )
-        }, 1000)
-      }
-    })
-  })
+		bookmarkPersistenceManager.checkIfSavedSession(sessionWindowId.toString(), (storageObject) => {
+			bookmarkFolderId = storageObject[sessionWindowId]
+			// `bookmarkFolderId` will be undefined and therefore falsey if no window-to-bookmark-folder-mapping exists.
+			if (bookmarkFolderId) {
+				setActionIconToSaving()
+				pendingTabUpdatedListenerCalls++
+				setTimeout(() => {
+					saveSessionIfNoPendingTabUpdatedListenerCalls(
+						sessionWindow,
+						bookmarkFolderId
+					)
+				}, 1000)
+			}
+		})
+	})
 }
 
 function saveSessionIfNoPendingTabUpdatedListenerCalls (
-  sessionWindow,
-  bookmarkFolderId
+	sessionWindow,
+	bookmarkFolderId
 ) {
-  if (--pendingTabUpdatedListenerCalls !== 0) {
-    console.log(
-      '%d newer pending tab updated listener calls. Returning without trying to save.',
-      pendingTabUpdatedListenerCalls
-    )
-    return
-  }
-  console.log(
-    '%d newer pending tab updated listener calls. Saving session to bookmark folder.',
-    pendingTabUpdatedListenerCalls
-  )
+	if (--pendingTabUpdatedListenerCalls !== 0) {
+		console.log(
+			'%d newer pending tab updated listener calls. Returning without trying to save.',
+			pendingTabUpdatedListenerCalls
+		)
+		return
+	}
+	console.log(
+		'%d newer pending tab updated listener calls. Saving session to bookmark folder.',
+		pendingTabUpdatedListenerCalls
+	)
 
-  bookmarkPersistenceManager.saveWindowAsBookmarkFolder(sessionWindow, bookmarkFolderId.toString(), () => {
-    console.log(`Session with window ID ${sessionWindow.id} saved to bookmark folder with ID ${bookmarkFolderId}`)
-    setActionIconToSaved()
-  })
+	bookmarkPersistenceManager.saveWindowAsBookmarkFolder(sessionWindow, bookmarkFolderId.toString(), () => {
+		console.log(`Session with window ID ${sessionWindow.id} saved to bookmark folder with ID ${bookmarkFolderId}`)
+		setActionIconToSaved()
+	})
 }
 
 function setActionIconToUnsaved () {
-  chrome.action.setIcon({path: '../status/unsaved.png'})
+	chrome.action.setIcon({path: '../status/unsaved.png'})
 }
 
 function setActionIconToSaving () {
-  chrome.action.setIcon({path: '../status/saving.png'})
+	chrome.action.setIcon({path: '../status/saving.png'})
 }
 function setActionIconToSaved () {
-  chrome.action.setIcon({path: '../status/saved.png'})
+	chrome.action.setIcon({path: '../status/saved.png'})
 }
 
 // TODO: This may delete the mapping that was just stored by resuming a saved session. Need to move the storage from
@@ -135,10 +134,10 @@ function setActionIconToSaved () {
  * time by closing the window.
  */
 function removePotentiallyReusedWindowIdFromInternalMappingOfOpenSessions (windowToCheck) {
-  console.log('The windows.onCreated event fired. Clearing window to session folder mapping...')
-  bookmarkPersistenceManager.removeWindowToSessionFolderMapping(windowToCheck.id, () => {
-    bookmarkPersistenceManager.getSession(windowToCheck)
-  })
+	console.log('The windows.onCreated event fired. Clearing window to session folder mapping...')
+	bookmarkPersistenceManager.removeWindowToSessionFolderMapping(windowToCheck.id, () => {
+		bookmarkPersistenceManager.getSession(windowToCheck)
+	})
 }
 
 /**
@@ -147,24 +146,24 @@ function removePotentiallyReusedWindowIdFromInternalMappingOfOpenSessions (windo
  * window closing and another one opening (such as saving updated sessions) will think that sessions are still open.
  */
 function removeClosedSessionFromInternalMappingOfOpenSessions (windowId) {
-  console.log(
-    'The windows.onRemoved event fired. Clearing window to session folder mapping...'
-  )
-  // Have to remove the mapping here rather than in `removeWindow` so that it
-  bookmarkPersistenceManager.removeWindowToSessionFolderMapping(windowId)
+	console.log(
+		'The windows.onRemoved event fired. Clearing window to session folder mapping...'
+	)
+	// Have to remove the mapping here rather than in `removeWindow` so that it
+	bookmarkPersistenceManager.removeWindowToSessionFolderMapping(windowId)
 }
 
 function setActionIcon (windowId) {
-  var setActionIconToSavedOrUnsaved = storageObject => {
-    var bookmarkFolderId = storageObject[windowId]
-    if (bookmarkFolderId) {
-      setActionIconToSaved()
-    } else {
-      setActionIconToUnsaved()
-    }
-  }
+	var setActionIconToSavedOrUnsaved = storageObject => {
+		var bookmarkFolderId = storageObject[windowId]
+		if (bookmarkFolderId) {
+			setActionIconToSaved()
+		} else {
+			setActionIconToUnsaved()
+		}
+	}
 
-  bookmarkPersistenceManager.checkIfSavedSession(windowId.toString(), setActionIconToSavedOrUnsaved)
+	bookmarkPersistenceManager.checkIfSavedSession(windowId.toString(), setActionIconToSavedOrUnsaved)
 }
 
 // ---===~ Initialisation ~===------------------------------------------------------------------------------------------
@@ -174,47 +173,47 @@ initialise()
 // TODO Ensure this is loaded before anything else occurs.
 // Currently it only works because it finishes before anything tries to reference seshyFolderId.
 function initialise () {
-  console.log('Extension started, pruning local storage...')
-  pruneLocalStorage(() => {
-    console.log('Local storage cleared.')
-  })
+	console.log('Extension started, pruning local storage...')
+	pruneLocalStorage(() => {
+		console.log('Local storage cleared.')
+	})
 }
 
 function pruneLocalStorage (callback) {
-  var windowIdsToRemove = []
+	var windowIdsToRemove = []
 
-  var getAllWindows = (storageObject) => {
-    chrome.windows.getAll(null, (windows) => {
-      getStorageKeysToBeRemoved(storageObject, windows)
-    })
-  }
+	var getAllWindows = (storageObject) => {
+		chrome.windows.getAll(null, (windows) => {
+			getStorageKeysToBeRemoved(storageObject, windows)
+		})
+	}
 
-  var getStorageKeysToBeRemoved = (storageObject, windows) => {
-    var storedWindowIds = Object.keys(storageObject).map(windowId =>
-      parseInt(windowId)
-    )
-    var currentlyOpenWindowIds = windows.map(aWindow => aWindow.id)
+	var getStorageKeysToBeRemoved = (storageObject, windows) => {
+		var storedWindowIds = Object.keys(storageObject).map(windowId =>
+			parseInt(windowId)
+		)
+		var currentlyOpenWindowIds = windows.map(aWindow => aWindow.id)
 
-    var iterateFunction = (storedWindowId, callback) => {
-      if (!currentlyOpenWindowIds.includes(storedWindowId)) {
-        windowIdsToRemove.push(storedWindowId)
-      }
-      callback()
-    }
+		var iterateFunction = (storedWindowId, callback) => {
+			if (!currentlyOpenWindowIds.includes(storedWindowId)) {
+				windowIdsToRemove.push(storedWindowId)
+			}
+			callback()
+		}
 
-    asyncLoop(storedWindowIds, iterateFunction, removeStorageKeysIfNecessary)
-  }
+		asyncLoop(storedWindowIds, iterateFunction, removeStorageKeysIfNecessary)
+	}
 
-  var removeStorageKeysIfNecessary = () => {
-    if (windowIdsToRemove) {
-      var keysToRemove = windowIdsToRemove.map(windowId => windowId.toString())
-      chrome.storage.local.remove(keysToRemove, () => {
-        if (isFunction(callback)) callback()
-      })
-    } else {
-      if (isFunction(callback)) callback()
-    }
-  }
+	var removeStorageKeysIfNecessary = () => {
+		if (windowIdsToRemove) {
+			var keysToRemove = windowIdsToRemove.map(windowId => windowId.toString())
+			chrome.storage.local.remove(keysToRemove, () => {
+				if (isFunction(callback)) callback()
+			})
+		} else {
+			if (isFunction(callback)) callback()
+		}
+	}
 
-  chrome.storage.local.get(null, getAllWindows)
+	chrome.storage.local.get(null, getAllWindows)
 }
