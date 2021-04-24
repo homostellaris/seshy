@@ -42,8 +42,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 	console.debug('tab updated', changeInfo)
 	scheduleSaveSessionIfNecessary(tabId, changeInfo, tab)
 })
-chrome.tabs.onCreated(tab => console.debug('tab created', tab))
-chrome.tabs.onRemoved(tab => console.debug('tab removed', tab))
+chrome.tabs.onCreated.addListener(tab => console.debug('tab created', tab))
+chrome.tabs.onRemoved.addListener(tab => console.debug('tab removed', tab))
 
 var pendingTabUpdatedListenerCalls = 0
 

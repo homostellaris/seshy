@@ -27,30 +27,34 @@ test.beforeEach(async t => {
 		],
 		// slowMo: 1000
 	})
-	const page = t.context.sessionManagerPage = await browserContext.pages()[0]
 
-	await page.goto('chrome://extensions')
-	await page.click('#devMode')
-	const extensionId = (await page.innerText('#extension-id')).substring(4)
-	await page.goto(`chrome-extension://${extensionId}/index.html`)
+	const sessionManagerPage = t.context.sessionManagerPage = await browserContext.pages()[0]
+	sessionManagerPage.on('pageerror', (error) => {
+		console.error(error.message)
+	})
 
-	page.setDefaultTimeout(5000) // Otherwise failed tests hang for ages if waitForEvent is never satisfied.
+	await sessionManagerPage.goto('chrome://extensions')
+	await sessionManagerPage.click('#devMode')
+	const extensionId = (await sessionManagerPage.innerText('#extension-id')).substring(4)
+	await sessionManagerPage.goto(`chrome-extension://${extensionId}/index.html`)
+
+	sessionManagerPage.setDefaultTimeout(5000) // Otherwise failed tests hang for ages if waitForEvent is never satisfied.
 })
 
 test.afterEach.always(async t => {
+	if (process.env.PWDEBUG) await t.context.sessionManagerPage.waitForTimeout(1000000)
 	await t.context.browserContext.close()
 })
 
 test('Saving, re-opening, then deleting sessions', async t => {
 	const {sessionManagerPage} = t.context
 
-	/* This is breaking the fourth wall a bit because its actually a window with the session manager
-   * that we're making assertions against.
-   */ 
+	await sessionManagerPage.reload()
+	// This is breaking the fourth wall a bit because its actually a window with the session manager that we're making assertions against.
 	await assertOpenSessions(t, sessionManagerPage, [unsavedSessionName])
 
 	const window = await createWindow(t, sessionManagerPage)
-	await sessionManagerPage.reload()
+	await sessionManagerPage.reload() // TODO: Try replacing with page.waitForSelector(selector[, options])
 	await assertOpenSessions(t, sessionManagerPage, [unsavedSessionName, unsavedSessionName])
 
 	await createTabs(sessionManagerPage, window.id, urls)
@@ -61,13 +65,16 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	await assertSessionName(t, sessionManagerPage, sessionName)
 
 	await closeWindow(sessionManagerPage, window.id)
+	await sessionManagerPage.waitForTimeout(1000) // Necessary because the window ID is not removed from the mapping in local storage before the closeWindow promise returns.
 	await sessionManagerPage.reload()
 	await assertOpenSessions(t, sessionManagerPage, [unsavedSessionName])
+	await sessionManagerPage.waitForTimeout(1000) // Necessary because the window ID is not removed from the mapping in local storage before the closeWindow promise returns.
+	await sessionManagerPage.reload()
 	await assertShelvedSessions(t, sessionManagerPage, [sessionName])
 
 	await sessionManagerPage.reload()
 	const [page, _] = await Promise.all([
-		t.context.browserContext.waitForEvent('page'),
+		t.context.browserContext.waitForEvent('page', {timeout: 2000}),
 		resumeSession(sessionManagerPage, sessionName)
 	])
 
@@ -80,7 +87,7 @@ test('Saving, re-opening, then deleting sessions', async t => {
 
 	t.is((await getWindows(sessionManagerPage)).length, 2)
 	await Promise.all([
-		page.waitForEvent('close'), // This isn't picking up the default timeout for some reason >:[
+		page.waitForEvent('close', {timeout: 2000}), // This isn't picking up the default timeout for some reason >:[
 		deleteSession(sessionManagerPage, sessionName)
 	])
 	t.is((await getWindows(sessionManagerPage)).length, 1)
@@ -98,6 +105,7 @@ async function assertOpenSessions(t, sessionManagerPage, expectedUnsavedSessionN
 
 async function assertShelvedSessions(t, sessionManagerPage, expectedShelvedSessionNames) {
 	const shelvedSessionNames = await sessionManagerPage.$$eval('#saved-sessions .session-card input', inputs => inputs.map(input => input.value))
+	// console.log(await sessionManagerPage.innerHTML('body'))
 	t.deepEqual(shelvedSessionNames, expectedShelvedSessionNames)
 }
 
