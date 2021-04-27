@@ -1,26 +1,6 @@
 import { isFunction, asyncLoop } from './util.js'
 import { BookmarkPersistenceManager } from './persistence/index.js'
-
-// const debounceWaitTime =
-//   typeof debounceWaitTimeOverride === 'undefined'
-//   	? 300
-//   	: debounceWaitTimeOverride
-
-// function debounce (func, wait, immediate) {
-// 	var timeout
-// 	return function () {
-// 		var context = this
-// 		var args = arguments
-// 		var later = function () {
-// 			timeout = null
-// 			if (!immediate) func.apply(context, args)
-// 		}
-// 		var callNow = immediate && !timeout
-// 		clearTimeout(timeout)
-// 		timeout = setTimeout(later, wait)
-// 		if (callNow) func.apply(context, args)
-// 	}
-// }
+import status from './status/index.js'
 
 // ---===~ Add listeners. ~===------------------------------------------------------------------------------------------
 chrome.runtime.onStartup.addListener(() => {
@@ -30,13 +10,13 @@ chrome.runtime.onSuspend.addListener(() => {
 	console.debug('Suspend event fired.')
 })
 
-// TODO Break these methods up into multiple independent listeners.
 chrome.windows.onCreated.addListener(
 	removePotentiallyReusedWindowIdFromInternalMappingOfOpenSessions
 )
 chrome.windows.onRemoved.addListener(
 	removeClosedSessionFromInternalMappingOfOpenSessions
 )
+
 chrome.windows.onFocusChanged.addListener(setActionIcon)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 	console.debug('tab updated', changeInfo)
@@ -80,7 +60,7 @@ function scheduleSaveSessionIfNecessary (tabId, changeInfo, tab) {
 			bookmarkFolderId = storageObject[sessionWindowId]
 			// `bookmarkFolderId` will be undefined and therefore falsey if no window-to-bookmark-folder-mapping exists.
 			if (bookmarkFolderId) {
-				setActionIconToSaving()
+				status.saving()
 				pendingTabUpdatedListenerCalls++
 				setTimeout(() => {
 					saveSessionIfNoPendingTabUpdatedListenerCalls(
@@ -111,19 +91,8 @@ function saveSessionIfNoPendingTabUpdatedListenerCalls (
 
 	bookmarkPersistenceManager.saveWindowAsBookmarkFolder(sessionWindow, bookmarkFolderId.toString(), () => {
 		console.log(`Session with window ID ${sessionWindow.id} saved to bookmark folder with ID ${bookmarkFolderId}`)
-		setActionIconToSaved()
+		status.saved()
 	})
-}
-
-function setActionIconToUnsaved () {
-	chrome.action.setIcon({path: '../status/unsaved.png'})
-}
-
-function setActionIconToSaving () {
-	chrome.action.setIcon({path: '../status/saving.png'})
-}
-function setActionIconToSaved () {
-	chrome.action.setIcon({path: '../status/saved.png'})
 }
 
 // TODO: This may delete the mapping that was just stored by resuming a saved session. Need to move the storage from
@@ -157,9 +126,9 @@ function setActionIcon (windowId) {
 	var setActionIconToSavedOrUnsaved = storageObject => {
 		var bookmarkFolderId = storageObject[windowId]
 		if (bookmarkFolderId) {
-			setActionIconToSaved()
+			status.saved()
 		} else {
-			setActionIconToUnsaved()
+			status.unsaved()
 		}
 	}
 
