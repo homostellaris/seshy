@@ -105,7 +105,6 @@ async function assertOpenSessions(t, sessionManagerPage, expectedUnsavedSessionN
 
 async function assertShelvedSessions(t, sessionManagerPage, expectedShelvedSessionNames) {
 	const shelvedSessionNames = await sessionManagerPage.$$eval('#saved-sessions .session-card input', inputs => inputs.map(input => input.value))
-	// console.log(await sessionManagerPage.innerHTML('body'))
 	t.deepEqual(shelvedSessionNames, expectedShelvedSessionNames)
 }
 
@@ -144,12 +143,15 @@ async function closeNewTab(sessionManagerPage, window) {
 }
 
 async function createTabs(sessionManagerPage, windowId, urls) {
-	return await Promise.all(urls.map(url => 
+	await Promise.all(urls.map(url => 
 		createTab(sessionManagerPage, {
 			windowId,
 			url,
 		})
 	))
+	const pages = await sessionManagerPage.context().pages()
+	const openedPages = pages.filter(page => urls.includes(page.url()))
+	await Promise.all(openedPages.map(openedPage => openedPage.waitForLoadState()))
 }
 
 async function updateSessionName(sessionManagerPage, name) {

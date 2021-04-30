@@ -2,21 +2,17 @@ import { isFunction, asyncLoop } from './util.js'
 import { BookmarkPersistenceManager } from './persistence/index.js'
 import status from './status/index.js'
 
-// ---===~ Add listeners. ~===------------------------------------------------------------------------------------------
-chrome.runtime.onStartup.addListener(() => {
-	console.debug('Startup event fired.')
-})
-chrome.runtime.onSuspend.addListener(() => {
-	console.debug('Suspend event fired.')
-})
+const bookmarkPersistenceManager = new BookmarkPersistenceManager()
 
+initialise()
+
+// Listeners must be at the top-level: https://developer.chrome.com/docs/extensions/mv2/background_migration/#listeners
 chrome.windows.onCreated.addListener(
 	removePotentiallyReusedWindowIdFromInternalMappingOfOpenSessions
 )
 chrome.windows.onRemoved.addListener(
 	removeClosedSessionFromInternalMappingOfOpenSessions
 )
-
 chrome.windows.onFocusChanged.addListener(setActionIcon)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 	console.debug('tab updated', changeInfo)
@@ -25,7 +21,55 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 chrome.tabs.onCreated.addListener(tab => console.debug('tab created', tab))
 chrome.tabs.onRemoved.addListener(tab => console.debug('tab removed', tab))
 
-var pendingTabUpdatedListenerCalls = 0
+// TODO: Ensure this is loaded before anything else occurs.
+// Currently it only works because it finishes before anything tries to reference seshyFolderId.
+function initialise () {
+	console.log('Extension started, pruning local storage...')
+	pruneLocalStorage(() => {
+		console.log('Local storage cleared.')
+	})
+}
+
+function pruneLocalStorage (callback) {
+	var windowIdsToRemove = []
+
+	var getAllWindows = (storageObject) => {
+		chrome.windows.getAll(null, (windows) => {
+			getStorageKeysToBeRemoved(storageObject, windows)
+		})
+	}
+
+	var getStorageKeysToBeRemoved = (storageObject, windows) => {
+		var storedWindowIds = Object.keys(storageObject).map(windowId =>
+			parseInt(windowId)
+		)
+		var currentlyOpenWindowIds = windows.map(aWindow => aWindow.id)
+
+		var iterateFunction = (storedWindowId, callback) => {
+			if (!currentlyOpenWindowIds.includes(storedWindowId)) {
+				windowIdsToRemove.push(storedWindowId)
+			}
+			callback()
+		}
+
+		asyncLoop(storedWindowIds, iterateFunction, removeStorageKeysIfNecessary)
+	}
+
+	var removeStorageKeysIfNecessary = () => {
+		if (windowIdsToRemove) {
+			var keysToRemove = windowIdsToRemove.map(windowId => windowId.toString())
+			chrome.storage.local.remove(keysToRemove, () => {
+				if (isFunction(callback)) callback()
+			})
+		} else {
+			if (isFunction(callback)) callback()
+		}
+	}
+
+	chrome.storage.local.get(null, getAllWindows)
+}
+
+let pendingTabUpdatedListenerCalls = 0
 
 /**
  * The first implementation for this was dumb in that it would simply get all the tabs for the parent window, remove
@@ -133,56 +177,4 @@ function setActionIcon (windowId) {
 	}
 
 	bookmarkPersistenceManager.checkIfSavedSession(windowId.toString(), setActionIconToSavedOrUnsaved)
-}
-
-// ---===~ Initialisation ~===------------------------------------------------------------------------------------------
-var bookmarkPersistenceManager = new BookmarkPersistenceManager()
-initialise()
-
-// TODO Ensure this is loaded before anything else occurs.
-// Currently it only works because it finishes before anything tries to reference seshyFolderId.
-function initialise () {
-	console.log('Extension started, pruning local storage...')
-	pruneLocalStorage(() => {
-		console.log('Local storage cleared.')
-	})
-}
-
-function pruneLocalStorage (callback) {
-	var windowIdsToRemove = []
-
-	var getAllWindows = (storageObject) => {
-		chrome.windows.getAll(null, (windows) => {
-			getStorageKeysToBeRemoved(storageObject, windows)
-		})
-	}
-
-	var getStorageKeysToBeRemoved = (storageObject, windows) => {
-		var storedWindowIds = Object.keys(storageObject).map(windowId =>
-			parseInt(windowId)
-		)
-		var currentlyOpenWindowIds = windows.map(aWindow => aWindow.id)
-
-		var iterateFunction = (storedWindowId, callback) => {
-			if (!currentlyOpenWindowIds.includes(storedWindowId)) {
-				windowIdsToRemove.push(storedWindowId)
-			}
-			callback()
-		}
-
-		asyncLoop(storedWindowIds, iterateFunction, removeStorageKeysIfNecessary)
-	}
-
-	var removeStorageKeysIfNecessary = () => {
-		if (windowIdsToRemove) {
-			var keysToRemove = windowIdsToRemove.map(windowId => windowId.toString())
-			chrome.storage.local.remove(keysToRemove, () => {
-				if (isFunction(callback)) callback()
-			})
-		} else {
-			if (isFunction(callback)) callback()
-		}
-	}
-
-	chrome.storage.local.get(null, getAllWindows)
 }

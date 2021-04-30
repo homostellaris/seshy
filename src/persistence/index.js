@@ -330,7 +330,7 @@ export class BookmarkPersistenceManager {
 		})
 	}
 
-	// TODO No need for sessionFolderId anymore.
+	// TODO: No need for sessionFolderId anymore.
 	saveOpenSessionTabs (session, callback) {
 		session.updateWindow((updatedWindow) => {
 			this.saveTabsAsBookmarks(updatedWindow.tabs, session.bookmarkFolder.id, callback)
@@ -364,6 +364,9 @@ export class BookmarkPersistenceManager {
 		console.info('Creating %d bookmarks.', tabs.length)
 		// TODO: Validate bookmarks have URLs otherwise they become folders
 		// From the docs: "If url is NULL or missing, it will be a folder."
+		if (!tabs.every(tab => !!tab.url)) {
+			throw new Error(`Tabs don't all have URLs which means bookmark folders will be created instead of bookmarks: ${tabs}`)
+		}
 		for (var i = 0; i < tabs.length; i++) {
 			console.info('Creating bookmark %d', i + 1)
 			var tab = tabs[i]
