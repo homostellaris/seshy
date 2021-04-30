@@ -2,7 +2,6 @@ import { isFunction, getSessionNameInput } from '/util.js'
 import chrome from '/chrome.js'
 
 export class BookmarkPersistenceManager {
-	// ---===~ Storage ~===-----------------------------------------------------------------------------------------------
 	constructor () {
 		this.seshyFolderId = null
 		this.checkIfSeshyFolderExists()

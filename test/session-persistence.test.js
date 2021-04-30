@@ -61,15 +61,13 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	await closeNewTab(sessionManagerPage, window)
 
 	const sessionName = 'Test session'
+	await sessionManagerPage.waitForTimeout(1000) // Necessary because the window ID is not removed from the mapping in local storage before the closeWindow promise returns.
 	await updateSessionName(sessionManagerPage, sessionName)
 	await assertSessionName(t, sessionManagerPage, sessionName)
 
 	await closeWindow(sessionManagerPage, window.id)
-	await sessionManagerPage.waitForTimeout(1000) // Necessary because the window ID is not removed from the mapping in local storage before the closeWindow promise returns.
 	await sessionManagerPage.reload()
 	await assertOpenSessions(t, sessionManagerPage, [unsavedSessionName])
-	await sessionManagerPage.waitForTimeout(1000) // Necessary because the window ID is not removed from the mapping in local storage before the closeWindow promise returns.
-	await sessionManagerPage.reload()
 	await assertShelvedSessions(t, sessionManagerPage, [sessionName])
 
 	await sessionManagerPage.reload()

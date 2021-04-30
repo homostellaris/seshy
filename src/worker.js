@@ -6,6 +6,10 @@ const bookmarkPersistenceManager = new BookmarkPersistenceManager()
 
 initialise()
 
+// window => bookmarkFolder
+// tabs => bookmark
+// whenever shit calms down persist the window
+
 // Listeners must be at the top-level: https://developer.chrome.com/docs/extensions/mv2/background_migration/#listeners
 chrome.windows.onCreated.addListener(
 	removePotentiallyReusedWindowIdFromInternalMappingOfOpenSessions
@@ -141,11 +145,10 @@ function saveSessionIfNoPendingTabUpdatedListenerCalls (
 
 // TODO: This may delete the mapping that was just stored by resuming a saved session. Need to move the storage from
 // `resumeSession` to here so that there can't be any clash.
-/**
- * Closing a window calls chrome.windows.remove so need to saveSession there somehow. But window is already gone.
- * A wrapper for chrome's window.remove method won't work because the user can effectively call that explicitly at any
- * time by closing the window.
- */
+
+// There is an event listener on removal of windows that removes session mappings but unfortunately this does
+// not work on the last window. Chrome closes before the cleanup can be done. Must therefore check on window
+// creation too.
 function removePotentiallyReusedWindowIdFromInternalMappingOfOpenSessions (windowToCheck) {
 	console.log('The windows.onCreated event fired. Clearing window to session folder mapping...')
 	bookmarkPersistenceManager.removeWindowToSessionFolderMapping(windowToCheck.id, () => {
