@@ -1,6 +1,10 @@
 import { isFunction, asyncLoop } from './util.js'
 import { BookmarkPersistenceManager } from './persistence/index.js'
 import status from './status/index.js'
+import {
+	getBookmarkFolderId,
+	persistSession,
+} from './persistence/index.js'
 
 const bookmarkPersistenceManager = new BookmarkPersistenceManager()
 
@@ -18,9 +22,11 @@ chrome.windows.onRemoved.addListener(
 	removeClosedSessionFromInternalMappingOfOpenSessions
 )
 chrome.windows.onFocusChanged.addListener(setActionIcon)
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener(async (_, changeInfo, tab) => {
 	console.debug('tab updated', changeInfo)
-	scheduleSaveSessionIfNecessary(tabId, changeInfo, tab)
+	const bookmarkFolderId = await getBookmarkFolderId(tab.windowId)
+	const isSavedSession = !!bookmarkFolderId
+	if (isSavedSession) persistSession(tab.windowId, bookmarkFolderId)
 })
 chrome.tabs.onCreated.addListener(tab => console.debug('tab created', tab))
 chrome.tabs.onRemoved.addListener(tab => console.debug('tab removed', tab))

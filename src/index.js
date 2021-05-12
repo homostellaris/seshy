@@ -6,7 +6,7 @@ import '/index.css'
 import chrome from '/chrome.js'
 import { BookmarkPersistenceManager } from '/persistence/index.js'
 import { asyncLoop, isFunction, getSessionNameInput } from '/util.js'
-import { Session } from '/session.js'
+import { Session } from '/session-legacy.js'
 
 var bookmarkPersistenceManager = new BookmarkPersistenceManager()
 

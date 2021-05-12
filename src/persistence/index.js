@@ -1,5 +1,6 @@
-import { isFunction, getSessionNameInput } from '/util.js'
-import chrome from '/chrome.js'
+import {isFunction, getSessionNameInput} from '../util.js'
+import chrome from '../chrome.js'
+import diff from 'hyperdiff'
 
 export class BookmarkPersistenceManager {
 	constructor () {
@@ -379,8 +380,10 @@ export class BookmarkPersistenceManager {
 
 			if (i === tabs.length - 1) {
 				chrome.bookmarks.create(createProperties, callback)
+				console.debug(`Saved bookmark ${createProperties.url}`)
 			} else {
 				chrome.bookmarks.create(createProperties)
+				console.debug(`Saved bookmark ${createProperties.url}`)
 			}
 		}
 	}
@@ -391,6 +394,7 @@ export class BookmarkPersistenceManager {
 			console.info('Removing tab %d', i + 1)
 			var bookmarkTreeNode = bookmarkTreeNodes[i]
 			chrome.bookmarks.remove(bookmarkTreeNode.id)
+			console.debug(`Removed bookmark ${bookmarkTreeNode.id}`)
 
 			if (i === bookmarkTreeNodes.length - 1 && isFunction(callback)) {
 				callback()
@@ -417,3 +421,50 @@ export class BookmarkPersistenceManager {
 		chrome.action.setIcon({path: '../status/saved.png'})
 	}
 }
+
+export async function persistSession (windowId, bookmarkFolderId) {
+	const window = await chrome.windows.get(windowId, {populate: true})
+	const bookmarkFolder = await chrome.bookmarks.get(bookmarkFolderId, {populate: true})
+
+	// TODO: Are these needed? Can we just use window.tabs and bookmarkFolder.children instead?
+	const openSessionTabs = window.tabs.map(({index, url}) => ({index, url}))
+	const savedSessionTabs = bookmarkFolder.children.map(({index, url}) => ({index, url}))
+
+	const {added, removed, common} = diff(savedSessionTabs, openSessionTabs, 'url')
+
+	// TODO: The API is a promise now!
+	const createOperations = added.map(tab => new Promise(resolve => {
+		chrome.bookmarks.create(tab, resolve)
+	}))
+	const removeOperations = removed.map(tab => chrome.bookmarks.remove('1')) // TODO: Update to use bookmark folder ID
+	const moveOperations = common
+		.filter(tab => window.tabs[tab.index - 1].url !== bookmarkFolder.children[tab.index - 1].url)
+		.map(tab => chrome.bookmarks.move(
+			bookmarkFolder.children.find(bookmark => bookmark.url === tab.url).id,
+			{index: tab.index})
+		)
+
+	await Promise.all([
+		...createOperations,
+		...removeOperations,
+		...moveOperations,
+	])
+}
+
+function createBookmarkFolder() {
+	throw new Error('Not yet implemented')
+}
+
+export async function getBookmarkFolderId (windowId) {
+	const items = await new Promise(resolve => {
+		chrome.storage.local.get(windowId, resolve)
+	})
+	return items[windowId.toString()] || null
+}
+
+// export class SessionRepository() {
+//     save(session)
+//     delete(session)
+//     update(session)
+//     getBookmarkFolder(windowId)
+// }
