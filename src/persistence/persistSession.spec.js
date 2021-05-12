@@ -39,7 +39,7 @@ test('One new tab creates one new bookmark', async t => {
 			}
 		]
 	})
-	chrome.bookmarks.create.yields({})
+	chrome.bookmarks.create.resolves({})
 
 	await persistSession(windowId, bookmarkFolderId)
 
@@ -73,7 +73,7 @@ test('Two new tabs creates two new bookmarks', async t => {
 			}
 		]
 	})
-	chrome.bookmarks.create.yields({})
+	chrome.bookmarks.create.resolves({})
 
 	await persistSession(windowId, bookmarkFolderId)
 
@@ -108,7 +108,7 @@ test('One closed tab removes one bookmark', async t => {
 			}
 		]
 	})
-	chrome.bookmarks.create.yields({})
+	chrome.bookmarks.create.resolves({})
 
 	await persistSession(windowId, bookmarkFolderId)
 
@@ -156,7 +156,7 @@ test('One tab moved moves one bookmark', async t => {
 			}
 		]
 	})
-	chrome.bookmarks.create.yields({})
+	chrome.bookmarks.create.resolves({})
 	chrome.bookmarks.move.resolves({})
 
 	await persistSession(windowId, bookmarkFolderId)

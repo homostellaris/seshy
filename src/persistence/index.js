@@ -426,17 +426,10 @@ export async function persistSession (windowId, bookmarkFolderId) {
 	const window = await chrome.windows.get(windowId, {populate: true})
 	const bookmarkFolder = await chrome.bookmarks.get(bookmarkFolderId, {populate: true})
 
-	// TODO: Are these needed? Can we just use window.tabs and bookmarkFolder.children instead?
-	const openSessionTabs = window.tabs.map(({index, url}) => ({index, url}))
-	const savedSessionTabs = bookmarkFolder.children.map(({index, url}) => ({index, url}))
+	const {added, removed, common} = diff(bookmarkFolder.children, window.tabs, 'url')
 
-	const {added, removed, common} = diff(savedSessionTabs, openSessionTabs, 'url')
-
-	// TODO: The API is a promise now!
-	const createOperations = added.map(tab => new Promise(resolve => {
-		chrome.bookmarks.create(tab, resolve)
-	}))
-	const removeOperations = removed.map(tab => chrome.bookmarks.remove('1')) // TODO: Update to use bookmark folder ID
+	const createOperations = added.map(tab => chrome.bookmarks.create(tab))
+	const removeOperations = removed.map(tab => chrome.bookmarks.remove(tab.id)) // TODO: Update to use bookmark folder ID
 	const moveOperations = common
 		.filter(tab => window.tabs[tab.index - 1].url !== bookmarkFolder.children[tab.index - 1].url)
 		.map(tab => chrome.bookmarks.move(
