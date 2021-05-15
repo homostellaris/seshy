@@ -1,3 +1,4 @@
+import { debounce } from 'debounce'
 import { isFunction, asyncLoop } from './util.js'
 import { BookmarkPersistenceManager } from './persistence/index.js'
 import status from './status/index.js'
@@ -22,14 +23,19 @@ chrome.windows.onRemoved.addListener(
 	removeClosedSessionFromInternalMappingOfOpenSessions
 )
 chrome.windows.onFocusChanged.addListener(setActionIcon)
-chrome.tabs.onUpdated.addListener(async (_, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener(onUpdatedListener)
+chrome.tabs.onCreated.addListener(tab => console.debug('tab created', tab))
+chrome.tabs.onRemoved.addListener(tab => console.debug('tab removed', tab))
+
+async function onUpdatedListener (_, changeInfo, tab) {
 	console.debug('tab updated', changeInfo)
 	const bookmarkFolderId = await getBookmarkFolderId(tab.windowId)
 	const isSavedSession = !!bookmarkFolderId
-	if (isSavedSession) persistSession(tab.windowId, bookmarkFolderId)
-})
-chrome.tabs.onCreated.addListener(tab => console.debug('tab created', tab))
-chrome.tabs.onRemoved.addListener(tab => console.debug('tab removed', tab))
+	if (isSavedSession) {
+		console.debug('persisting session')
+		persistSession(tab.windowId, bookmarkFolderId)
+	}
+}
 
 // TODO: Ensure this is loaded before anything else occurs.
 // Currently it only works because it finishes before anything tries to reference seshyFolderId.

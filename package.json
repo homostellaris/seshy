@@ -33,6 +33,7 @@
   },
   "homepage": "https://github.com/moderatemisbehaviour/seshy#readme",
   "dependencies": {
+    "debounce": "^1.2.1",
     "hyperdiff": "^2.0.8",
     "material-components-web": "^10.0.0",
     "material-design-icons": "^3.0.1"

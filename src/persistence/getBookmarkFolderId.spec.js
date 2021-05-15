@@ -6,10 +6,10 @@ const windowIdForUnsavedSession = 2
 const bookmarkFolderId = 7
 
 test.before(() => {
-	chrome.storage.local.get.withArgs(windowIdForSavedSession).yields({
+	chrome.storage.local.get.withArgs(windowIdForSavedSession.toString()).yields({
 		[windowIdForSavedSession]: bookmarkFolderId
 	})
-	chrome.storage.local.get.withArgs(2).yields({})
+	chrome.storage.local.get.withArgs('2').yields({})
 })
 
 test('Returns bookmark folder ID if window ID is a key in local storage', async t => {
