@@ -11,10 +11,6 @@ const bookmarkPersistenceManager = new BookmarkPersistenceManager()
 
 initialise()
 
-// window => bookmarkFolder
-// tabs => bookmark
-// whenever shit calms down persist the window
-
 // Listeners must be at the top-level: https://developer.chrome.com/docs/extensions/mv2/background_migration/#listeners
 chrome.windows.onCreated.addListener(
 	removePotentiallyReusedWindowIdFromInternalMappingOfOpenSessions
@@ -23,7 +19,7 @@ chrome.windows.onRemoved.addListener(
 	removeClosedSessionFromInternalMappingOfOpenSessions
 )
 chrome.windows.onFocusChanged.addListener(setActionIcon)
-chrome.tabs.onUpdated.addListener(onUpdatedListener)
+chrome.tabs.onUpdated.addListener(debounce(onUpdatedListener, 2000))
 chrome.tabs.onCreated.addListener(tab => console.debug('tab created', tab))
 chrome.tabs.onRemoved.addListener(tab => console.debug('tab removed', tab))
 
@@ -83,76 +79,6 @@ function pruneLocalStorage (callback) {
 	}
 
 	chrome.storage.local.get(null, getAllWindows)
-}
-
-let pendingTabUpdatedListenerCalls = 0
-
-/**
- * The first implementation for this was dumb in that it would simply get all the tabs for the parent window, remove
- * all bookmarks from the bookmark folder, and re-create all the bookmarks based on the tabs currently in the window.
- * This did not work for several reasons...
- *
- * Creation of tabs seems to be quicker than removal of tabs. This means that if 2 tabs are created or updated in quick
- * succession then they will both trigger a series of removals and creations. A third tab change event may be triggered
- * when the creations have completed but the removals have not, meaning that at some point there are duplicate bookmarks
- * in the bookmark folder because 2 sets were created before the removals completed.
- *
- * In addition bookmark removals may be pending as other creations come through and trigger their own removals.
- * In the time it takes to get to some of the later removals an earlier pending removal may complete resulting in a
- * "can't find bookmark for id" error.
- */
-function scheduleSaveSessionIfNecessary (tabId, changeInfo, tab) {
-	console.log('Tab %d is %s.', tabId, changeInfo.status)
-
-	var sessionWindowId = tab.windowId
-	console.debug(sessionWindowId)
-	var bookmarkFolderId
-	chrome.windows.get(sessionWindowId, {populate: true}, sessionWindow => {
-		if (chrome.runtime.lastError) {
-			// If tab is changed and then window removed quickly this listener can fire after the window is removed.
-			bookmarkPersistenceManager.removeWindowToSessionFolderMapping(sessionWindowId)
-			return
-		}
-
-		console.log('Tab %d caused window %d to be retrieved with %d tabs.', tab.id, sessionWindowId, sessionWindow.tabs.length)
-
-		bookmarkPersistenceManager.checkIfSavedSession(sessionWindowId.toString(), (storageObject) => {
-			bookmarkFolderId = storageObject[sessionWindowId]
-			// `bookmarkFolderId` will be undefined and therefore falsey if no window-to-bookmark-folder-mapping exists.
-			if (bookmarkFolderId) {
-				status.saving()
-				pendingTabUpdatedListenerCalls++
-				setTimeout(() => {
-					saveSessionIfNoPendingTabUpdatedListenerCalls(
-						sessionWindow,
-						bookmarkFolderId
-					)
-				}, 1000)
-			}
-		})
-	})
-}
-
-function saveSessionIfNoPendingTabUpdatedListenerCalls (
-	sessionWindow,
-	bookmarkFolderId
-) {
-	if (--pendingTabUpdatedListenerCalls !== 0) {
-		console.log(
-			'%d newer pending tab updated listener calls. Returning without trying to save.',
-			pendingTabUpdatedListenerCalls
-		)
-		return
-	}
-	console.log(
-		'%d newer pending tab updated listener calls. Saving session to bookmark folder.',
-		pendingTabUpdatedListenerCalls
-	)
-
-	bookmarkPersistenceManager.saveWindowAsBookmarkFolder(sessionWindow, bookmarkFolderId.toString(), () => {
-		console.log(`Session with window ID ${sessionWindow.id} saved to bookmark folder with ID ${bookmarkFolderId}`)
-		status.saved()
-	})
 }
 
 // TODO: This may delete the mapping that was just stored by resuming a saved session. Need to move the storage from

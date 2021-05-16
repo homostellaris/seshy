@@ -449,10 +449,6 @@ export async function persistSession (windowId, bookmarkFolderId) {
 	])
 }
 
-function createBookmarkFolder() {
-	throw new Error('Not yet implemented')
-}
-
 export async function getBookmarkFolderId (windowId) {
 	const items = await new Promise(resolve => {
 		chrome.storage.local.get(windowId.toString(), resolve)
