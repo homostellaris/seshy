@@ -9,8 +9,8 @@ export class BookmarkPersistenceManager {
 	}
 
 	/**
-   * Callback has no args.
-   */
+	 * Callback has no args.
+	 */
 	storeWindowToSessionFolderMapping (windowId, sessionFolderId, callback) {
 		var windowToSessionFolderMapping = {}
 		windowToSessionFolderMapping[windowId] = sessionFolderId
@@ -23,20 +23,7 @@ export class BookmarkPersistenceManager {
 		}
 	}
 
-	/**
-   * The callback should take an `items` object as its parameter.
-   * If nothing is found in storage for the passed `windowId` then the object will have no keys.
-   */
-	getWindowToSessionFolderMapping (windowId, callback) {
-		chrome.storage.local.get(windowId.toString(), callback)
-	}
-
-	removeWindowToSessionFolderMapping (windowId, callback) {
-		chrome.storage.local.remove(windowId.toString())
-		if (isFunction(callback)) callback()
-	}
-
-	// TODO See if using Chrome messages API to communicate with Seshy lib will utilise multiple threads and therefore
+	// TODO: See if using Chrome messages API to communicate with Seshy lib will utilise multiple threads and therefore
 	// improve performance.
 	// Public methods
 	// ---===~ Initialisation ~===----------------------------------------------------------------------------------------
@@ -202,7 +189,7 @@ export class BookmarkPersistenceManager {
 		var removeSessionWindowIfOpen = () => {
 			if (session.currentlyOpen()) {
 				session.updateWindow(() => {
-					this.removeWindow(session, removeBookmarkFolderIfSaved)
+					chrome.windows.remove(session.window.id, removeBookmarkFolderIfSaved)
 				})
 			} else {
 				removeBookmarkFolderIfSaved()
@@ -315,10 +302,6 @@ export class BookmarkPersistenceManager {
 		chrome.windows.getAll({populate: true, windowTypes: ['normal']}, callback)
 	}
 
-	checkIfSavedSession (windowToCheckId, callback) {
-		this.getWindowToSessionFolderMapping(windowToCheckId, callback)
-	}
-
 	createSessionFolder (session, callback) {
 		console.log(`Creating session folder for session named '${session.name}'.`)
 		var bookmarkInfo = {
@@ -402,20 +385,6 @@ export class BookmarkPersistenceManager {
 		}
 	}
 
-	removeWindow (session, callback) {
-		var preventSessionManagerThinkingSessionIsOpen = () => {
-			this.removeWindowToSessionFolderMapping(session.window.id, () => {
-				chrome.windows.remove(session.window.id, callback)
-			})
-		}
-
-		if (session.saved()) {
-			this.saveSession(session, preventSessionManagerThinkingSessionIsOpen)
-		} else {
-			preventSessionManagerThinkingSessionIsOpen()
-		}
-	}
-
 	// TODO: Duplicate of the function in api.js
 	setActionIconToSaved () {
 		chrome.action.setIcon({path: '../status/saved.png'})
@@ -454,6 +423,10 @@ export async function getBookmarkFolderId (windowId) {
 		chrome.storage.local.get(windowId.toString(), resolve)
 	})
 	return items[windowId] || null
+}
+
+export async function storeOpenSessionWindowIds (windows) {
+	return 1
 }
 
 // export class SessionRepository() {

@@ -94,7 +94,10 @@ class SessionManager {
 			})
 		}
 
-		chrome.storage.local.get(null, createCurrentlyOpenSessions)
+		chrome.storage.local.get(null, items => {
+			console.debug('Storage state:', items)
+			createCurrentlyOpenSessions(items)
+		})
 	}
 
 	focusCurrentlyOpenSession (callback) {
