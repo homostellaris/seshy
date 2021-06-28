@@ -41,6 +41,7 @@ async function removeStaleWindowIds () {
 }
 
 export default {
+	getOpenSessionWindowIds,
 	removeClosedWindowId,
 	removeStaleWindowIds
 }

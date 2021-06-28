@@ -425,10 +425,6 @@ export async function getBookmarkFolderId (windowId) {
 	return items[windowId] || null
 }
 
-export async function storeOpenSessionWindowIds (windows) {
-	return 1
-}
-
 // export class SessionRepository() {
 //     save(session)
 //     delete(session)
