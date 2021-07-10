@@ -37,7 +37,6 @@ export function addKeyboardShortcuts () {
 		default: return // Exit this handler for other keys.
 		}
 		event.preventDefault() // Prevent the default action (scroll / move caret).
-		console.log(document.activeElement)
 	})
 }
 

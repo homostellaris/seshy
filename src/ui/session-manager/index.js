@@ -1,17 +1,59 @@
-export function deleteSession () {
+import * as mdc from 'material-components-web'
 
+class ShelvedSessionManager {
+	resume () {
+
+	}
+
+	remove () {
+
+	}
+
+	rename () {
+
+	}
 }
 
-export function editSession () {
-	
+class UnsavedSessionManager {
+	resume () {
+		console.info('RESUMING')
+	}
+
+	remove () {
+
+	}
+
+	rename () {
+
+	}
 }
 
-export function resumeSession () {
+class UnshelvedSessionManager {
+	resume () {
 
+	}
+
+	remove () {
+
+	}
+
+	rename () {
+
+	}
 }
 
-export function saveSession () {
-	
+export function factory(sessionCard) {
+	const sessionType = sessionCard.dataset.type
+
+	if (sessionType === 'unsaved') {
+		return new UnsavedSessionManager()
+	} else if (sessionType === 'unshelved') {
+		return new UnshelvedSessionManager()
+	} else if (sessionType === 'shelved') {
+		return new ShelvedSessionManager()
+	}
+
+	throw new Error('Unknown session type', sessionType)
 }
 
 export function getSessionLists () {
@@ -20,4 +62,21 @@ export function getSessionLists () {
 
 export function getSessionsFromSessionList (sessionList) {
 	return sessionList.getElementsByClassName('session-card')
+}
+
+export function initialiseMaterialComponents () {
+	mdc.autoInit()
+}
+
+export async function focusCurrentlyOpenSession () {
+	const currentlyOpenWindow = await chrome.windows.getCurrent(null)
+	const sessionCard = document.querySelector(`[data-id="${currentlyOpenWindow.id}"]`)
+	sessionCard.focus()
+}
+
+export default {
+	factory,
+	ShelvedSessionManager,
+	UnsavedSessionManager,
+	UnshelvedSessionManager,
 }

@@ -89,7 +89,6 @@ test('three IDs are removed when three tracked windows are no longer open', asyn
 
 	await openSavedSessionTracker.removeStaleWindowIds()
 
-	console.log()
 	t.assert(chrome.storage.local.remove.calledOnce)
 	t.assert(chrome.storage.local.remove.calledWith(['1', '2', '3']))
 })
