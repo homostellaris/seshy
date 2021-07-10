@@ -1,19 +1,17 @@
 import * as mdc from 'material-components-web'
 
-import { isFunction } from '/util.js'
 import { getSessionLists, getSessionsFromSessionList } from '../session-manager/index.js'
 
-export function initialiseKeyboardShortcutsDialog (callback) {
+export function initialiseKeyboardShortcutsDialog () {
 	var keyboardShortcutsElement = document.querySelector('#keyboard-shortcuts')
 	document.dialog = new mdc.dialog.MDCDialog(keyboardShortcutsElement)
 	document.dialog.listen('MDCDialog:accept', () => {
 		document.body.style.minHeight = 'initial'
 	})
-	if (isFunction(callback)) callback()
 }
 
-export function addKeyboardShortcuts (callback) {
-	document.keydownEventListener = (event) => {
+export function addKeyboardShortcuts () {
+	document.addEventListener('keydown', (event) => {
 		switch (event.key) {
 		case 'ArrowLeft':
 			selectLastSessionInPreviousSessionList()
@@ -36,14 +34,11 @@ export function addKeyboardShortcuts (callback) {
 			document.dialog.show()
 			break
 
-		default: return // exit this handler for other keys
+		default: return // Exit this handler for other keys.
 		}
-		event.preventDefault() // prevent the default action (scroll / move caret)
-	}
-
-	document.addEventListener('keydown', document.keydownEventListener)
-
-	if (isFunction(callback)) callback()
+		event.preventDefault() // Prevent the default action (scroll / move caret).
+		console.log(document.activeElement)
+	})
 }
 
 function selectNextSession () {

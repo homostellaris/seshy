@@ -1,11 +1,17 @@
 import localStorage from '../localStorage/index.js'
 
+// TODO: Prefer the terminology 'unshelved' session here and everywhere else.
 /**
  * We need to know which windows represent which sessions so the extensions can do basic functions like
  * update the correct bookmark folder and display correctly in the UI but there is no way to holistically
  * determine which windows represent which sessions other than keeping a record of the windows that are created
  * and removed when the user opens or closes sessions throug the UI.
  */
+
+async function getOpenSessionBookmarkFolderIds () {
+	const items = await localStorage.getAll()
+	return items ? Object.values(items) : []
+}
 
 async function getOpenSessionWindowIds () {
 	const items = await localStorage.getAll()
@@ -41,6 +47,7 @@ async function removeStaleWindowIds () {
 }
 
 export default {
+	getOpenSessionBookmarkFolderIds,
 	getOpenSessionWindowIds,
 	removeClosedWindowId,
 	removeStaleWindowIds
