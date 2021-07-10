@@ -1,4 +1,4 @@
-import { BookmarkPersistenceManager } from '/persistence/index.js'
+import { BookmarkPersistenceManager } from './api/index.js'
 import { isFunction, getSessionNameInput } from '/util.js'
 
 var bookmarkPersistenceManager = new BookmarkPersistenceManager()

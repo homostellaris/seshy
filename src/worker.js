@@ -1,10 +1,10 @@
 import { debounce } from 'debounce'
-import status from './status/index.js'
+import status from './ui/status/index.js'
 import {
 	getBookmarkFolderId,
 	persistSession,
-} from './persistence/index.js'
-import openSavedSessionTracker from './persistence/openSavedSessionTracker'
+} from './api/index.js'
+import openSavedSessionTracker from './api/openSavedSessionTracker'
 
 // Listeners must be at the top-level: https://developer.chrome.com/docs/extensions/mv2/background_migration/#listeners
 chrome.tabs.onUpdated.addListener(debounce(onUpdatedListener, 2000))

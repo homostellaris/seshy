@@ -1,6 +1,6 @@
-import Session from '../session.js'
-import openSavedSessionTracker from '../persistence/openSavedSessionTracker/index.js'
-import bookmarks from '../persistence/bookmarks/index.js'
+import Session from '../../api/session.js'
+import openSavedSessionTracker from '../../api/openSavedSessionTracker/index.js'
+import bookmarks from '../../api/bookmarks/index.js'
 
 const shelvedSessionListId = 'saved-sessions'
 const currentlyOpenSessionListId = 'currently-open-sessions' // TODO: Split this up into 3 lists

@@ -387,7 +387,7 @@ export class BookmarkPersistenceManager {
 
 	// TODO: Duplicate of the function in api.js
 	setActionIconToSaved () {
-		chrome.action.setIcon({path: '../status/saved.png'})
+		chrome.action.setIcon({path: '../ui/status/saved.png'})
 	}
 }
 
