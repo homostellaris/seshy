@@ -2,7 +2,7 @@ import test from 'ava'
 import {chromium} from 'playwright'
 
 // TODO: Move to separate files.
-const unsavedSessionName = 'Unsaved Session'
+const unsavedSessionName = 'Unsaved session'
 
 const exampleDotCom = 'http://example.com/'
 const githubDotCom = 'https://github.com/'
@@ -17,7 +17,7 @@ const urls = [
 test.beforeEach(async t => {
 	const pathToExtension = 'build/'
 	const userDataDir = `/tmp/seshy-development/test-runs/${parseInt(Math.random() * 1000000)}`
-	console.log(userDataDir)
+	console.log('Chrome user data directory is', userDataDir)
 
 	const browserContext = t.context.browserContext = await chromium.launchPersistentContext(userDataDir,{
 		headless: false,
@@ -36,7 +36,7 @@ test.beforeEach(async t => {
 	await sessionManagerPage.goto('chrome://extensions')
 	await sessionManagerPage.click('#devMode')
 	const extensionId = (await sessionManagerPage.innerText('#extension-id')).substring(4)
-	await sessionManagerPage.goto(`chrome-extension://${extensionId}/index.html`)
+	await sessionManagerPage.goto(`chrome-extension://${extensionId}/ui/index.html`)
 
 	sessionManagerPage.setDefaultTimeout(5000) // Otherwise failed tests hang for ages if waitForEvent is never satisfied.
 })

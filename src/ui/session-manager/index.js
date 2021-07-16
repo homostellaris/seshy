@@ -1,6 +1,10 @@
 import * as mdc from 'material-components-web'
 
 class ShelvedSessionManager {
+	constructor (sessionCard) {
+		this.sessionCard = sessionCard
+	}
+
 	resume () {
 
 	}
@@ -15,8 +19,19 @@ class ShelvedSessionManager {
 }
 
 class UnsavedSessionManager {
-	resume () {
-		console.info('RESUMING')
+	constructor (sessionCard) {
+		this.sessionCard = sessionCard
+	}
+
+	async resume () {
+		const isFocused = document.activeElement === this.sessionCard
+
+		if (isFocused) {
+			window.close() // Close the session manager to show the already focused window.
+		} else {
+			const windowId = Number(this.sessionCard.dataset.id)
+			chrome.windows.update(windowId, {focused: true})
+		}
 	}
 
 	remove () {
@@ -29,6 +44,10 @@ class UnsavedSessionManager {
 }
 
 class UnshelvedSessionManager {
+	constructor (sessionCard) {
+		this.sessionCard = sessionCard
+	}
+
 	resume () {
 
 	}
@@ -46,11 +65,11 @@ export function factory(sessionCard) {
 	const sessionType = sessionCard.dataset.type
 
 	if (sessionType === 'unsaved') {
-		return new UnsavedSessionManager()
+		return new UnsavedSessionManager(sessionCard)
 	} else if (sessionType === 'unshelved') {
-		return new UnshelvedSessionManager()
+		return new UnshelvedSessionManager(sessionCard)
 	} else if (sessionType === 'shelved') {
-		return new ShelvedSessionManager()
+		return new ShelvedSessionManager(sessionCard)
 	}
 
 	throw new Error('Unknown session type', sessionType)
