@@ -1,7 +1,8 @@
-import Session from '../../api/session.js'
-import openSavedSessionTracker from '../../api/openSavedSessionTracker/index.js'
 import bookmarks from '../../api/bookmarks/index.js'
-import sessionManager from './index.js'
+import localStorage from '../../api/localStorage/index.js'
+import openSavedSessionTracker from '../../api/openSavedSessionTracker/index.js'
+import Session from '../../api/session.js'
+import SessionManager from './index.js'
 
 const shelvedSessionListId = 'saved-sessions'
 const currentlyOpenSessionListId = 'currently-open-sessions' // TODO: Split this up into 3 lists
@@ -14,7 +15,7 @@ async function createSessionCards () {
 	const windowsUnshelved = []
 
 	windows.forEach(window => {
-		if (openSavedSessionWindowIds.includes(window.id)) {
+		if (openSavedSessionWindowIds.includes(window.id.toString())) {
 			windowsUnshelved.push(window)
 		} else {
 			windowsUnsaved.push(window)
@@ -47,7 +48,7 @@ async function createUnshelvedSessionCards (windows) {
 	const promises = windows.map(async window => {
 		const unshelvedSessionIdMappings = await localStorage.getAll() // TODO: Abstract this away into a higher-level module rather than calling localStorage directly
 		const bookmarkFolderId = unshelvedSessionIdMappings[window.id.toString()]
-		const bookmarkFolder = await bookmarks.get(bookmarkFolderId)
+		const bookmarkFolder = await bookmarks.getFolder(bookmarkFolderId)
 
 		const session = new Session({
 			name: bookmarkFolder.title,
@@ -95,9 +96,12 @@ function createSessionCard (session, sessionType) {
 	const resumeIcon = sessionCard.getElementsByClassName('resume-icon')[0]
 	const deleteIcon = sessionCard.getElementsByClassName('delete-icon')[0]
 
-	editIcon.addEventListener('click', event => sessionManager.factory(event.target.closest('.session-card')).edit())
-	resumeIcon.addEventListener('click', event => sessionManager.factory(event.target.closest('.session-card')).resume())
-	deleteIcon.addEventListener('click', event => sessionManager.factory(event.target.closest('.session-card')).remove())
+	const sessionManager = SessionManager.factory(sessionCard)
+	const {edit, resume, remove} = sessionManager.eventHandlers
+
+	editIcon.addEventListener('click', edit) // Wrapped in an arrow function to keep `this` as the session manager rather than the event object.
+	resumeIcon.addEventListener('click', resume)
+	deleteIcon.addEventListener('click', remove)
 
 	// sessionCard.addEventListener('click', (event) => {
 	// 	var classList = event.target.classList

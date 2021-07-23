@@ -17,7 +17,7 @@ const urls = [
 test.beforeEach(async t => {
 	const pathToExtension = 'build/'
 	const userDataDir = `/tmp/seshy-development/test-runs/${parseInt(Math.random() * 1000000)}`
-	console.log('Chrome user data directory is', userDataDir)
+	console.log('Chrome user data directory is', userDataDir, '\n')
 
 	const browserContext = t.context.browserContext = await chromium.launchPersistentContext(userDataDir,{
 		headless: false,
@@ -29,8 +29,15 @@ test.beforeEach(async t => {
 	})
 
 	const sessionManagerPage = t.context.sessionManagerPage = await browserContext.pages()[0]
+
+	sessionManagerPage.on('console', async consoleMessage => {
+		for (let i = 0; i < consoleMessage.args().length; ++i) {
+			const type = consoleMessage.type()
+			console[type](`Console ${type}:` , await consoleMessage.args()[i].jsonValue())
+		}
+	})
 	sessionManagerPage.on('pageerror', (error) => {
-		console.error(error.message)
+		console.error('Error:', error.message)
 	})
 
 	await sessionManagerPage.goto('chrome://extensions')

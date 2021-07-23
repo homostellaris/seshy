@@ -1,5 +1,5 @@
 import 'material-components-web/dist/material-components-web.css'
-import './material-icons/index.css'
+import './materialIcons/index.css'
 
 import './index.css'
 import {
@@ -9,12 +9,12 @@ import {
 import {
 	focusCurrentlyOpenSession,
 	initialiseMaterialComponents,
-} from './session-manager/index.js'
-import createSessionCards from './session-manager/createSessionCards.js'
+} from './SessionManager/index.js'
+import createSessionCards from './SessionManager/createSessionCards.js'
 
-(async function (){
+(async function () {
 	await createSessionCards()
-	focusCurrentlyOpenSession()
+	// focusCurrentlyOpenSession()
 	addKeyboardShortcuts()
 	initialiseMaterialComponents()
 	// initialiseKeyboardShortcutsDialog()

@@ -8,6 +8,10 @@ import localStorage from '../localStorage/index.js'
  * and removed when the user opens or closes sessions throug the UI.
  */
 
+async function addOpenSessionWindowId (windowId, bookmarkFolderId) {
+	await localStorage.add(windowId, bookmarkFolderId)
+}
+
 async function getOpenSessionBookmarkFolderIds () {
 	const items = await localStorage.getAll()
 	return items ? Object.values(items) : []
@@ -47,6 +51,7 @@ async function removeStaleWindowIds () {
 }
 
 export default {
+	addOpenSessionWindowId,
 	getOpenSessionBookmarkFolderIds,
 	getOpenSessionWindowIds,
 	removeClosedWindowId,

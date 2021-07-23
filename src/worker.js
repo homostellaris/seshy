@@ -1,10 +1,15 @@
 import { debounce } from 'debounce'
-import status from './ui/status/index.js'
+import bookmarks from './api/bookmarks/index.js'
 import {
 	getBookmarkFolderId,
-	persistSession,
+	persistSession
 } from './api/index.js'
 import openSavedSessionTracker from './api/openSavedSessionTracker'
+import status from './ui/status/index.js'
+
+(async function () {
+	await bookmarks.createSeshyFolder()
+}())
 
 // Listeners must be at the top-level: https://developer.chrome.com/docs/extensions/mv2/background_migration/#listeners
 chrome.tabs.onUpdated.addListener(debounce(onUpdatedListener, 2000))

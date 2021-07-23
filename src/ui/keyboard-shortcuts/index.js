@@ -1,6 +1,6 @@
 import * as mdc from 'material-components-web'
 
-import { getSessionLists, getSessionsFromSessionList } from '../session-manager/index.js'
+import { getSessionLists, getSessionsFromSessionList } from '../SessionManager/index.js'
 
 export function initialiseKeyboardShortcutsDialog () {
 	var keyboardShortcutsElement = document.querySelector('#keyboard-shortcuts')
