@@ -40,7 +40,7 @@ function createUnsavedSessionCards (windows) {
 			saved: false,
 			windowId: window.id,
 		})
-		createSessionCard(session, 'unsaved')
+		createSessionCard(session, 'unsaved', window.id)
 	})
 }
 
@@ -54,9 +54,8 @@ async function createUnshelvedSessionCards (windows) {
 			name: bookmarkFolder.title,
 			tabs: bookmarkFolder.children,
 			saved: true,
-			windowId: window.id,
 		})
-		createSessionCard(session, 'unshelved')
+		createSessionCard(session, 'unshelved', window.id)
 	})
 
 	await Promise.all(promises)
@@ -73,16 +72,16 @@ async function createShelvedSessionCards () {
 			tabs: bookmarkFolder.children,
 			saved: true,
 		})
-		createSessionCard(session, 'shelved')
+		createSessionCard(session, 'shelved', bookmarkFolder.id)
 	})
 }
 
-function createSessionCard (session, sessionType) {
+function createSessionCard (session, sessionType, dataId) {
 	const listId = sessionType === 'unsaved' || sessionType === 'unshelved' ? currentlyOpenSessionListId : shelvedSessionListId
 	const sessionList = document.getElementById(listId)
 
 	const sessionCard = document.createElement('li')
-	sessionCard.setAttribute('data-id', session.windowId)
+	sessionCard.setAttribute('data-id', dataId)
 	sessionCard.setAttribute('data-type', sessionType)
 	sessionCard.setAttribute('class', 'session-card mdc-list-item mdc-theme--background mdc-elevation--z2')
 	sessionCard.setAttribute('tabindex', '0') // Make `li` element focusable.

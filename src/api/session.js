@@ -1,9 +1,8 @@
 class Session {
-	constructor({name, tabs, saved, windowId}) {
+	constructor({name, tabs, saved}) {
 		this.name = name
 		this.tabs = tabs
 		this.saved = saved
-		this.windowId = windowId
 	}
 }
 

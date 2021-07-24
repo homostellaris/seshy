@@ -13,10 +13,6 @@ class SessionManager {
 			save: this.save.bind(this),
 		}
 	}
-
-	get windowId () {
-		return Number(this.sessionCard.dataset.id)
-	}
 }
 
 class ShelvedSessionManager extends SessionManager {
@@ -28,8 +24,13 @@ class ShelvedSessionManager extends SessionManager {
 
 	}
 
-	resume () {
+	async resume () {
+		const bookmarkFolderId = this.sessionCard.dataset.id
+		const bookmarkFolder = await bookmarks.getFolder(bookmarkFolderId)
+		const urls = bookmarkFolder.children.map(bookmark => bookmark.url)
 
+		const window = await chrome.windows.create({url: urls}) // The Chrome API uses the singular 'url' even though you can pass an array.
+		await openSavedSessionTracker.addOpenSessionWindowId(window.id, bookmarkFolderId)
 	}
 
 	remove () {
@@ -81,6 +82,7 @@ class UnsavedSessionManager extends SessionManager {
 
 	async remove () {
 		await chrome.windows.remove(this.windowId)
+		this.sessionCard.remove()
 	}
 
 	async save () {
@@ -93,6 +95,10 @@ class UnsavedSessionManager extends SessionManager {
 		
 		const savedStateIcon = this.sessionCard.getElementsByClassName('saved-state-icon')[0]
 		savedStateIcon.textContent = 'bookmark'
+	}
+
+	get windowId () {
+		return Number(this.sessionCard.dataset.id)
 	}
 }
 
@@ -109,12 +115,18 @@ class UnshelvedSessionManager extends SessionManager {
 
 	}
 
-	remove () {
-
+	async remove () {
+		await chrome.windows.remove(this.windowId)
+		// Event listener in worker will remove window ID from storage to stop tracking as an open saved session.
+		this.sessionCard.remove()
 	}
 
 	save () {
 		
+	}
+
+	get windowId () {
+		return Number(this.sessionCard.dataset.id)
 	}
 }
 
