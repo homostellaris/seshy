@@ -4,10 +4,10 @@ import './materialIcons/index.css'
 import './index.css'
 import {
 	addKeyboardShortcuts,
-	initialiseKeyboardShortcutsDialog
+	// initialiseKeyboardShortcutsDialog
 } from './keyboard-shortcuts/index.js'
 import {
-	focusCurrentlyOpenSession,
+	// focusCurrentlyOpenSession,
 	initialiseMaterialComponents,
 } from './SessionManager/index.js'
 import createSessionCards from './SessionManager/createSessionCards.js'
