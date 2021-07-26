@@ -69,7 +69,6 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	await tester.closeNewTab(window)
 
 	const sessionName = 'Test session'
-	await playwrightPage.waitForTimeout(1000) // Necessary because the window ID is not removed from the mapping in local storage before the closeWindow promise returns.
 	await tester.updateSessionName(sessionName)
 	await tester.assertSessionName(sessionName)
 
@@ -80,11 +79,12 @@ test('Saving, re-opening, then deleting sessions', async t => {
 
 	// TODO: Edit the shelved session
 
-	await playwrightPage.reload()
-	const [page, _] = await Promise.all([
+	const [resumedSessionPage, _] = await Promise.all([
 		t.context.browserContext.waitForEvent('page', {timeout: 2000}),
 		tester.resumeSession(sessionName)
 	])
+	resumedSessionPage.setDefaultTimeout(2000)
+	await resumedSessionPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
 
 	await playwrightPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
 	await playwrightPage.reload()
@@ -95,9 +95,10 @@ test('Saving, re-opening, then deleting sessions', async t => {
 
 	t.is((await tester.getWindows()).length, 2)
 	await Promise.all([
-		page.waitForEvent('close', {timeout: 2000}), // This isn't picking up the default timeout for some reason >:[ TODO: Probably because its set on a different page!
+		resumedSessionPage.waitForEvent('close', {timeout: 2000}),
 		tester.deleteSession(sessionName)
 	])
+	await playwrightPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
 	t.is((await tester.getWindows()).length, 1)
 	const sessions = await tester.getSessionNames()
 	t.deepEqual(sessions, [unsavedSessionName])
@@ -163,6 +164,7 @@ class SessionManagerTester {
 				url,
 			})
 		))
+		await this.playwrightPage.waitForTimeout(1000) // Playwright takes too long to recognise the new pages without this :/
 		const pages = await this.playwrightPage.context().pages()
 		const openedPages = pages.filter(page => urls.includes(page.url()))
 		await Promise.all(openedPages.map(openedPage => openedPage.waitForLoadState()))
