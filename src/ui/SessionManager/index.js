@@ -13,39 +13,6 @@ class SessionManager {
 			save: this.save.bind(this),
 		}
 	}
-}
-
-class ShelvedSessionManager extends SessionManager {
-	constructor (sessionCard) {
-		super(sessionCard)
-	}
-
-	edit () {
-
-	}
-
-	async resume () {
-		const bookmarkFolderId = this.sessionCard.dataset.id
-		const bookmarkFolder = await bookmarks.getFolder(bookmarkFolderId)
-		const urls = bookmarkFolder.children.map(bookmark => bookmark.url)
-
-		const window = await chrome.windows.create({url: urls}) // The Chrome API uses the singular 'url' even though you can pass an array.
-		await openSavedSessionTracker.addOpenSessionWindowId(window.id, bookmarkFolderId)
-	}
-
-	remove () {
-
-	}
-
-	save () {
-
-	}
-}
-
-class UnsavedSessionManager extends SessionManager {
-	constructor (sessionCard) {
-		super(sessionCard)
-	}
 
 	async edit () {
 		const sessionNameInput = this.sessionCard.getElementsByClassName('session-name-input')[0]
@@ -70,6 +37,44 @@ class UnsavedSessionManager extends SessionManager {
 		sessionNameInput.readOnly = true
 	}
 
+	get sessionName () {
+		return this.sessionCard.getElementsByClassName('session-name-input')[0].value
+	}
+}
+
+class ShelvedSessionManager extends SessionManager {
+	constructor (sessionCard) {
+		super(sessionCard)
+	}
+
+	async resume () {
+		const bookmarkFolderId = this.sessionCard.dataset.id
+		const bookmarkFolder = await bookmarks.getFolder(bookmarkFolderId)
+		const urls = bookmarkFolder.children.map(bookmark => bookmark.url)
+
+		const window = await chrome.windows.create({url: urls}) // The Chrome API uses the singular 'url' even though you can pass an array.
+		await openSavedSessionTracker.addOpenSessionWindowId(window.id, bookmarkFolderId)
+	}
+
+	async remove () {
+		await bookmarks.removeFolder(this.bookmarkFolderId)
+	}
+
+	async save () {
+		const bookmarkId = this.sessionCard.dataset.id
+		await bookmarks.renameFolder(bookmarkId, this.sessionName)
+	}
+
+	get bookmarkFolderId () {
+		return this.sessionCard.dataset.id
+	}
+}
+
+class UnsavedSessionManager extends SessionManager {
+	constructor (sessionCard) {
+		super(sessionCard)
+	}
+
 	async resume () {
 		const isFocused = document.activeElement === this.sessionCard
 
@@ -86,8 +91,7 @@ class UnsavedSessionManager extends SessionManager {
 	}
 
 	async save () {
-		const sessionName = this.sessionCard.getElementsByClassName('session-name-input')[0].value
-		const bookmarkFolder = await bookmarks.createFolder(sessionName)
+		const bookmarkFolder = await bookmarks.createFolder(this.sessionName)
 		const windowId = Number(this.sessionCard.dataset.id)
 
 		await persistSession(windowId, bookmarkFolder.id)
@@ -107,10 +111,6 @@ class UnshelvedSessionManager extends SessionManager {
 		super(sessionCard)
 	}
 
-	edit () {
-
-	}
-
 	resume () {
 
 	}
@@ -121,8 +121,8 @@ class UnshelvedSessionManager extends SessionManager {
 		this.sessionCard.remove()
 	}
 
-	save () {
-		
+	async save () {
+
 	}
 
 	get windowId () {

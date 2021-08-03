@@ -43,10 +43,22 @@ async function getSeshyFolder () {
 	return bookmarkTreeNodes.length ? bookmarkTreeNodes[0] : null
 }
 
+async function renameFolder (bookmarkFolderId, name) {
+	await chrome.bookmarks.update(bookmarkFolderId, {
+		title: name,
+	})
+}
+
+async function removeFolder (bookmarkFolderId) {
+	await chrome.bookmarks.removeTree(bookmarkFolderId)
+}
+
 export default {
 	createFolder,
 	createSeshyFolder,
 	getAllFolders,
 	getFolder,
 	getSeshyFolder,
+	renameFolder,
+	removeFolder,
 }

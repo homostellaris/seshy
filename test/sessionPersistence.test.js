@@ -68,27 +68,28 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	await tester.createTabs(window.id, urls)
 	await tester.closeNewTab(window)
 
-	const sessionName = 'Test session'
-	await tester.updateSessionName(sessionName)
-	await tester.assertSessionName(sessionName)
+	const savedSessionName = 'Test session'
+	await tester.updateUnsavedSessionName(1, savedSessionName)
+	await tester.assertOpenSessions([unsavedSessionName, savedSessionName])
 
 	await tester.closeWindow(window.id)
 	await playwrightPage.reload()
 	await tester.assertOpenSessions([unsavedSessionName])
-	await tester.assertShelvedSessions([sessionName])
+	await tester.assertShelvedSessions([savedSessionName])
 
-	// TODO: Edit the shelved session
+	const updatedSessionName = 'Test session updated'
+	await tester.updateShelvedSessionName(0, updatedSessionName)
+	await tester.assertShelvedSessions([updatedSessionName])
 
 	const [resumedSessionPage, _] = await Promise.all([
 		t.context.browserContext.waitForEvent('page', {timeout: 2000}),
-		tester.resumeSession(sessionName)
+		tester.resumeSessionByIndex(1)
 	])
 	resumedSessionPage.setDefaultTimeout(2000)
-	await resumedSessionPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
 
 	await playwrightPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
 	await playwrightPage.reload()
-	await tester.assertOpenSessions([unsavedSessionName, sessionName])
+	await tester.assertOpenSessions([unsavedSessionName, updatedSessionName])
 	await tester.assertShelvedSessions([])
 	const unshelvedSessionWindow = await tester.getCurrentWindow()
 	await tester.assertWindowTabUrls(unshelvedSessionWindow, urls)
@@ -96,7 +97,7 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	t.is((await tester.getWindows()).length, 2)
 	await Promise.all([
 		resumedSessionPage.waitForEvent('close', {timeout: 2000}),
-		tester.deleteSession(sessionName)
+		tester.deleteSession(updatedSessionName)
 	])
 	await playwrightPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
 	t.is((await tester.getWindows()).length, 1)
@@ -121,12 +122,6 @@ class SessionManagerTester {
 	async assertShelvedSessions(expectedShelvedSessionNames) {
 		const shelvedSessionNames = await this.playwrightPage.$$eval('#saved-sessions .session-card input', inputs => inputs.map(input => input.value))
 		this.avaExecutionContext.deepEqual(shelvedSessionNames, expectedShelvedSessionNames)
-	}
-
-	async assertSessionName(name) {
-		const sessionCardInput = await this.playwrightPage.$('.session-card:nth-child(2) .session-name-input')
-		const sessionName = await sessionCardInput.evaluate(input => input.value)
-		this.avaExecutionContext.is(sessionName, name)
 	}
 
 	async createWindow() {
@@ -170,8 +165,15 @@ class SessionManagerTester {
 		await Promise.all(openedPages.map(openedPage => openedPage.waitForLoadState()))
 	}
 
-	async updateSessionName (name) {
-		const editButton = await this.playwrightPage.$('.session-card:nth-child(2) .edit-button')
+	async updateUnsavedSessionName (sessionIndex, name) {
+		const editButton = await this.playwrightPage.$(`#currently-open-sessions .session-card:nth-child(${sessionIndex + 1}) .edit-button`)
+		await editButton.click()
+		await this.playwrightPage.keyboard.type(name)
+		await editButton.click()
+	}
+
+	async updateShelvedSessionName (sessionIndex, name) {
+		const editButton = await this.playwrightPage.$(`#saved-sessions .session-card:nth-child(${sessionIndex + 1}) .edit-button`)
 		await editButton.click()
 		await this.playwrightPage.keyboard.type(name)
 		await editButton.click()
@@ -185,9 +187,25 @@ class SessionManagerTester {
 		return window
 	}
 
-	async resumeSession (sessionName) {
-		const resumeButton = await this.playwrightPage.$(`.session-card:has(.session-name-input[value="${sessionName}"]) .resume-button`)
+	async resumeSessionByIndex(sessionIndex) {
+		const sessionCards = await this.playwrightPage.$$('.session-card')
+		const resumeButton = await sessionCards[sessionIndex].$('.resume-button')
 		await resumeButton.click()
+	}
+
+	async resumeSessionByName (sessionName) {
+		await this.playwrightPage.evaluate(
+			sessionName => {
+				const sessionCards = document.getElementsByClassName('session-card')
+				const sessionCard = Array.prototype.find.call(sessionCards, function (sessionCard) {
+					const sessionNameInput = sessionCard.getElementsByClassName('session-name-input')[0]
+					return sessionNameInput.value === sessionName
+				})
+				const resumeButton = sessionCard.getElementsByClassName('resume-button')[0]
+				resumeButton.click()
+			},
+			sessionName
+		)
 	}
 
 	async getCurrentWindow() {
