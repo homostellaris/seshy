@@ -1,5 +1,5 @@
 import { debounce } from 'debounce'
-import bookmarks from './api/bookmarks/index.js'
+import bookmarks from './api/chrome/bookmarks.js'
 import {
 	getBookmarkFolderId,
 	persistSession

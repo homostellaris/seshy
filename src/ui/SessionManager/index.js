@@ -1,5 +1,5 @@
 import * as mdc from 'material-components-web'
-import bookmarks from '../../api/bookmarks'
+import bookmarks from '../../api/chrome/bookmarks'
 import {persistSession} from '../../api'
 import openSavedSessionTracker from '../../api/openSavedSessionTracker'
 

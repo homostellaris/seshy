@@ -1,4 +1,3 @@
-import chrome from '../chrome.js'
 import diff from 'hyperdiff'
 
 export async function persistSession (windowId, bookmarkFolderId) {

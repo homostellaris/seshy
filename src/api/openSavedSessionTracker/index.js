@@ -1,4 +1,4 @@
-import localStorage from '../localStorage/index.js'
+import localStorage from '../chrome/localStorage.js'
 
 // TODO: Prefer the terminology 'unshelved' session here and everywhere else.
 /**
