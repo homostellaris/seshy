@@ -33,18 +33,25 @@ async function getAllOpenWindows () { // TODO: Extract to windows module
 }
 
 function createUnsavedSessionCards (windows) {
+	const sessionList = document.getElementById(currentlyOpenSessionListId)
+
 	windows.forEach(window => {
 		const session = new Session({
 			name: 'Unsaved session',
 			tabs: window.tabs,
 			saved: false,
-			windowId: window.id,
 		})
-		createSessionCard(session, 'unsaved', window.id)
+		const sessionCard = createSessionCard(session, {
+			windowId: window.id,
+			type: 'unsaved',
+		})
+		sessionList.appendChild(sessionCard)
 	})
 }
 
 async function createUnshelvedSessionCards (windows) {
+	const sessionList = document.getElementById(currentlyOpenSessionListId)
+
 	const promises = windows.map(async window => {
 		const unshelvedSessionIdMappings = await localStorage.getAll() // TODO: Abstract this away into a higher-level module rather than calling localStorage directly
 		const bookmarkFolderId = unshelvedSessionIdMappings[window.id.toString()]
@@ -55,7 +62,12 @@ async function createUnshelvedSessionCards (windows) {
 			tabs: bookmarkFolder.children,
 			saved: true,
 		})
-		createSessionCard(session, 'unshelved', window.id)
+		const sessionCard = createSessionCard(session, {
+			bookmarkFolderId,
+			windowId: window.id,
+			type: 'unshelved',
+		})
+		sessionList.appendChild(sessionCard)
 	})
 
 	await Promise.all(promises)
@@ -65,6 +77,7 @@ async function createShelvedSessionCards () {
 	const shelvedSessionBookmarkFolderIds = await openSavedSessionTracker.getOpenSessionBookmarkFolderIds()
 	const shelvedBookmarkFolders = (await bookmarks.getAllFolders())
 		.filter(bookmarkFolder => !shelvedSessionBookmarkFolderIds.includes(bookmarkFolder.id)) // TODO: Should maybe check window IDs instead to avoid stale mappings?
+	const sessionList = document.getElementById(shelvedSessionListId)
 
 	shelvedBookmarkFolders.forEach(async bookmarkFolder => {
 		const session = new Session({
@@ -72,22 +85,24 @@ async function createShelvedSessionCards () {
 			tabs: bookmarkFolder.children,
 			saved: true,
 		})
-		createSessionCard(session, 'shelved', bookmarkFolder.id)
+		const sessionCard = createSessionCard(session, {
+			bookmarkFolderId: bookmarkFolder.id,
+			type: 'shelved',
+		})
+		sessionList.appendChild(sessionCard)
 	})
 }
 
-function createSessionCard (session, sessionType, dataId) {
-	const listId = sessionType === 'unsaved' || sessionType === 'unshelved' ? currentlyOpenSessionListId : shelvedSessionListId
-	const sessionList = document.getElementById(listId)
-
+function createSessionCard (session, dataset) {
 	const sessionCard = document.createElement('li')
-	sessionCard.setAttribute('data-id', dataId)
-	sessionCard.setAttribute('data-type', sessionType)
+
+	for (const [key, value] of Object.entries(dataset)) {
+		sessionCard.dataset[key] = value
+	}
+
 	sessionCard.setAttribute('class', 'session-card mdc-list-item mdc-theme--background mdc-elevation--z2')
 	sessionCard.setAttribute('tabindex', '0') // Make `li` element focusable.
 	sessionCard.innerHTML = getSessionInnerHtml(session.name, session.tabs.length, session.saved)
-
-	sessionList.appendChild(sessionCard)
 
 	sessionCard.addEventListener('focus', (event) => addSelectedClass(event.target))
 
@@ -101,6 +116,8 @@ function createSessionCard (session, sessionType, dataId) {
 	editIcon.addEventListener('click', edit) // Wrapped in an arrow function to keep `this` as the session manager rather than the event object.
 	resumeIcon.addEventListener('click', resume)
 	deleteIcon.addEventListener('click', remove)
+
+	return sessionCard
 
 	// sessionCard.addEventListener('click', (event) => {
 	// 	var classList = event.target.classList

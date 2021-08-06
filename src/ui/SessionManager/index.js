@@ -42,35 +42,7 @@ class SessionManager {
 	}
 }
 
-class ShelvedSessionManager extends SessionManager {
-	constructor (sessionCard) {
-		super(sessionCard)
-	}
-
-	async resume () {
-		const bookmarkFolderId = this.sessionCard.dataset.id
-		const bookmarkFolder = await bookmarks.getFolder(bookmarkFolderId)
-		const urls = bookmarkFolder.children.map(bookmark => bookmark.url)
-
-		const window = await chrome.windows.create({url: urls}) // The Chrome API uses the singular 'url' even though you can pass an array.
-		await openSavedSessionTracker.addOpenSessionWindowId(window.id, bookmarkFolderId)
-	}
-
-	async remove () {
-		await bookmarks.removeFolder(this.bookmarkFolderId)
-	}
-
-	async save () {
-		const bookmarkId = this.sessionCard.dataset.id
-		await bookmarks.renameFolder(bookmarkId, this.sessionName)
-	}
-
-	get bookmarkFolderId () {
-		return this.sessionCard.dataset.id
-	}
-}
-
-class UnsavedSessionManager extends SessionManager {
+class OpenSessionManager extends SessionManager {
 	constructor (sessionCard) {
 		super(sessionCard)
 	}
@@ -85,6 +57,16 @@ class UnsavedSessionManager extends SessionManager {
 		}
 	}
 
+	get windowId () {
+		return Number(this.sessionCard.dataset.windowId)
+	}
+}
+
+class UnsavedSessionManager extends OpenSessionManager {
+	constructor (sessionCard) {
+		super(sessionCard)
+	}
+
 	async remove () {
 		await chrome.windows.remove(this.windowId)
 		this.sessionCard.remove()
@@ -92,27 +74,18 @@ class UnsavedSessionManager extends SessionManager {
 
 	async save () {
 		const bookmarkFolder = await bookmarks.createFolder(this.sessionName)
-		const windowId = Number(this.sessionCard.dataset.id)
 
-		await persistSession(windowId, bookmarkFolder.id)
-		await openSavedSessionTracker.addOpenSessionWindowId(windowId, bookmarkFolder.id)
+		await persistSession(this.windowId, bookmarkFolder.id)
+		await openSavedSessionTracker.addOpenSessionWindowId(this.windowId, bookmarkFolder.id)
 		
 		const savedStateIcon = this.sessionCard.getElementsByClassName('saved-state-icon')[0]
 		savedStateIcon.textContent = 'bookmark'
 	}
-
-	get windowId () {
-		return Number(this.sessionCard.dataset.id)
-	}
 }
 
-class UnshelvedSessionManager extends SessionManager {
+class UnshelvedSessionManager extends OpenSessionManager {
 	constructor (sessionCard) {
 		super(sessionCard)
-	}
-
-	resume () {
-
 	}
 
 	async remove () {
@@ -121,12 +94,39 @@ class UnshelvedSessionManager extends SessionManager {
 		this.sessionCard.remove()
 	}
 
+	// TODO: Fix duplication between these methods and the ShelvedSessionManager methods.
 	async save () {
-
+		await bookmarks.renameFolder(this.bookmarkFolderId, this.sessionName)
 	}
 
-	get windowId () {
-		return Number(this.sessionCard.dataset.id)
+	get bookmarkFolderId () {
+		return this.sessionCard.dataset.bookmarkFolderId
+	}
+}
+
+class ShelvedSessionManager extends SessionManager {
+	constructor (sessionCard) {
+		super(sessionCard)
+	}
+
+	async resume () {
+		const bookmarkFolder = await bookmarks.getFolder(this.bookmarkFolderId)
+		const urls = bookmarkFolder.children.map(bookmark => bookmark.url)
+
+		const window = await chrome.windows.create({url: urls}) // The Chrome API uses the singular 'url' even though you can pass an array.
+		await openSavedSessionTracker.addOpenSessionWindowId(window.id, this.bookmarkFolderId)
+	}
+
+	async remove () {
+		await bookmarks.removeFolder(this.bookmarkFolderId)
+	}
+
+	async save () {
+		await bookmarks.renameFolder(this.bookmarkFolderId, this.sessionName)
+	}
+
+	get bookmarkFolderId () {
+		return this.sessionCard.dataset.bookmarkFolderId
 	}
 }
 
