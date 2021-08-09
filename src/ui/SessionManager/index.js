@@ -1,4 +1,3 @@
-import * as mdc from 'material-components-web'
 import bookmarks from '../../api/chrome/bookmarks'
 import {persistSession} from '../../api'
 import openSavedSessionTracker from '../../api/openSavedSessionTracker'
@@ -11,6 +10,7 @@ class SessionManager {
 			resume: this.resume.bind(this),
 			remove: this.remove.bind(this),
 			save: this.save.bind(this),
+			keydown: this.keydown.bind(this),
 		}
 	}
 
@@ -24,17 +24,51 @@ class SessionManager {
 		editIcon.style.color = '#4CAF50'
 
 		editIcon.removeEventListener('click', this.eventHandlers.edit)
-		await new Promise(resolve => {
-			editIcon.addEventListener('click', resolve)
-		})
+		this.sessionCard.removeEventListener('keydown', this.eventHandlers.keydown)
 
+		let editingCompletePromiseResolve
+		const editingCompletePromise = new Promise(resolve => {
+			editingCompletePromiseResolve = resolve
+		})
+		editIcon.addEventListener('click', completeEditOnIconClick)
+		this.sessionCard.addEventListener('keydown', completeEditOnEnterKey)
+
+		await editingCompletePromise
 		await this.save()
 
+		editIcon.removeEventListener('click', completeEditOnIconClick)
+		this.sessionCard.removeEventListener('keydown', completeEditOnEnterKey)
 		editIcon.addEventListener('click', this.eventHandlers.edit)
+		this.sessionCard.addEventListener('keydown', this.eventHandlers.keydown)
+
 		editIcon.textContent = 'edit'
 		editIcon.style.color = '#000'
 
 		sessionNameInput.readOnly = true
+
+		function completeEditOnEnterKey (event) {
+			if (event.key === 'Enter') editingCompletePromiseResolve()
+		}
+		function completeEditOnIconClick () {
+			editingCompletePromiseResolve()
+		}
+	}
+
+	// TODO: Push this up to the whole session manager scope to make it easier to add and remove arrow key event listeners.
+	keydown (event) {
+		switch (event.key) {
+		case 'Enter':
+			this.resume()
+			break
+		case 'r':
+			this.edit()
+			break
+		case '#':
+			this.remove()
+			break
+		default: return
+		}
+		event.preventDefault()
 	}
 
 	get sessionName () {
@@ -119,6 +153,7 @@ class ShelvedSessionManager extends SessionManager {
 
 	async remove () {
 		await bookmarks.removeFolder(this.bookmarkFolderId)
+		this.sessionCard.remove()
 	}
 
 	async save () {
@@ -150,16 +185,6 @@ export function getSessionLists () {
 
 export function getSessionsFromSessionList (sessionList) {
 	return sessionList.getElementsByClassName('session-card')
-}
-
-export function initialiseMaterialComponents () {
-	mdc.autoInit()
-}
-
-export async function focusCurrentlyOpenSession () {
-	const currentlyOpenWindow = await chrome.windows.getCurrent(null)
-	const sessionCard = document.querySelector(`[data-id="${currentlyOpenWindow.id}"]`)
-	sessionCard.focus()
 }
 
 export default {

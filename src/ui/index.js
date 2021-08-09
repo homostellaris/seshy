@@ -1,21 +1,20 @@
-import 'material-components-web/dist/material-components-web.css'
-import './materialIcons/index.css'
-
 import './index.css'
 import {
-	addKeyboardShortcuts,
-	// initialiseKeyboardShortcutsDialog
+	addKeyboardShortcuts
 } from './keyboard-shortcuts/index.js'
-import {
-	// focusCurrentlyOpenSession,
-	initialiseMaterialComponents,
-} from './SessionManager/index.js'
+import materialComponents from './materialComponents'
 import createSessionCards from './SessionManager/createSessionCards.js'
 
 (async function () {
 	await createSessionCards()
-	// focusCurrentlyOpenSession()
+	focusCurrentlyOpenSession()
 	addKeyboardShortcuts()
-	initialiseMaterialComponents()
+	materialComponents.init()
 	// initialiseKeyboardShortcutsDialog()
 }())
+
+async function focusCurrentlyOpenSession () {
+	const currentlyOpenWindow = await chrome.windows.getCurrent(null)
+	const sessionCard = document.querySelector(`[data-window-id="${currentlyOpenWindow.id}"]`)
+	sessionCard.focus()
+}

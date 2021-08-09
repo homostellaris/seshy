@@ -111,53 +111,15 @@ function createSessionCard (session, dataset) {
 	const deleteIcon = sessionCard.getElementsByClassName('delete-icon')[0]
 
 	const sessionManager = SessionManager.factory(sessionCard)
-	const {edit, resume, remove} = sessionManager.eventHandlers
+	const {edit, resume, remove, keydown} = sessionManager.eventHandlers
 
 	editIcon.addEventListener('click', edit) // Wrapped in an arrow function to keep `this` as the session manager rather than the event object.
 	resumeIcon.addEventListener('click', resume)
 	deleteIcon.addEventListener('click', remove)
 
+	sessionCard.addEventListener('keydown', keydown)
+
 	return sessionCard
-
-	// sessionCard.addEventListener('click', (event) => {
-	// 	var classList = event.target.classList
-	// 	if (classList.contains('edit-icon')) {
-	// 		if (this.sessionIsBeingRenamed(event.target)) {
-	// 			this.finishEditingSession(this)
-	// 		} else {
-	// 			this.startEditingSession(this)
-	// 		}
-	// 	} else if (classList.contains('resume-icon')) {
-	// 		this.resumeSession(this)
-	// 	} else if (classList.contains('delete-icon')) {
-	// 		this.deleteSession()
-	// 	}
-	// })
-	// sessionCard.addEventListener('keydown', (event) => {
-	// 	if (event.key === 'Enter') {
-	// 		if (this.sessionIsBeingRenamed(event.target)) {
-	// 			this.finishEditingSession(this)
-	// 			event.stopPropagation()
-	// 		} else {
-	// 			this.resumeSession()
-	// 			event.stopPropagation()
-	// 		}
-	// 	}
-	// })
-	// sessionCard.addEventListener('keydown', (event) => {
-	// 	switch (event.key) {
-	// 	case 'r':
-	// 		this.startEditingSession(this)
-	// 		break
-
-	// 	case '#':
-	// 		this.deleteSession()
-	// 		break
-
-	// 	default: return
-	// 	}
-	// 	event.preventDefault()
-	// })
 }
 
 function getSessionInnerHtml (name, tabsCount, saved) {
