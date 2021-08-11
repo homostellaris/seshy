@@ -13,8 +13,6 @@ import status from './ui/status/index.js'
 
 // Listeners must be at the top-level: https://developer.chrome.com/docs/extensions/mv2/background_migration/#listeners
 chrome.tabs.onUpdated.addListener(debounce(onUpdatedListener, 2000))
-chrome.tabs.onCreated.addListener(tab => console.debug('tab created', tab))
-chrome.tabs.onRemoved.addListener(tab => console.debug('tab removed', tab))
 chrome.windows.onRemoved.addListener(
 	openSavedSessionTracker.removeClosedWindowId
 )

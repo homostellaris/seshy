@@ -28,7 +28,8 @@ async function getOpenSessionWindowIds () {
  * and do things like show it in the open sessions section of the UI.
  */
 async function removeClosedWindowId (windowId) {
-	return new Promise((resolve) => {
+	console.debug(`chrome.windows.onRemoved event fired, removing window ID: ${windowId}`)
+	return new Promise(resolve => {
 		chrome.storage.local.remove(windowId.toString(), resolve)
 	})
 }
@@ -47,6 +48,7 @@ async function removeStaleWindowIds () {
 		.filter(windowId => !openWindowIds.includes(windowId))
 		.map(windowId => windowId.toString())
 
+	console.debug(`storage.local.onChange event fired, removing stale window IDs: ${staleWindowIds}`)
 	if (staleWindowIds.length) await localStorage.remove(staleWindowIds)
 }
 
