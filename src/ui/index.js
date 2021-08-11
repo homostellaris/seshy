@@ -1,6 +1,7 @@
 import './index.css'
 import {
-	addKeyboardShortcuts
+	addKeyboardShortcuts,
+	initialiseKeyboardShortcutsDialog,
 } from './keyboard-shortcuts/index.js'
 import materialComponents from './materialComponents'
 import createSessionCards from './SessionManager/createSessionCards.js'
@@ -10,7 +11,7 @@ import createSessionCards from './SessionManager/createSessionCards.js'
 	focusCurrentlyOpenSession()
 	addKeyboardShortcuts()
 	materialComponents.init()
-	// initialiseKeyboardShortcutsDialog()
+	initialiseKeyboardShortcutsDialog()
 }())
 
 async function focusCurrentlyOpenSession () {

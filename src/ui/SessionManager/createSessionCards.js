@@ -25,7 +25,6 @@ async function createSessionCards () {
 	createUnsavedSessionCards(windowsUnsaved)
 	await createUnshelvedSessionCards(windowsUnshelved)
 	createShelvedSessionCards()
-	// await initialiseMaterialComponents()
 }
 
 async function getAllOpenWindows () { // TODO: Extract to windows module

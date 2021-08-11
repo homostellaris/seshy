@@ -31,7 +31,7 @@ export function addKeyboardShortcuts () {
 
 		case '?':
 			document.body.style.minHeight = '424px'
-			document.dialog.show()
+			document.dialog.open()
 			break
 
 		default: return // Exit this handler for other keys.
