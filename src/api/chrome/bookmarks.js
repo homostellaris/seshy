@@ -24,7 +24,7 @@ async function getAllFolders () {
 	const seshyFolder = await getSeshyFolder()
 	const seshyFolderSubtree = await chrome.bookmarks.getSubTree(seshyFolder.id)
 	const bookmarkFolders = seshyFolderSubtree[0].children
-		.filter(bookmarkFolder => !isSystemFolder(bookmarkFolder))
+		.filter(bookmarkTreeNode => isFolder(bookmarkTreeNode) && !isSystemFolder(bookmarkTreeNode))
 	return bookmarkFolders
 }
 
@@ -51,6 +51,10 @@ async function renameFolder (bookmarkFolderId, name) {
 
 async function removeFolder (bookmarkFolderId) {
 	await chrome.bookmarks.removeTree(bookmarkFolderId)
+}
+
+function isFolder (bookmarkTreeNode) {
+	return bookmarkTreeNode.url === undefined
 }
 
 export default {
