@@ -11,7 +11,7 @@ const playwrightDotCom = 'https://playwright.dev/'
 const urls = [
 	exampleDotCom,
 	githubDotCom,
-	playwrightDotCom
+	playwrightDotCom,
 ]
 
 test.beforeEach(async t => {
@@ -23,7 +23,7 @@ test.beforeEach(async t => {
 		headless: false,
 		args: [
 			`--disable-extensions-except=${pathToExtension}`,
-			`--load-extension=${pathToExtension}`
+			`--load-extension=${pathToExtension}`,
 		],
 		// slowMo: 1000
 	})
@@ -83,7 +83,7 @@ test('Saving, re-opening, then deleting sessions', async t => {
 
 	const [resumedSessionPage, _] = await Promise.all([
 		t.context.browserContext.waitForEvent('page', {timeout: 2000}),
-		tester.resumeSessionByIndex(1)
+		tester.resumeSessionByIndex(1),
 	])
 	resumedSessionPage.setDefaultTimeout(2000)
 
@@ -97,7 +97,7 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	t.is((await tester.getWindows()).length, 2)
 	await Promise.all([
 		resumedSessionPage.waitForEvent('close', {timeout: 2000}),
-		tester.deleteSession(updatedSessionName)
+		tester.deleteSession(updatedSessionName),
 	])
 	await playwrightPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
 	t.is((await tester.getWindows()).length, 1)
@@ -140,7 +140,7 @@ class SessionManagerTester {
 		return this.playwrightPage.evaluate(createProperties => new Promise(resolve => {
 			chrome.tabs.create(
 				createProperties,
-				tab => resolve(tab)
+				tab => resolve(tab),
 			)
 		}), createProperties)
 	}
@@ -157,7 +157,7 @@ class SessionManagerTester {
 			this.createTab({
 				windowId,
 				url,
-			})
+			}),
 		))
 		await this.playwrightPage.waitForTimeout(1000) // Playwright takes too long to recognise the new pages without this :/
 		const pages = await this.playwrightPage.context().pages()
@@ -204,7 +204,7 @@ class SessionManagerTester {
 				const resumeButton = sessionCard.getElementsByClassName('resume-button')[0]
 				resumeButton.click()
 			},
-			sessionName
+			sessionName,
 		)
 	}
 

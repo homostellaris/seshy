@@ -57,5 +57,5 @@ export default {
 	getOpenSessionBookmarkFolderIds,
 	getOpenSessionWindowIds,
 	removeClosedWindowId,
-	removeStaleWindowIds
+	removeStaleWindowIds,
 }

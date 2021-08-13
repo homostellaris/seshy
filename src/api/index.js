@@ -17,7 +17,7 @@ export async function persistSession (windowId, bookmarkFolderId) {
 		.filter(tab => window.tabs[tab.index].url !== bookmarkFolder.children[tab.index].url)
 		.map(tab => chrome.bookmarks.move(
 			bookmarkFolder.children.find(bookmark => bookmark.url === tab.url).id,
-			{index: tab.index})
+			{index: tab.index}),
 		)
 
 	await Promise.all([
