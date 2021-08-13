@@ -1,0 +1,60 @@
+@font-face {
+  font-family: 'Boogaloo';
+  src: url('/ui/fonts/Boogaloo/Boogaloo-Regular.ttf');
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 600px;
+  padding-bottom: 0.5em;
+  background-color: #f1f1f1;
+}
+
+button {
+  padding: 0;
+  margin: 0 8px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
+}
+
+#keyboard-shortcuts table {
+  border-spacing: 1em;
+}
+
+#title {
+  font-family: 'Boogaloo', cursive;
+  font-size: 2rem;
+}
+
+/* TODO: Use material components theming instead. */
+.mdc-top-app-bar__section {
+  background-color: #ff7f2a;
+}
+
+.session-card {
+  /* There is no guttering between session cards by default, add some. */
+  margin: 0.5rem;
+}
+
+.session-name {
+  height: auto !important;
+  width: 100%; /* Allows full width text input. */
+}
+
+.mdc-list-item__text {
+  width: 65%; /* Allows full width text input. */
+  padding-top: 3px; /* Horrible hack to vertically centre the card content. Might be fixed if we stop using a text field within a list item which is not officially supported. */
+}
+
+.selected {
+  background-color: gainsboro !important;
+}

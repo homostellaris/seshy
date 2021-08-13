@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Session Manager</title>
+    <link rel="stylesheet" type="text/css" href="./index.css" />
+  </head>
+  <body>
+    <header class="mdc-top-app-bar">
+      <div class="mdc-top-app-bar__row">
+        <section
+          class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start"
+        >
+          <a
+            id="more-information"
+            href="./moreInformation/index.html"
+            class="material-icons mdc-top-app-bar__navigation-icon"
+            >help</a
+          >
+          <span id="title" class="mdc-top-app-bar__title">Seshy</span>
+        </section>
+      </div>
+    </header>
+
+    <main id="content" class="mdc-top-app-bar--fixed-adjust">
+      <div class="mdc-list-group">
+        <h3 class="mdc-list-group__subheader">Currently Open Sessions</h3>
+        <ul
+          id="currently-open-sessions"
+          class="session-list mdc-list mdc-list--two-line mdc-list--dense"
+        ></ul>
+      </div>
+
+      <div class="mdc-list-group">
+        <h3 class="mdc-list-group__subheader">Shelved Sessions</h3>
+        <ul
+          id="saved-sessions"
+          class="session-list mdc-list mdc-list--two-line mdc-list--dense"
+        ></ul>
+      </div>
+
+      <aside id="keyboard-shortcuts" class="mdc-dialog">
+        <div class="mdc-dialog__container">
+          <div
+            class="mdc-dialog__surface"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="my-dialog-title"
+            aria-describedby="my-dialog-content"
+          >
+            <div class="mdc-dialog__header">
+              <h2 id="my-dialog-title" class="mdc-dialog__title">
+                Keyboard Shortcuts
+              </h2>
+            </div>
+            <div id="my-dialog-content" class="mdc-dialog__content">
+              <table>
+                <tbody>
+                  <tr>
+                    <td><code>&uarr;</code>/<code>&darr;</code></td>
+                    <td>
+                      Select session above / below the currently selected one
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>&larr;</code>/<code>&rarr;</code></td>
+                    <td>Jump to previous / next session list</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>ENTER</code>
+                    </td>
+                    <td>
+                      Resume selected session, or if renaming, confirm the
+                      rename.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>r</code>
+                    </td>
+                    <td>Rename selected session</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>#</code>
+                    </td>
+                    <td>Delete selected session</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>?</code>
+                    </td>
+                    <td>Show keyboard shortucts</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="mdc-dialog__actions">
+              <button
+                type="button"
+                class="mdc-button mdc-dialog__button"
+                data-mdc-dialog-action="ok"
+              >
+                <div class="mdc-button__ripple"></div>
+                <span class="mdc-button__label">OK</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="mdc-dialog__scrim"></div>
+      </aside>
+    </main>
+  </body>
+
+  <script type="module" src="./index.js"></script>
+</html>
