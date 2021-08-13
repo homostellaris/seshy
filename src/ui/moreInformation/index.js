@@ -13,7 +13,7 @@ var reportABug = () => {
 }
 
 var seeOpenSourceCredits = () => {
-	window.location.href = '/credits/index.html'
+	window.location.href = '../credits/index.html'
 }
 
 var setUp = () => {

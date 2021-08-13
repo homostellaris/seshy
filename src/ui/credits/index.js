@@ -35,7 +35,7 @@ function getCreditInnerHtml (name, description, copyright, license) {
 	var fileName = name.toLowerCase().replace(/\s/g, '-')
 	if (copyright) {
 		innerHtml += `
-    <a href="./copyrights/${fileName}">
+    <a href="./copyrights/${fileName}.html">
       <button class="view-copright-button" title="view copyright">
         <i class="material-icons">copyright</i>
       </button>
@@ -44,7 +44,7 @@ function getCreditInnerHtml (name, description, copyright, license) {
 	}
 	if (license) {
 		innerHtml += `
-    <a href="./licenses/${fileName}">
+    <a href="./licenses/${fileName}.html">
       <button class="view-license-button" title="view license">
         <i class="material-icons">subject</i>
       </button>
