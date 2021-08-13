@@ -2,7 +2,7 @@ import './index.css'
 import {
 	addKeyboardShortcuts,
 	initialiseKeyboardShortcutsDialog,
-} from './keyboard-shortcuts/index.js'
+} from './keyboardShortcuts/index.js'
 import materialComponents from './materialComponents'
 import createSessionCards from './SessionManager/createSessionCards.js'
 
