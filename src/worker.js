@@ -1,8 +1,8 @@
-import { debounce } from 'debounce'
+import {debounce} from 'debounce'
 import bookmarks from './api/chrome/bookmarks.js'
 import {
 	getBookmarkFolderId,
-	persistSession
+	persistSession,
 } from './api/index.js'
 import openSavedSessionTracker from './api/openSavedSessionTracker'
 import status from './ui/status/index.js'
@@ -14,7 +14,7 @@ import status from './ui/status/index.js'
 // Listeners must be at the top-level: https://developer.chrome.com/docs/extensions/mv2/background_migration/#listeners
 chrome.tabs.onUpdated.addListener(debounce(onUpdatedListener, 2000))
 chrome.windows.onRemoved.addListener(
-	openSavedSessionTracker.removeClosedWindowId
+	openSavedSessionTracker.removeClosedWindowId,
 )
 chrome.storage.onChanged.addListener(openSavedSessionTracker.removeStaleWindowIds)
 chrome.windows.onFocusChanged.addListener(setActionIcon)

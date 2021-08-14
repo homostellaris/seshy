@@ -29,8 +29,8 @@ test('One new tab creates one new bookmark', async t => {
 				index: 1,
 				title: 'GitHub',
 				url: githubDotCom,
-			}
-		]
+			},
+		],
 	})
 	chrome.bookmarks.getSubTree.withArgs(bookmarkFolderId).resolves([{
 		id: bookmarkFolderId,
@@ -39,8 +39,8 @@ test('One new tab creates one new bookmark', async t => {
 				index: 0,
 				title: 'Example',
 				url: exampleDotCom,
-			}
-		]
+			},
+		],
 	}])
 	chrome.bookmarks.create.resolves({})
 
@@ -72,17 +72,17 @@ test('Two new tabs creates two new bookmarks', async t => {
 				index: 2,
 				title: 'Playwright',
 				url: playwrightDotCom,
-			}
-		]
+			},
+		],
 	})
 	chrome.bookmarks.getSubTree.withArgs(bookmarkFolderId).resolves([{
 		id: bookmarkFolderId,
 		children: [
 			{
 				index: 0,
-				url: exampleDotCom
-			}
-		]
+				url: exampleDotCom,
+			},
+		],
 	}])
 	chrome.bookmarks.create.resolves({})
 
@@ -95,7 +95,7 @@ test('Two new tabs creates two new bookmarks', async t => {
 			parentId: bookmarkFolderId,
 			title: 'GitHub',
 			url: githubDotCom,
-		})
+		}),
 	)
 	t.assert(
 		chrome.bookmarks.create.calledWith(
@@ -103,9 +103,9 @@ test('Two new tabs creates two new bookmarks', async t => {
 				index: 2,
 				parentId: bookmarkFolderId,
 				title: 'Playwright',
-				url: playwrightDotCom
-			}
-		)
+				url: playwrightDotCom,
+			},
+		),
 	)
 })
 
@@ -118,7 +118,7 @@ test('One closed tab removes one bookmark', async t => {
 				index: 0,
 				url: exampleDotCom,
 			},
-		]
+		],
 	})
 	chrome.bookmarks.getSubTree.withArgs(bookmarkFolderId).resolves([{
 		id: bookmarkFolderId,
@@ -126,14 +126,14 @@ test('One closed tab removes one bookmark', async t => {
 			{
 				id: '1',
 				index: 0,
-				url: exampleDotCom
+				url: exampleDotCom,
 			},
 			{
 				id: '2',
 				index: 1,
 				url: githubDotCom,
-			}
-		]
+			},
+		],
 	}])
 	chrome.bookmarks.create.resolves({})
 
@@ -160,8 +160,8 @@ test('One tab moved moves one bookmark', async t => {
 				id: '3',
 				index: 2,
 				url: githubDotCom,
-			}
-		]
+			},
+		],
 	})
 	chrome.bookmarks.getSubTree.withArgs(bookmarkFolderId).resolves([{
 		id: bookmarkFolderId,
@@ -180,8 +180,8 @@ test('One tab moved moves one bookmark', async t => {
 				id: '2',
 				index: 2,
 				url: playwrightDotCom,
-			}
-		]
+			},
+		],
 	}])
 	chrome.bookmarks.create.resolves({})
 	chrome.bookmarks.move.resolves({})
