@@ -33,17 +33,22 @@
   },
   "homepage": "https://github.com/moderatemisbehaviour/seshy#readme",
   "dependencies": {
+    "@material/dialog": "^12.0.0",
+    "@material/list": "^12.0.0",
+    "@material/ripple": "^12.0.0",
+    "@material/theme": "^12.0.0",
+    "@material/top-app-bar": "^12.0.0",
     "debounce": "^1.2.1",
     "hyperdiff": "^2.0.8",
-    "material-components-web": "^10.0.0",
     "material-design-icons": "^3.0.1"
   },
   "devDependencies": {
+    "@snowpack/plugin-sass": "^1.4.0",
     "ava": "^3.15.0",
     "eslint": "^7.24.0",
     "playwright": "^1.9.0",
     "sinon": "^7.5.0",
     "sinon-chrome": "^3.0.1",
-    "snowpack": "^3.1.2"
+    "snowpack": "^3.8.6"
   }
 }

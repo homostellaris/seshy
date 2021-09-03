@@ -4,8 +4,7 @@ import openSavedSessionTracker from '../../api/openSavedSessionTracker/index.js'
 import Session from '../../api/session.js'
 import SessionManager from './index.js'
 
-const shelvedSessionListId = 'saved-sessions'
-const currentlyOpenSessionListId = 'currently-open-sessions' // TODO: Split this up into 3 lists
+const sessionList = document.getElementById('sessions')
 
 async function createSessionCards () {
 	const windows = await getAllOpenWindows()
@@ -24,7 +23,9 @@ async function createSessionCards () {
 
 	createUnsavedSessionCards(windowsUnsaved)
 	await createUnshelvedSessionCards(windowsUnshelved)
-	createShelvedSessionCards()
+	await createShelvedSessionCards()
+	createDividers()
+	await addTabIndex()
 }
 
 async function getAllOpenWindows () { // TODO: Extract to windows module
@@ -32,8 +33,6 @@ async function getAllOpenWindows () { // TODO: Extract to windows module
 }
 
 function createUnsavedSessionCards (windows) {
-	const sessionList = document.getElementById(currentlyOpenSessionListId)
-
 	windows.forEach(window => {
 		const session = new Session({
 			name: 'Unsaved session',
@@ -43,14 +42,12 @@ function createUnsavedSessionCards (windows) {
 		const sessionCard = createSessionCard(session, {
 			windowId: window.id,
 			type: 'unsaved',
-		})
+		}, true)
 		sessionList.appendChild(sessionCard)
 	})
 }
 
 async function createUnshelvedSessionCards (windows) {
-	const sessionList = document.getElementById(currentlyOpenSessionListId)
-
 	const promises = windows.map(async window => {
 		const unshelvedSessionIdMappings = await localStorage.getAll() // TODO: Abstract this away into a higher-level module rather than calling localStorage directly
 		const bookmarkFolderId = unshelvedSessionIdMappings[window.id.toString()]
@@ -65,7 +62,7 @@ async function createUnshelvedSessionCards (windows) {
 			bookmarkFolderId,
 			windowId: window.id,
 			type: 'unshelved',
-		})
+		}, true)
 		sessionList.appendChild(sessionCard)
 	})
 
@@ -76,7 +73,6 @@ async function createShelvedSessionCards () {
 	const shelvedSessionBookmarkFolderIds = await openSavedSessionTracker.getOpenSessionBookmarkFolderIds()
 	const shelvedBookmarkFolders = (await bookmarks.getAllFolders())
 		.filter(bookmarkFolder => !shelvedSessionBookmarkFolderIds.includes(bookmarkFolder.id)) // TODO: Should maybe check window IDs instead to avoid stale mappings?
-	const sessionList = document.getElementById(shelvedSessionListId)
 
 	shelvedBookmarkFolders.forEach(async bookmarkFolder => {
 		const session = new Session({
@@ -87,23 +83,48 @@ async function createShelvedSessionCards () {
 		const sessionCard = createSessionCard(session, {
 			bookmarkFolderId: bookmarkFolder.id,
 			type: 'shelved',
-		})
+		}, false)
 		sessionList.appendChild(sessionCard)
 	})
 }
 
-function createSessionCard (session, dataset) {
+function createDividers () {
+	const sessionCards = document.getElementsByClassName('session-card')
+
+	for (let sessionCard of sessionCards) {
+		if (sessionCard.nextSibling === null) continue
+		const divider = createDivider()
+		sessionCard.after(divider)
+	}
+}
+
+async function addTabIndex () {
+	const currentlyOpenWindow = await chrome.windows.getCurrent(null)
+	const sessionCard = document.querySelector(`[data-window-id="${currentlyOpenWindow.id}"]`)
+	sessionCard.setAttribute('tabindex', '0') // Make `li` element focusable.
+	sessionCard.setAttribute('aria-current', true) // Make `li` element focusable.
+	sessionCard.setAttribute('aria-selected', true) // Make `li` element focusable.
+	sessionCard.classList.add('mdc-deprecated-list-item--selected')
+	sessionCard.focus()
+}
+
+function createDivider () {
+	const dividerElement = document.createElement('li')
+	dividerElement.innerHTML = '<li role="separator" class="mdc-deprecated-list-divider"></li>'
+	return dividerElement
+}
+
+function createSessionCard (session, dataset, activated) {
 	const sessionCard = document.createElement('li')
+	sessionCard.setAttribute('role', 'option')
+	sessionCard.classList.add('session-card', 'mdc-deprecated-list-item')
+	if (activated) sessionCard.classList.add('mdc-deprecated-list-item--activated')
 
 	for (const [key, value] of Object.entries(dataset)) {
 		sessionCard.dataset[key] = value
 	}
 
-	sessionCard.setAttribute('class', 'session-card mdc-list-item mdc-theme--background mdc-elevation--z2')
-	sessionCard.setAttribute('tabindex', '0') // Make `li` element focusable.
 	sessionCard.innerHTML = getSessionInnerHtml(session.name, session.tabs.length, session.saved)
-
-	sessionCard.addEventListener('focus', (event) => addSelectedClass(event.target))
 
 	const editIcon = sessionCard.getElementsByClassName('edit-icon')[0]
 	const resumeIcon = sessionCard.getElementsByClassName('resume-icon')[0]
@@ -124,20 +145,12 @@ function createSessionCard (session, dataset) {
 function getSessionInnerHtml (name, tabsCount, saved) {
 	var savedStateIcon = saved ? 'bookmark' : 'bookmark_border'
 	var innerHtml = `
-    <span class="mdc-list-item__graphic">
-      <i class="saved-state-icon material-icons" title="saved state">${savedStateIcon}</i>
+	<span class="mdc-deprecated-list-item__ripple"></span>
+    <span class="mdc-deprecated-list-item__text">
+	  <span class="mdc-deprecated-list-item__primary-text">${name}</span>
+	  <span class="mdc-deprecated-list-item__secondary-text">${tabsCount} tabs</span>
     </span>
-    <span class="mdc-list-item__text">
-      <div class="session-name mdc-text-field mdc-text-field--dense mdc-text-field--fullwidth">
-        <span class="mdc-text-field__ripple"></span>
-        <input type="text" class="session-name-input mdc-text-field__input" value="${name}" readonly="true">
-        <span class="mdc-line-ripple"></span>
-      </div>
-      <span class="tabs-number mdc-list-item__secondary-text">
-        ${tabsCount} tabs
-      </span>
-    </span>
-    <span class="mdc-list-item__meta">
+    <span class="mdc-deprecated-list-item__meta">
       <button class="edit-button" title="edit">
         <i class="edit-icon material-icons">edit</i>
       </button>
@@ -150,16 +163,6 @@ function getSessionInnerHtml (name, tabsCount, saved) {
     </span>
   `
 	return innerHtml
-}
-
-function addSelectedClass (sessionCard) {
-	console.debug('Focus event handler triggered. Removing selected class from existing elements.')
-	var selectedSessions = document.getElementsByClassName('selected')
-	for (var i = 0; i < selectedSessions.length; i++) {
-		selectedSessions[i].classList.remove('selected')
-	}
-	console.debug('Adding selected class to focused element.')
-	sessionCard.classList.add('selected')
 }
 
 export default createSessionCards

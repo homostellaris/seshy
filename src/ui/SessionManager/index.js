@@ -179,14 +179,6 @@ export function factory (sessionCard) {
 	throw new Error('Unknown session type', sessionType)
 }
 
-export function getSessionLists () {
-	return document.getElementsByClassName('session-list')
-}
-
-export function getSessionsFromSessionList (sessionList) {
-	return sessionList.getElementsByClassName('session-card')
-}
-
 export default {
 	factory,
 	ShelvedSessionManager,
