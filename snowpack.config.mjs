@@ -18,10 +18,7 @@ export default {
 		],
 	],
 	packageOptions: {
-		// namedExports: [
-		// 	'@material/list',
-		// 	'@material/ripple',
-		// ],
+		/* ... */
 	},
 	devOptions: {
 		/* ... */
@@ -35,5 +32,6 @@ export default {
 			'worker.js',
 			'ui/index.js', // TODO: See if CSS bundling starts working with only specific parts of the app bundled.
 		],
+		// TODO: See if minifying, tree-shaking, and other optimisations are worth it.
 	},
 }

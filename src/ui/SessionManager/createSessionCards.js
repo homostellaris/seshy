@@ -4,7 +4,9 @@ import openSavedSessionTracker from '../../api/openSavedSessionTracker/index.js'
 import Session from '../../api/session.js'
 import SessionManager from './index.js'
 
-const sessionList = document.getElementById('sessions')
+const unsavedSessionsHeader = document.getElementById('unsaved')
+const unshelvedSessionsHeader = document.getElementById('unshelved')
+const shelvedSessionsHeader = document.getElementById('shelved')
 
 async function createSessionCards () {
 	const windows = await getAllOpenWindows()
@@ -21,10 +23,9 @@ async function createSessionCards () {
 		}
 	})
 
-	createUnsavedSessionCards(windowsUnsaved)
+	await createUnsavedSessionCards(windowsUnsaved)
 	await createUnshelvedSessionCards(windowsUnshelved)
 	await createShelvedSessionCards()
-	createDividers()
 	await addTabIndex()
 }
 
@@ -32,23 +33,27 @@ async function getAllOpenWindows () { // TODO: Extract to windows module
 	return chrome.windows.getAll({populate: true, windowTypes: ['normal']})
 }
 
-function createUnsavedSessionCards (windows) {
-	windows.forEach(window => {
+async function createUnsavedSessionCards (windows) {
+	await Promise.all(windows.reverse().map(async window => {
 		const session = new Session({
-			name: 'Unsaved session',
+			name: window.tabs[0].title,
 			tabs: window.tabs,
 			saved: false,
 		})
-		const sessionCard = createSessionCard(session, {
-			windowId: window.id,
-			type: 'unsaved',
-		}, true)
-		sessionList.appendChild(sessionCard)
-	})
+		const sessionCard = createSessionCard(
+			session,
+			{
+				windowId: window.id,
+				type: 'unsaved',
+			},
+			window.tabs[0].favIconUrl,
+		)
+		unsavedSessionsHeader.after(sessionCard)
+	}))
 }
 
 async function createUnshelvedSessionCards (windows) {
-	const promises = windows.map(async window => {
+	const promises = windows.reverse().map(async window => {
 		const unshelvedSessionIdMappings = await localStorage.getAll() // TODO: Abstract this away into a higher-level module rather than calling localStorage directly
 		const bookmarkFolderId = unshelvedSessionIdMappings[window.id.toString()]
 		const bookmarkFolder = await bookmarks.getFolder(bookmarkFolderId)
@@ -58,12 +63,16 @@ async function createUnshelvedSessionCards (windows) {
 			tabs: bookmarkFolder.children,
 			saved: true,
 		})
-		const sessionCard = createSessionCard(session, {
-			bookmarkFolderId,
-			windowId: window.id,
-			type: 'unshelved',
-		}, true)
-		sessionList.appendChild(sessionCard)
+		const sessionCard = createSessionCard(
+			session,
+			{
+				bookmarkFolderId,
+				windowId: window.id,
+				type: 'unshelved',
+			},
+			window.tabs[0].favIconUrl,
+		)
+		unshelvedSessionsHeader.after(sessionCard)
 	})
 
 	await Promise.all(promises)
@@ -74,17 +83,20 @@ async function createShelvedSessionCards () {
 	const shelvedBookmarkFolders = (await bookmarks.getAllFolders())
 		.filter(bookmarkFolder => !shelvedSessionBookmarkFolderIds.includes(bookmarkFolder.id)) // TODO: Should maybe check window IDs instead to avoid stale mappings?
 
-	shelvedBookmarkFolders.forEach(async bookmarkFolder => {
+	shelvedBookmarkFolders.reverse().forEach(async bookmarkFolder => {
 		const session = new Session({
 			name: bookmarkFolder.title,
 			tabs: bookmarkFolder.children,
 			saved: true,
 		})
-		const sessionCard = createSessionCard(session, {
-			bookmarkFolderId: bookmarkFolder.id,
-			type: 'shelved',
-		}, false)
-		sessionList.appendChild(sessionCard)
+		const sessionCard = createSessionCard(
+			session,
+			{
+				bookmarkFolderId: bookmarkFolder.id,
+				type: 'shelved',
+			},
+		)
+		shelvedSessionsHeader.after(sessionCard)
 	})
 }
 
@@ -114,17 +126,16 @@ function createDivider () {
 	return dividerElement
 }
 
-function createSessionCard (session, dataset, activated) {
+function createSessionCard (session, dataset, thumbnailUrl) {
 	const sessionCard = document.createElement('li')
 	sessionCard.setAttribute('role', 'option')
 	sessionCard.classList.add('session-card', 'mdc-deprecated-list-item')
-	if (activated) sessionCard.classList.add('mdc-deprecated-list-item--activated')
 
 	for (const [key, value] of Object.entries(dataset)) {
 		sessionCard.dataset[key] = value
 	}
 
-	sessionCard.innerHTML = getSessionInnerHtml(session.name, session.tabs.length, session.saved)
+	sessionCard.innerHTML = getSessionInnerHtml(session.name, session.tabs.length, thumbnailUrl)
 
 	const editIcon = sessionCard.getElementsByClassName('edit-icon')[0]
 	const resumeIcon = sessionCard.getElementsByClassName('resume-icon')[0]
@@ -142,10 +153,10 @@ function createSessionCard (session, dataset, activated) {
 	return sessionCard
 }
 
-function getSessionInnerHtml (name, tabsCount, saved) {
-	var savedStateIcon = saved ? 'bookmark' : 'bookmark_border'
+function getSessionInnerHtml (name, tabsCount, thumbnailUrl = 'https://www.thebloodytourofyork.co.uk/wp-content/uploads/2020/07/placeholder.png') {
 	var innerHtml = `
 	<span class="mdc-deprecated-list-item__ripple"></span>
+	<img src="${thumbnailUrl}" class="mdc-deprecated-list-item__graphic favicon" aria-hidden="true">
     <span class="mdc-deprecated-list-item__text">
 	  <span class="mdc-deprecated-list-item__primary-text">${name}</span>
 	  <span class="mdc-deprecated-list-item__secondary-text">${tabsCount} tabs</span>

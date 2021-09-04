@@ -5,13 +5,20 @@
     $on-secondary: #442b2d,
 );
 // TODO: Find out why @material/package doesn't work.
-@use "@material/list/mdc-list.scss";
-@use "@material/dialog/mdc-dialog.scss";
-@use "@material/top-app-bar/mdc-top-app-bar.scss";
-// @use "@material/theme/variables" with (
-//   $primary: color-palette.$red-500
-// );
+@use "@material/list";
+@use "@material/dialog/mdc-dialog";
+@use "@material/top-app-bar/mdc-top-app-bar";
 
-// .mdc-list {
-// 	background-color: var(--mdc-theme-surface, #fff);
-// }
+@include list.deprecated-core-styles;
+
+.mdc-deprecated-list .mdc-deprecated-list-item__graphic.favicon {
+    @include list.deprecated-graphic-size($leading-padding: 16px, $text-offset: 16px, $width: 16px, $height: 16px);
+}
+
+.mdc-list-group__subheader {
+    font-size: 14px;
+}
+
+.mdc-deprecated-list-item__meta {
+    flex-shrink: 0; // Stop meta icons wrapping onto two rows.
+}

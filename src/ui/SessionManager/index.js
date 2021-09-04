@@ -57,9 +57,6 @@ class SessionManager {
 	// TODO: Push this up to the whole session manager scope to make it easier to add and remove arrow key event listeners.
 	keydown (event) {
 		switch (event.key) {
-		case 'Enter':
-			this.resume()
-			break
 		case 'r':
 			this.edit()
 			break
@@ -82,7 +79,8 @@ class OpenSessionManager extends SessionManager {
 	}
 
 	async resume () {
-		const isFocused = document.activeElement === this.sessionCard
+		const focusedWindowId = await chrome.windows.getCurrent()
+		const isFocused = focusedWindowId === this.windowId
 
 		if (isFocused) {
 			window.close() // Close the session manager to show the already focused window.
