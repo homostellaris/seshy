@@ -28,12 +28,20 @@ async function getAllFolders () {
 	return bookmarkFolders
 }
 
+export async function getBookmarkFolderId (windowId) {
+	const items = await new Promise(resolve => {
+		chrome.storage.local.get(windowId.toString(), resolve)
+	})
+	return items[windowId] || null
+}
+
 function isSystemFolder (bookmarkFolder) {
-	return new RegExp('^_').test(bookmarkFolder.title)
+	return new RegExp('^\\.').test(bookmarkFolder.title)
 }
 
 async function getFolder (bookmarkFolderId) {
 	const [bookmarkFolder] = await chrome.bookmarks.getSubTree(bookmarkFolderId)
+	
 	return bookmarkFolder
 }
 

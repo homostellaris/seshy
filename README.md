@@ -1,12 +1,16 @@
-[**Seshy** is available on the Chrome Web Store](https://chrome.google.com/webstore/detail/seshy/noeieddjehppejohbbchbcmheecaneac) but be aware that it is pre-1.0 and so some minor bugs can be expected.
+[**Seshy** is available on the Chrome Web Store](https://chrome.google.com/webstore/detail/seshy/noeieddjehppejohbbchbcmheecaneac)
 
 # What is Seshy?
-A Chrome window is not always a throwaway set of tabs, sometimes it is an ongoing *session* with the same lifecycle as the task you are working on. The problem is that tasks can be easily put down and picked back up again but browsing sessions cannot. **Seshy** aims to solve that problem.
+Having too many tabs open is bad for your productivity because you continuously waste brain cycles looking for the tab you need.
 
-To **Seshy**, every Chrome window is a *session*. If a *session* is marked as *saved* when it becomes persistent and is stored in a bookmark folder. Tabs are stored as bookmarks in the session's bookmark folder and are updated (almost) immediately whenever something changes about them. In fact, you can view Seshy simply as an extension that maps windows to *sessions* and tabs to *bookmarks* and provides a UI for browsing and resuming them.
+Rather than having one Chrome window with lots of tabs open its best to have many Chrome windows each with only a few tabs. Each Chrome window can represent one task that you are working on and can contain only the tabs needed for that task. We could call these focused Chrome windows *sessions*!
 
-# Testing
-Note: Tests are currently being migrated to Jest and Playwright but there is an [outstanding bug](https://github.com/microsoft/playwright/issues/2676) blocking the use of Playwright.
+Whilst you are working it should be effortless to create, name, and switch between sessions. It should also be easy to close sessions you are no longer working on and re-open them later. This is what **Seshy** does! Watch the video below to see it in action 👇
+
+<<insert video here>>
+
+# How does Seshy work?
+At its core Seshy maps *windows* to *bookmark folders* and *tabs* to *bookmarks*. Being able to store *sessions* as bookmark folders and bookmarks allows them to be closed and re-opened later and also means they sync to your other devices (assuming you have Chrome installed on them and have bookmarks synced).
 
 # Contributing
-Just raise a PR :)
+There are plenty of oustanding issues for new features and improvements, feel free to raise a PR against an existing issue or create a new one but note that it is encouraged to use *discussions* for new feature ideas rather than *issues*

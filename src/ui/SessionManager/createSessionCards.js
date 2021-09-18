@@ -1,7 +1,4 @@
-import bookmarks from '../../api/chrome/bookmarks.js'
-import localStorage from '../../api/chrome/localStorage.js'
-import openSavedSessionTracker from '../../api/openSavedSessionTracker/index.js'
-import Session from '../../api/session.js'
+import {getShelvedSessions, getUnsavedSessions, getUnshelvedSessions} from '../../api/index.js'
 import SessionManager from './index.js'
 
 const unsavedSessionsHeader = document.getElementById('unsaved')
@@ -9,90 +6,51 @@ const unshelvedSessionsHeader = document.getElementById('unshelved')
 const shelvedSessionsHeader = document.getElementById('shelved')
 
 async function createSessionCards () {
-	const windows = await getAllOpenWindows()
-	const openSavedSessionWindowIds = await openSavedSessionTracker.getOpenSessionWindowIds()
-
-	const windowsUnsaved = []
-	const windowsUnshelved = []
-
-	windows.forEach(window => {
-		if (openSavedSessionWindowIds.includes(window.id.toString())) {
-			windowsUnshelved.push(window)
-		} else {
-			windowsUnsaved.push(window)
-		}
-	})
-
-	await createUnsavedSessionCards(windowsUnsaved)
-	await createUnshelvedSessionCards(windowsUnshelved)
+	await createUnsavedSessionCards()
+	await createUnshelvedSessionCards()
 	await createShelvedSessionCards()
 	await addTabIndex()
 }
 
-async function getAllOpenWindows () { // TODO: Extract to windows module
-	return chrome.windows.getAll({populate: true, windowTypes: ['normal']})
-}
+async function createUnsavedSessionCards () {
+	const unsavedSessions = await getUnsavedSessions()
 
-async function createUnsavedSessionCards (windows) {
-	await Promise.all(windows.reverse().map(async window => {
-		const session = new Session({
-			name: window.tabs[0].title,
-			tabs: window.tabs,
-			saved: false,
-		})
+	unsavedSessions.reverse().map(unsavedSession => {
 		const sessionCard = createSessionCard(
-			session,
+			unsavedSession,
 			{
-				windowId: window.id,
+				windowId: unsavedSession.windowId,
 				type: 'unsaved',
 			},
-			window.tabs[0].favIconUrl,
 		)
 		unsavedSessionsHeader.after(sessionCard)
-	}))
+	})
 }
 
-async function createUnshelvedSessionCards (windows) {
-	const promises = windows.reverse().map(async window => {
-		const unshelvedSessionIdMappings = await localStorage.getAll() // TODO: Abstract this away into a higher-level module rather than calling localStorage directly
-		const bookmarkFolderId = unshelvedSessionIdMappings[window.id.toString()]
-		const bookmarkFolder = await bookmarks.getFolder(bookmarkFolderId)
+async function createUnshelvedSessionCards () {
+	const unshelvedSessions = await getUnshelvedSessions()
 
-		const session = new Session({
-			name: bookmarkFolder.title,
-			tabs: bookmarkFolder.children,
-			saved: true,
-		})
+	unshelvedSessions.reverse().map(unshelvedSession => {
 		const sessionCard = createSessionCard(
-			session,
+			unshelvedSession,
 			{
-				bookmarkFolderId,
-				windowId: window.id,
+				bookmarkFolderId: unshelvedSession.bookmarkFolderId,
+				windowId: unshelvedSession.windowId,
 				type: 'unshelved',
 			},
-			window.tabs[0].favIconUrl,
 		)
 		unshelvedSessionsHeader.after(sessionCard)
 	})
-
-	await Promise.all(promises)
 }
 
 async function createShelvedSessionCards () {
-	const shelvedSessionBookmarkFolderIds = await openSavedSessionTracker.getOpenSessionBookmarkFolderIds()
-	const shelvedBookmarkFolders = (await bookmarks.getAllFolders())
-		.filter(bookmarkFolder => !shelvedSessionBookmarkFolderIds.includes(bookmarkFolder.id)) // TODO: Should maybe check window IDs instead to avoid stale mappings?
+	const shelvedSessions = await getShelvedSessions()
 
-	shelvedBookmarkFolders.reverse().forEach(async bookmarkFolder => {
-		const session = new Session({
-			name: bookmarkFolder.title,
-			tabs: bookmarkFolder.children,
-			saved: true,
-		})
+	shelvedSessions.reverse().forEach(async shelvedSession => {
 		const sessionCard = createSessionCard(
-			session,
+			shelvedSession,
 			{
-				bookmarkFolderId: bookmarkFolder.id,
+				bookmarkFolderId: shelvedSession.bookmarkFolderId,
 				type: 'shelved',
 			},
 		)
@@ -112,6 +70,7 @@ function createDividers () {
 
 async function addTabIndex () {
 	const currentlyOpenWindow = await chrome.windows.getCurrent(null)
+	console.log(currentlyOpenWindow.id)
 	const sessionCard = document.querySelector(`[data-window-id="${currentlyOpenWindow.id}"]`)
 	sessionCard.setAttribute('tabindex', '0') // Make `li` element focusable.
 	sessionCard.setAttribute('aria-current', true) // Make `li` element focusable.
@@ -126,7 +85,7 @@ function createDivider () {
 	return dividerElement
 }
 
-function createSessionCard (session, dataset, thumbnailUrl) {
+function createSessionCard (session, dataset) {
 	const sessionCard = document.createElement('li')
 	sessionCard.setAttribute('role', 'option')
 	sessionCard.classList.add('session-card', 'mdc-deprecated-list-item')
@@ -135,7 +94,7 @@ function createSessionCard (session, dataset, thumbnailUrl) {
 		sessionCard.dataset[key] = value
 	}
 
-	sessionCard.innerHTML = getSessionInnerHtml(session.name, session.tabs.length, thumbnailUrl)
+	sessionCard.innerHTML = getSessionInnerHtml(session.name, session.tabs.length, session.image)
 
 	const editIcon = sessionCard.getElementsByClassName('edit-icon')[0]
 	const resumeIcon = sessionCard.getElementsByClassName('resume-icon')[0]
@@ -153,10 +112,10 @@ function createSessionCard (session, dataset, thumbnailUrl) {
 	return sessionCard
 }
 
-function getSessionInnerHtml (name, tabsCount, thumbnailUrl = 'https://www.thebloodytourofyork.co.uk/wp-content/uploads/2020/07/placeholder.png') {
+function getSessionInnerHtml (name, tabsCount, thumbnailUrl) {
 	var innerHtml = `
 	<span class="mdc-deprecated-list-item__ripple"></span>
-	<img src="${thumbnailUrl}" class="mdc-deprecated-list-item__graphic favicon" aria-hidden="true">
+	<img src="${thumbnailUrl || 'https://www.thebloodytourofyork.co.uk/wp-content/uploads/2020/07/placeholder.png'}" class="mdc-deprecated-list-item__graphic favicon" aria-hidden="true">
     <span class="mdc-deprecated-list-item__text">
 	  <span class="mdc-deprecated-list-item__primary-text">${name}</span>
 	  <span class="mdc-deprecated-list-item__secondary-text">${tabsCount} tabs</span>

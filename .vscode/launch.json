@@ -21,9 +21,11 @@
       "name": "Debug implementation",
       "request": "launch",
       "type": "pwa-chrome",
-      "url": "chrome-extension://jeolgmmombbnpdpplbipfmmfhjocfjpl/index.html",
+      "url": "chrome-extension://jeolgmmombbnpdpplbipfmmfhjocfjpl/ui/index.html",
       "webRoot": "${workspaceFolder}/src",
-      "runtimeArgs": ["--load-extension=${workspaceFolder}/build"],
+      "runtimeArgs": [
+        "--load-extension=${workspaceFolder}/build",
+      ],
       // "userDataDir": false,
       // "urlFilter": "chrome-extension://*",
       "sourceMaps": true,
