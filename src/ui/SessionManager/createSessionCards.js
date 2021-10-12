@@ -41,6 +41,17 @@ async function createUnshelvedSessionCards () {
 		)
 		unshelvedSessionsHeader.after(sessionCard)
 	})
+
+	if (unshelvedSessions.length === 0) {
+		const sessionCard = createPlaceholderSessionCard(
+			{
+				image: null,
+				name: 'No unshelved sessions',
+				tabs: [],
+			},
+		)
+		unshelvedSessionsHeader.after(sessionCard)
+	}
 }
 
 async function createShelvedSessionCards () {
@@ -70,7 +81,6 @@ function createDividers () {
 
 async function addTabIndex () {
 	const currentlyOpenWindow = await chrome.windows.getCurrent(null)
-	console.log(currentlyOpenWindow.id)
 	const sessionCard = document.querySelector(`[data-window-id="${currentlyOpenWindow.id}"]`)
 	sessionCard.setAttribute('tabindex', '0') // Make `li` element focusable.
 	sessionCard.setAttribute('aria-current', true) // Make `li` element focusable.
@@ -85,7 +95,7 @@ function createDivider () {
 	return dividerElement
 }
 
-function createSessionCard (session, dataset) {
+function createSessionCard (session, dataset = {}) {
 	const sessionCard = document.createElement('li')
 	sessionCard.setAttribute('role', 'option')
 	sessionCard.classList.add('session-card', 'mdc-deprecated-list-item')
@@ -108,6 +118,16 @@ function createSessionCard (session, dataset) {
 	deleteIcon.addEventListener('click', remove)
 
 	sessionCard.addEventListener('keydown', keydown)
+
+	return sessionCard
+}
+
+function createPlaceholderSessionCard (session) {
+	const sessionCard = document.createElement('li')
+	sessionCard.setAttribute('role', 'option')
+	sessionCard.classList.add('session-card', 'mdc-deprecated-list-item', 'mdc-deprecated-list-item--disabled')
+
+	sessionCard.innerHTML = getSessionInnerHtml(session.name, session.tabs.length, session.image)
 
 	return sessionCard
 }

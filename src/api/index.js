@@ -1,18 +1,20 @@
 import diff from 'hyperdiff'
-import bookmarks from './chrome/bookmarks'
+import bookmarks from './chrome/bookmarks.js'
 import localStorage from './chrome/localStorage.js'
 import openSavedSessionTracker from './openSavedSessionTracker/index.js'
-import {ShelvedSession, UnsavedSession, UnshelvedSession} from './session'
+import {ShelvedSession, UnsavedSession, UnshelvedSession} from './session.js'
 
 export async function persistSession (windowId, bookmarkFolderId) {
 	const window = await chrome.windows.get(windowId, {populate: true})
 	const [bookmarkFolder] = await chrome.bookmarks.getSubTree(bookmarkFolderId)
 
+	console.log(bookmarkFolder)
+	const bookmarksWithoutSeshyBookmark = bookmarkFolder.children.filter(bookmark => bookmark.title !== '.seshy')
+	const windowTabs = [...window.tabs]
 	const imageTab = getImageTab(window)
-	const windowTabsWithImage = [...window.tabs]
-	windowTabsWithImage.unshift(imageTab)
+	if (imageTab) windowTabs.unshift(imageTab)
 
-	const {added, removed, common} = diff(bookmarkFolder.children || [], windowTabsWithImage || [], 'url')
+	const {added, removed, common} = diff(bookmarkFolder.children || [], windowTabs || [], 'url')
 
 	const createOperations = added.map(({index, title, url}) => chrome.bookmarks.create({
 		index,
@@ -22,7 +24,10 @@ export async function persistSession (windowId, bookmarkFolderId) {
 	}))
 	const removeOperations = removed.map(tab => chrome.bookmarks.remove(tab.id)) // TODO: Update to use bookmark folder ID
 	const moveOperations = common
-		.filter(tab => window.tabs[tab.index].url !== bookmarkFolder.children[tab.index].url)
+		.filter(tab => {
+			console.debug('JA HIER', tab)
+			return windowTabs[tab.index].url !== bookmarkFolder.children[tab.index].url
+		})
 		.map(tab => chrome.bookmarks.move(
 			bookmarkFolder.children.find(bookmark => bookmark.url === tab.url).id,
 			{index: tab.index}),
@@ -37,12 +42,31 @@ export async function persistSession (windowId, bookmarkFolderId) {
 
 function getImageTab(window) {
 	const image = window.tabs[0].favIconUrl
+	if (!image) {
+		console.warn('Unable to find image for url ' + window.tabs[0].url)
+		return null
+	}
+
 	const url = new URL(`seshy:///?image=${image}`).toString()
 	return {
 		index: 0,
 		title: '.seshy',
 		url,
 	}
+}
+
+export async function getShelvedSession (bookmarkFolderId) {
+	const bookmarkFolder = await bookmarks.getFolder(bookmarkFolderId)
+	const seshyBookmark = bookmarkFolder.children.find(bookmark => bookmark.title === '.seshy')
+	const image = seshyBookmark ? new URL(seshyBookmark.url).searchParams.get('image') : null
+	const tabs = bookmarkFolder.children.filter(bookmark => bookmark !== seshyBookmark)
+
+	return new ShelvedSession({
+		bookmarkFolderId: bookmarkFolder.id,
+		image,
+		name: bookmarkFolder.title,
+		tabs,
+	})
 }
 
 export async function getShelvedSessions () {
@@ -90,6 +114,8 @@ export async function getUnshelvedSessions () {
 	const promises = windowsUnshelved.reverse().map(async window => {
 		const bookmarkFolderId = unshelvedSessionIdMappings[window.id.toString()]
 		const bookmarkFolder = await bookmarks.getFolder(bookmarkFolderId)
+
+		console.log(window.tabs[0].favIconUrl)
 
 		return new UnshelvedSession({
 			bookmarkFolderId: bookmarkFolder.id,

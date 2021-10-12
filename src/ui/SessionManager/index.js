@@ -1,5 +1,5 @@
 import bookmarks from '../../api/chrome/bookmarks'
-import {persistSession} from '../../api'
+import {getShelvedSession, persistSession} from '../../api'
 import openSavedSessionTracker from '../../api/openSavedSessionTracker'
 
 class SessionManager {
@@ -142,9 +142,8 @@ class ShelvedSessionManager extends SessionManager {
 	}
 
 	async resume () {
-		const bookmarkFolder = await bookmarks.getFolder(this.bookmarkFolderId)
-		const urls = bookmarkFolder.children.map(bookmark => bookmark.url)
-
+		const shelvedSession = await getShelvedSession(this.bookmarkFolderId)
+		const urls = shelvedSession.tabs.map(tab => tab.url)
 		const window = await chrome.windows.create({url: urls}) // The Chrome API uses the singular 'url' even though you can pass an array.
 		await openSavedSessionTracker.addOpenSessionWindowId(window.id, this.bookmarkFolderId)
 	}
