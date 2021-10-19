@@ -7,6 +7,6 @@ import createSessionCards from './SessionManager/createSessionCards.js'
 
 (async function () {
 	await createSessionCards()
-	addKeyboardShortcuts()
 	materialComponents.init()
+	addKeyboardShortcuts()
 }())

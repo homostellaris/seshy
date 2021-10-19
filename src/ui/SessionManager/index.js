@@ -1,3 +1,4 @@
+import {MDCTextField} from '@material/textfield'
 import bookmarks from '../../api/chrome/bookmarks'
 import {getShelvedSession, persistSession} from '../../api'
 import openSavedSessionTracker from '../../api/openSavedSessionTracker'
@@ -14,15 +15,30 @@ class SessionManager {
 		}
 	}
 
+	// TODO: This method is crazy, needs more encapsulation.
 	async edit () {
-		const sessionNameInput = this.sessionCard.getElementsByClassName('session-name-input')[0]
-		sessionNameInput.readOnly = false
-		sessionNameInput.select()
+		const sessionName = this.sessionCard.getElementsByClassName('session-name')[0]
+		sessionName.innerHTML = `
+			<label class="mdc-text-field mdc-text-field--outlined mdc-text-field--no-label">
+				<span class="mdc-notched-outline">
+				<span class="mdc-notched-outline__leading"></span>
+				<span class="mdc-notched-outline__trailing"></span>
+				</span>
+				<input class="mdc-text-field__input" type="text" aria-label="Label" value="${this.sessionName}"">
+			</label>
+		`
+		const textField = new MDCTextField(sessionName.querySelector('.mdc-text-field'))
+		textField.focus()
+		document.querySelector('.mdc-text-field__input').select()
 
 		const editIcon = this.sessionCard.getElementsByClassName('edit-icon')[0]
 		editIcon.textContent = 'done'
 		editIcon.style.color = '#4CAF50'
 
+		function stopClickBubbling (event) {
+			event.stopPropagation()
+		}
+		this.sessionCard.addEventListener('click', stopClickBubbling)
 		editIcon.removeEventListener('click', this.eventHandlers.edit)
 		this.sessionCard.removeEventListener('keydown', this.eventHandlers.keydown)
 
@@ -34,8 +50,9 @@ class SessionManager {
 		this.sessionCard.addEventListener('keydown', completeEditOnEnterKey)
 
 		await editingCompletePromise
-		await this.save()
+		await this.save(textField.value)
 
+		this.sessionCard.removeEventListener('click', stopClickBubbling)
 		editIcon.removeEventListener('click', completeEditOnIconClick)
 		this.sessionCard.removeEventListener('keydown', completeEditOnEnterKey)
 		editIcon.addEventListener('click', this.eventHandlers.edit)
@@ -44,7 +61,8 @@ class SessionManager {
 		editIcon.textContent = 'edit'
 		editIcon.style.color = '#000'
 
-		sessionNameInput.readOnly = true
+		sessionName.innerHTML = textField.value
+		this.sessionCard.focus()
 
 		function completeEditOnEnterKey (event) {
 			if (event.key === 'Enter') editingCompletePromiseResolve()
@@ -69,7 +87,7 @@ class SessionManager {
 	}
 
 	get sessionName () {
-		return this.sessionCard.getElementsByClassName('session-name-input')[0].value
+		return this.sessionCard.getElementsByClassName('session-name')[0].textContent
 	}
 }
 
@@ -104,8 +122,8 @@ class UnsavedSessionManager extends OpenSessionManager {
 		this.sessionCard.remove()
 	}
 
-	async save () {
-		const bookmarkFolder = await bookmarks.createFolder(this.sessionName)
+	async save (sessionName) {
+		const bookmarkFolder = await bookmarks.createFolder(sessionName)
 
 		await persistSession(this.windowId, bookmarkFolder.id)
 		await openSavedSessionTracker.addOpenSessionWindowId(this.windowId, bookmarkFolder.id)
@@ -127,8 +145,8 @@ class UnshelvedSessionManager extends OpenSessionManager {
 	}
 
 	// TODO: Fix duplication between these methods and the ShelvedSessionManager methods.
-	async save () {
-		await bookmarks.renameFolder(this.bookmarkFolderId, this.sessionName)
+	async save (sessionName) {
+		await bookmarks.renameFolder(this.bookmarkFolderId, sessionName)
 	}
 
 	get bookmarkFolderId () {
@@ -153,8 +171,8 @@ class ShelvedSessionManager extends SessionManager {
 		this.sessionCard.remove()
 	}
 
-	async save () {
-		await bookmarks.renameFolder(this.bookmarkFolderId, this.sessionName)
+	async save (sessionName) {
+		await bookmarks.renameFolder(this.bookmarkFolderId, sessionName)
 	}
 
 	get bookmarkFolderId () {

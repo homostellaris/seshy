@@ -137,7 +137,7 @@ function getSessionInnerHtml (name, tabsCount, thumbnailUrl) {
 	<span class="mdc-deprecated-list-item__ripple"></span>
 	<img src="${thumbnailUrl || 'https://www.thebloodytourofyork.co.uk/wp-content/uploads/2020/07/placeholder.png'}" class="mdc-deprecated-list-item__graphic favicon" aria-hidden="true">
     <span class="mdc-deprecated-list-item__text">
-	  <span class="mdc-deprecated-list-item__primary-text">${name}</span>
+	  <span class="session-name mdc-deprecated-list-item__primary-text">${name}</span>
 	  <span class="mdc-deprecated-list-item__secondary-text">${tabsCount} tabs</span>
     </span>
     <span class="mdc-deprecated-list-item__meta">

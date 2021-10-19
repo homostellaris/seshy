@@ -198,7 +198,7 @@ class SessionManagerTester {
 			sessionName => {
 				const sessionCards = document.getElementsByClassName('session-card')
 				const sessionCard = Array.prototype.find.call(sessionCards, function (sessionCard) {
-					const sessionNameInput = sessionCard.getElementsByClassName('session-name-input')[0]
+					const sessionNameInput = sessionCard.getElementsByClassName('session-name-input')[0] // TODO: Update usages to session-name.textContent
 					return sessionNameInput.value === sessionName
 				})
 				const resumeButton = sessionCard.getElementsByClassName('resume-button')[0]
