@@ -33,7 +33,8 @@ test.beforeEach(async t => {
 	playwrightPage.on('console', async consoleMessage => {
 		for (let i = 0; i < consoleMessage.args().length; ++i) {
 			const type = consoleMessage.type()
-			console[type](`Console ${type}:` , await consoleMessage.args()[i].jsonValue())
+			const consoleMethod = type === 'warning' ? 'warn' : type
+			console[consoleMethod](`Console ${type}:` , await consoleMessage.args()[i].jsonValue())
 		}
 	})
 	playwrightPage.on('pageerror', (error) => {
@@ -58,23 +59,28 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	const tester = new SessionManagerTester(t, playwrightPage)
 
 	await playwrightPage.reload()
+	const sessionManagerTitle = await playwrightPage.title()
 	// This is breaking the fourth wall a bit because its actually a window with the session manager that we're making assertions against.
-	await tester.assertOpenSessions([unsavedSessionName])
+	await tester.assertUnsavedSessions([sessionManagerTitle])
 
-	const [window] = await tester.createWindow()
+	const [page, window] = await tester.createWindow()
 	await playwrightPage.reload() // TODO: Try replacing with page.waitForSelector(selector[, options])
-	await tester.assertOpenSessions([unsavedSessionName, unsavedSessionName])
+	await tester.assertUnsavedSessions([sessionManagerTitle, await page.title()])
 
 	await tester.createTabs(window.id, urls)
 	await tester.closeNewTab(window)
 
 	const savedSessionName = 'Test session'
 	await tester.updateUnsavedSessionName(1, savedSessionName)
-	await tester.assertOpenSessions([unsavedSessionName, savedSessionName])
+	await tester.assertUnsavedSessions([sessionManagerTitle, savedSessionName])
+	await playwrightPage.reload()
+	await tester.assertUnsavedSessions([sessionManagerTitle])
+	await tester.assertUnshelvedSessions([savedSessionName])
 
 	await tester.closeWindow(window.id)
 	await playwrightPage.reload()
-	await tester.assertOpenSessions([unsavedSessionName])
+	await tester.assertUnsavedSessions([sessionManagerTitle])
+	await tester.assertUnshelvedSessions([])
 	await tester.assertShelvedSessions([savedSessionName])
 
 	const updatedSessionName = 'Test session updated'
@@ -89,7 +95,8 @@ test('Saving, re-opening, then deleting sessions', async t => {
 
 	await playwrightPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
 	await playwrightPage.reload()
-	await tester.assertOpenSessions([unsavedSessionName, updatedSessionName])
+	await tester.assertUnsavedSessions([sessionManagerTitle])
+	await tester.assertUnshelvedSessions([updatedSessionName])
 	await tester.assertShelvedSessions([])
 	const unshelvedSessionWindow = await tester.getCurrentWindow()
 	await tester.assertWindowTabUrls(unshelvedSessionWindow, urls)
@@ -101,8 +108,10 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	])
 	await playwrightPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
 	t.is((await tester.getWindows()).length, 1)
-	const sessions = await tester.getSessionNames()
-	t.deepEqual(sessions, [unsavedSessionName])
+
+	await tester.assertUnsavedSessions([sessionManagerTitle])
+	await tester.assertUnshelvedSessions([])
+	await tester.assertShelvedSessions([])
 })
 
 test.todo('Saving, re-opening, then deleting sessions (with keyboard shortcuts)')
@@ -114,14 +123,23 @@ class SessionManagerTester {
 	}
 
 	// TODO: Create a SesssionManagerPageAsserter or something like that to avoid passing it as an arg all the time.
-	async assertOpenSessions(expectedUnsavedSessionNames) {
-		const unsavedSessionNames = await this.playwrightPage.$$eval('#currently-open-sessions .session-card input', inputs => inputs.map(input => input.value))
-		this.avaExecutionContext.deepEqual(unsavedSessionNames, expectedUnsavedSessionNames)
+	async assertUnsavedSessions(expectedUnsavedSessionNames) {
+		await this.assertSession('unsaved', expectedUnsavedSessionNames)
 	}
 
-	async assertShelvedSessions(expectedShelvedSessionNames) {
-		const shelvedSessionNames = await this.playwrightPage.$$eval('#saved-sessions .session-card input', inputs => inputs.map(input => input.value))
-		this.avaExecutionContext.deepEqual(shelvedSessionNames, expectedShelvedSessionNames)
+	async assertUnshelvedSessions(expectedSessionNames) {
+		await this.assertSession('unshelved', expectedSessionNames)
+	}
+
+	async assertShelvedSessions(expectedSessionNames) {
+		await this.assertSession('shelved', expectedSessionNames)
+	}
+
+	async assertSession(sessionType, expectedSessionNames) {
+		if (expectedSessionNames.length) await this.playwrightPage.waitForSelector(`[data-type="${sessionType}"] .session-name`)
+
+		const actualSessionNames = await this.playwrightPage.$$eval(`[data-type="${sessionType}"] .session-name`, sessionNames => sessionNames.map(sessionName => sessionName.textContent))
+		this.avaExecutionContext.deepEqual(actualSessionNames, expectedSessionNames)
 	}
 
 	async createWindow() {
@@ -133,7 +151,7 @@ class SessionManagerTester {
 				})
 			})),
 		])
-		return [window, page]
+		return [page, window]
 	}
 
 	async createTab(createProperties) {
@@ -166,14 +184,20 @@ class SessionManagerTester {
 	}
 
 	async updateUnsavedSessionName (sessionIndex, name) {
-		const editButton = await this.playwrightPage.$(`#currently-open-sessions .session-card:nth-child(${sessionIndex + 1}) .edit-button`)
-		await editButton.click()
-		await this.playwrightPage.keyboard.type(name)
-		await editButton.click()
+		await this.updateSessionName('unsaved', sessionIndex, name)
+	}
+
+	async updateUnshelvedSessionName (sessionIndex, name) {
+		await this.updateSessionName('unshelved', sessionIndex, name)
 	}
 
 	async updateShelvedSessionName (sessionIndex, name) {
-		const editButton = await this.playwrightPage.$(`#saved-sessions .session-card:nth-child(${sessionIndex + 1}) .edit-button`)
+		await this.updateSessionName('shelved', sessionIndex, name)
+	}
+
+	async updateSessionName (sessionType, sessionIndex, name) {
+		const editButtons = await this.playwrightPage.$$(`[data-type="${sessionType}"] .edit-button`)
+		const editButton = editButtons[sessionIndex]
 		await editButton.click()
 		await this.playwrightPage.keyboard.type(name)
 		await editButton.click()
@@ -198,7 +222,7 @@ class SessionManagerTester {
 			sessionName => {
 				const sessionCards = document.getElementsByClassName('session-card')
 				const sessionCard = Array.prototype.find.call(sessionCards, function (sessionCard) {
-					const sessionNameInput = sessionCard.getElementsByClassName('session-name-input')[0] // TODO: Update usages to session-name.textContent
+					const sessionNameInput = sessionCard.getElementsByClassName('session-name-input')[0] // TODO: Update usages to session-name.textContentg
 					return sessionNameInput.value === sessionName
 				})
 				const resumeButton = sessionCard.getElementsByClassName('resume-button')[0]
@@ -230,13 +254,7 @@ class SessionManagerTester {
 	}
 
 	async deleteSession(sessionName) {
-		const deleteButton = await this.playwrightPage.$(`.session-card:has(.session-name-input[value="${sessionName}"]) .delete-button`)
+		const deleteButton = await this.playwrightPage.$(`.session-card:has-text("${sessionName}") .delete-button`)
 		await deleteButton.click()
-	}
-
-	async getSessionNames() {
-		const sessionNameInputs = await this.playwrightPage.$$('.session-name-input')
-		const sessionNames = await Promise.all(sessionNameInputs.map(session => session.getAttribute('value')))
-		return sessionNames
 	}
 }

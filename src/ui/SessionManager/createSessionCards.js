@@ -42,16 +42,16 @@ async function createUnshelvedSessionCards () {
 		unshelvedSessionsHeader.after(sessionCard)
 	})
 
-	if (unshelvedSessions.length === 0) {
-		const sessionCard = createPlaceholderSessionCard(
-			{
-				image: null,
-				name: 'No unshelved sessions',
-				tabs: [],
-			},
-		)
-		unshelvedSessionsHeader.after(sessionCard)
-	}
+	// if (unshelvedSessions.length === 0) {
+	// 	const sessionCard = createPlaceholderSessionCard(
+	// 		{
+	// 			image: null,
+	// 			name: 'No unshelved sessions',
+	// 			tabs: [],
+	// 		},
+	// 	)
+	// 	unshelvedSessionsHeader.after(sessionCard)
+	// }
 }
 
 async function createShelvedSessionCards () {
@@ -114,7 +114,10 @@ function createSessionCard (session, dataset = {}) {
 	const {edit, resume, remove, keydown} = sessionManager.eventHandlers
 
 	editIcon.addEventListener('click', edit) // Wrapped in an arrow function to keep `this` as the session manager rather than the event object.
-	resumeIcon.addEventListener('click', resume)
+	resumeIcon.addEventListener('click', event => {
+		resume()
+		event.stopPropagation() // Prevent the MDC List click action from taking effect.
+	})
 	deleteIcon.addEventListener('click', remove)
 
 	sessionCard.addEventListener('keydown', keydown)

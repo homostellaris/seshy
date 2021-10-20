@@ -8,8 +8,6 @@ export async function persistSession (windowId, bookmarkFolderId) {
 	const window = await chrome.windows.get(windowId, {populate: true})
 	const [bookmarkFolder] = await chrome.bookmarks.getSubTree(bookmarkFolderId)
 
-	console.log(bookmarkFolder)
-	const bookmarksWithoutSeshyBookmark = bookmarkFolder.children.filter(bookmark => bookmark.title !== '.seshy')
 	const windowTabs = [...window.tabs]
 	const imageTab = getImageTab(window)
 	if (imageTab) windowTabs.unshift(imageTab)
@@ -25,7 +23,6 @@ export async function persistSession (windowId, bookmarkFolderId) {
 	const removeOperations = removed.map(tab => chrome.bookmarks.remove(tab.id)) // TODO: Update to use bookmark folder ID
 	const moveOperations = common
 		.filter(tab => {
-			console.debug('JA HIER', tab)
 			return windowTabs[tab.index].url !== bookmarkFolder.children[tab.index].url
 		})
 		.map(tab => chrome.bookmarks.move(
@@ -114,8 +111,6 @@ export async function getUnshelvedSessions () {
 	const promises = windowsUnshelved.reverse().map(async window => {
 		const bookmarkFolderId = unshelvedSessionIdMappings[window.id.toString()]
 		const bookmarkFolder = await bookmarks.getFolder(bookmarkFolderId)
-
-		console.log(window.tabs[0].favIconUrl)
 
 		return new UnshelvedSession({
 			bookmarkFolderId: bookmarkFolder.id,
