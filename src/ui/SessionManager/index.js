@@ -21,8 +21,8 @@ class SessionManager {
 		sessionName.innerHTML = `
 			<label class="mdc-text-field mdc-text-field--outlined mdc-text-field--no-label">
 				<span class="mdc-notched-outline">
-				<span class="mdc-notched-outline__leading"></span>
-				<span class="mdc-notched-outline__trailing"></span>
+					<span class="mdc-notched-outline__leading"></span>
+					<span class="mdc-notched-outline__trailing"></span>
 				</span>
 				<input class="mdc-text-field__input" type="text" aria-label="Label" value="${this.sessionName}"">
 			</label>
@@ -127,9 +127,6 @@ class UnsavedSessionManager extends OpenSessionManager {
 
 		await persistSession(this.windowId, bookmarkFolder.id)
 		await openSavedSessionTracker.addOpenSessionWindowId(this.windowId, bookmarkFolder.id)
-		
-		const savedStateIcon = this.sessionCard.getElementsByClassName('saved-state-icon')[0]
-		savedStateIcon.textContent = 'bookmark'
 	}
 }
 
