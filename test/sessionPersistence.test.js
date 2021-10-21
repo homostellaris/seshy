@@ -133,7 +133,10 @@ class SessionManagerTester {
 	}
 
 	async assertSession(sessionType, expectedSessionNames) {
-		if (expectedSessionNames.length) await this.playwrightPage.waitForSelector(`[data-type="${sessionType}"] .session-name`)
+		await this.playwrightPage.waitForSelector(
+			`[data-type="${sessionType}"] .session-name`,
+			{state: expectedSessionNames.length ? 'visible' : 'hidden'},
+		)
 
 		const actualSessionNames = await this.playwrightPage.$$eval(`[data-type="${sessionType}"] .session-name`, sessionNames => sessionNames.map(sessionName => sessionName.textContent))
 		this.avaExecutionContext.deepEqual(actualSessionNames, expectedSessionNames)
