@@ -2,12 +2,20 @@
 // See all supported options: https://www.snowpack.dev/reference/configuration
 
 /** @type {import("snowpack").SnowpackUserConfig } */
-module.exports = {
+export default {
 	mount: {
 		'src': '/',
 	},
 	plugins: [
-		/* ... */
+		[
+			'@snowpack/plugin-sass',
+			{
+				compilerOptions: {
+					stopOnError: false,
+					trace: true,
+				},
+			},
+		],
 	],
 	packageOptions: {
 		/* ... */
@@ -24,5 +32,6 @@ module.exports = {
 			'worker.js',
 			'ui/index.js', // TODO: See if CSS bundling starts working with only specific parts of the app bundled.
 		],
+		// TODO: See if minifying, tree-shaking, and other optimisations are worth it.
 	},
 }

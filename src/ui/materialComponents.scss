@@ -1,0 +1,38 @@
+@use "@material/theme" with (
+    $primary: #fcb8ab,
+    $secondary: #feeae6,
+    $on-primary: #442b2d, // TODO: Use this on activated list items
+    $on-secondary: #442b2d,
+);
+// TODO: Find out why @material/package doesn't work.
+@use "@material/list";
+@use "@material/dialog/mdc-dialog";
+@use "@material/top-app-bar/mdc-top-app-bar";
+
+@use "@material/floating-label/mdc-floating-label";
+@use "@material/line-ripple/mdc-line-ripple";
+@use "@material/notched-outline/mdc-notched-outline";
+@use "@material/textfield";
+
+@include textfield.core-styles;
+@include list.deprecated-core-styles;
+
+.mdc-deprecated-list .mdc-deprecated-list-item__graphic.favicon {   
+    @include list.deprecated-graphic-size($leading-padding: 16px, $text-offset: 16px, $width: 16px, $height: 16px);
+}
+
+.mdc-list-group__subheader {
+    font-size: 14px;
+}
+
+.mdc-deprecated-list-item__meta {
+    flex-shrink: 0; // Stop meta icons wrapping onto two rows.
+}
+
+.mdc-text-field {
+    @include textfield.outlined-height($height: 24px); // To match list primary text height.
+}
+
+.mdc-text-field__input {
+    font-size: 0.812rem; // To match dense list font size.
+}

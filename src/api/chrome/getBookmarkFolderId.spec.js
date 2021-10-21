@@ -1,5 +1,5 @@
 import test from 'ava'
-import {getBookmarkFolderId} from './index.js'
+import {getBookmarkFolderId} from './bookmarks.js'
 
 const windowIdForSavedSession = 1
 const windowIdForUnsavedSession = 2

@@ -1,9 +1,11 @@
 import {debounce} from 'debounce'
 import bookmarks from './api/chrome/bookmarks.js'
 import {
-	getBookmarkFolderId,
 	persistSession,
 } from './api/index.js'
+import {
+	getBookmarkFolderId,
+} from './api/chrome/bookmarks'
 import openSavedSessionTracker from './api/openSavedSessionTracker'
 import status from './ui/status/index.js'
 
@@ -31,7 +33,7 @@ async function onUpdatedListener (_, changeInfo, tab) {
 
 async function setActionIcon (windowId) {
 	const openSavedSessionWindowIds = await openSavedSessionTracker.getOpenSessionWindowIds()
-	const isOpenSavedSession = openSavedSessionWindowIds.includes(windowId)
+	const isOpenSavedSession = openSavedSessionWindowIds.includes(windowId.toString())
 	if (isOpenSavedSession) {
 		status.saved()
 	} else {

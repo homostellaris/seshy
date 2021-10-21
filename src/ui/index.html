@@ -10,33 +10,36 @@
         <section
           class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start"
         >
+          <!-- <button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button" aria-label="Open navigation menu">menu</button> -->
+          <span id="title" class="mdc-top-app-bar__title">Seshy</span>
+        </section>
+        <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
+          <!-- <button class="material-icons mdc-top-app-bar__action-item mdc-icon-button" aria-label="Search">search</button> -->
           <a
             id="more-information"
             href="./moreInformation/index.html"
             class="material-icons mdc-top-app-bar__navigation-icon"
-            >help</a
-          >
-          <span id="title" class="mdc-top-app-bar__title">Seshy</span>
+          >help</a>
         </section>
       </div>
     </header>
 
     <main id="content" class="mdc-top-app-bar--fixed-adjust">
-      <div class="mdc-list-group">
-        <h3 class="mdc-list-group__subheader">Currently Open Sessions</h3>
         <ul
-          id="currently-open-sessions"
-          class="session-list mdc-list mdc-list--two-line mdc-list--dense"
-        ></ul>
-      </div>
-
-      <div class="mdc-list-group">
-        <h3 class="mdc-list-group__subheader">Shelved Sessions</h3>
-        <ul
-          id="saved-sessions"
-          class="session-list mdc-list mdc-list--two-line mdc-list--dense"
-        ></ul>
-      </div>
+          id="sessions"
+          class="mdc-deprecated-list mdc-deprecated-list--dense mdc-deprecated-list--thumbnail-list mdc-deprecated-list--two-line"
+          role="listbox"
+        >
+        <h3 id="unsaved" class="mdc-list-group__subheader">
+          Unsaved
+        </h3>
+        <h3 id="unshelved" class="mdc-list-group__subheader">
+          Unshelved
+        </h3>
+        <h5 id="shelved" class="mdc-list-group__subheader">
+          Shelved
+        </h5>
+      </ul>
 
       <aside id="keyboard-shortcuts" class="mdc-dialog">
         <div class="mdc-dialog__container">
