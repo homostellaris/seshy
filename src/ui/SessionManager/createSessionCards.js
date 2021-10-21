@@ -41,17 +41,6 @@ async function createUnshelvedSessionCards () {
 		)
 		unshelvedSessionsHeader.after(sessionCard)
 	})
-
-	// if (unshelvedSessions.length === 0) {
-	// 	const sessionCard = createPlaceholderSessionCard(
-	// 		{
-	// 			image: null,
-	// 			name: 'No unshelved sessions',
-	// 			tabs: [],
-	// 		},
-	// 	)
-	// 	unshelvedSessionsHeader.after(sessionCard)
-	// }
 }
 
 async function createShelvedSessionCards () {
@@ -69,16 +58,6 @@ async function createShelvedSessionCards () {
 	})
 }
 
-function createDividers () {
-	const sessionCards = document.getElementsByClassName('session-card')
-
-	for (let sessionCard of sessionCards) {
-		if (sessionCard.nextSibling === null) continue
-		const divider = createDivider()
-		sessionCard.after(divider)
-	}
-}
-
 async function addTabIndex () {
 	const currentlyOpenWindow = await chrome.windows.getCurrent(null)
 	const sessionCard = document.querySelector(`[data-window-id="${currentlyOpenWindow.id}"]`)
@@ -87,12 +66,6 @@ async function addTabIndex () {
 	sessionCard.setAttribute('aria-selected', true) // Make `li` element focusable.
 	sessionCard.classList.add('mdc-deprecated-list-item--selected')
 	sessionCard.focus()
-}
-
-function createDivider () {
-	const dividerElement = document.createElement('li')
-	dividerElement.innerHTML = '<li role="separator" class="mdc-deprecated-list-divider"></li>'
-	return dividerElement
 }
 
 function createSessionCard (session, dataset = {}) {
@@ -121,16 +94,6 @@ function createSessionCard (session, dataset = {}) {
 	deleteIcon.addEventListener('click', remove)
 
 	sessionCard.addEventListener('keydown', keydown)
-
-	return sessionCard
-}
-
-function createPlaceholderSessionCard (session) {
-	const sessionCard = document.createElement('li')
-	sessionCard.setAttribute('role', 'option')
-	sessionCard.classList.add('session-card', 'mdc-deprecated-list-item', 'mdc-deprecated-list-item--disabled')
-
-	sessionCard.innerHTML = getSessionInnerHtml(session.name, session.tabs.length, session.image)
 
 	return sessionCard
 }

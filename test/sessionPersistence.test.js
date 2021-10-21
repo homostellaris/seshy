@@ -1,9 +1,6 @@
 import test from 'ava'
 import {chromium} from 'playwright'
 
-// TODO: Move to separate files.
-const unsavedSessionName = 'Unsaved session'
-
 const exampleDotCom = 'http://example.com/'
 const githubDotCom = 'https://github.com/'
 const playwrightDotCom = 'https://playwright.dev/'

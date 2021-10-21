@@ -17,7 +17,7 @@ function init () {
 function initList () {
 	const list = new MDCList(document.querySelector('#sessions'))
 	list.singleSelection = true
-	const listItemRipples = list.listElements.map((listItemEl) => new MDCRipple(listItemEl))
+	list.listElements.map((listItemEl) => new MDCRipple(listItemEl))
 	list.listen('MDCList:action', event => {
 		const listItemIndex = event.detail.index
 		const sessionCard = list.listElements[listItemIndex]
@@ -28,7 +28,7 @@ function initList () {
 
 function initTopAppbar () {
 	const topAppBarElement = document.querySelector('.mdc-top-app-bar')
-	const topAppBar = new MDCTopAppBar(topAppBarElement)
+	new MDCTopAppBar(topAppBarElement)
 }
 
 function initKeyboardShortcutsDialog () {
