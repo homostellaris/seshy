@@ -1,5 +1,5 @@
-var openNewTabThenExitActionPopup = (url) => {
-	var createProperties = {url}
+function openNewTabThenExitActionPopup (url) {
+	const createProperties = {url}
 	chrome.tabs.create(createProperties)
 	window.close()
 }
@@ -8,61 +8,61 @@ function Credit (name, description, websiteUrl, copyright, license) {
 	copyright = typeof copyright === 'undefined' ? true : copyright
 	license = typeof license === 'undefined' ? true : license
 
-	var creditElement = document.createElement('li')
+	const creditElement = document.createElement('li')
 	creditElement.setAttribute('class', 'mdc-list-item')
 	creditElement.setAttribute('tabindex', '0') // Make `li` element focusable.
 
 	creditElement.innerHTML = getCreditInnerHtml(name, description, copyright, license)
 	createWebsiteLinkClickListener(creditElement, websiteUrl)
 
-	var creditList = document.getElementById('credit-list')
+	const creditList = document.getElementById('credit-list')
 	creditList.appendChild(creditElement)
 }
 
 function getCreditInnerHtml (name, description, copyright, license) {
-	var innerHtml = `
-  <span class="mdc-list-item__text">
-      ${name}
-      <span class="mdc-list-item__secondary-text">
-        ${description}
-      </span>
-  </span>
-  <span class="mdc-list-item__meta">
-    <button class="go-to-website-button" title="go to website">
-      <i class="material-icons">open_in_browser</i>
-    </button>
-  `
-	var fileName = name.toLowerCase().replace(/\s/g, '-')
+	let innerHtml = `
+		<span class="mdc-list-item__text">
+			${name}
+			<span class="mdc-list-item__secondary-text">
+				${description}
+			</span>
+		</span>
+		<span class="mdc-list-item__meta">
+		<button class="go-to-website-button" title="go to website">
+		<i class="material-icons">open_in_browser</i>
+		</button>
+  	`
+	const fileName = name.toLowerCase().replace(/\s/g, '-')
 	if (copyright) {
 		innerHtml += `
-    <a href="./copyrights/${fileName}.html">
-      <button class="view-copright-button" title="view copyright">
-        <i class="material-icons">copyright</i>
-      </button>
-    </a>
-    `
+			<a href="./copyrights/${fileName}.html">
+			<button class="view-copright-button" title="view copyright">
+				<i class="material-icons">copyright</i>
+			</button>
+			</a>
+    	`
 	}
 	if (license) {
 		innerHtml += `
-    <a href="./licenses/${fileName}.html">
-      <button class="view-license-button" title="view license">
-        <i class="material-icons">subject</i>
-      </button>
-    </a>
-    `
+			<a href="./licenses/${fileName}.html">
+			<button class="view-license-button" title="view license">
+				<i class="material-icons">subject</i>
+			</button>
+			</a>
+		`
 	}
 	innerHtml += '</span>'
 	return innerHtml
 }
 
 function createWebsiteLinkClickListener (creditElement, websiteUrl) {
-	var goToWebsiteButton = creditElement.getElementsByClassName('go-to-website-button')[0]
+	const goToWebsiteButton = creditElement.getElementsByClassName('go-to-website-button')[0]
 	goToWebsiteButton.addEventListener('click', () => {
 		openNewTabThenExitActionPopup(websiteUrl)
 	})
 }
 
-var setUp = () => {
+function setUp () {
 	/* eslint-disable no-new */
 	new Credit('Material Components for Web', 'For making the UI.', 'https://material.io/components/web/')
 	new Credit('Jasmine', 'For testing.', 'https://jasmine.github.io/')

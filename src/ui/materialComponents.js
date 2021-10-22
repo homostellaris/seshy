@@ -32,7 +32,7 @@ function initTopAppbar () {
 }
 
 function initKeyboardShortcutsDialog () {
-	var keyboardShortcutsElement = document.querySelector('#keyboard-shortcuts')
+	const keyboardShortcutsElement = document.querySelector('#keyboard-shortcuts')
 	document.dialog = new MDCDialog(keyboardShortcutsElement)
 	document.dialog.listen('MDCDialog:accept', () => {
 		document.body.style.minHeight = 'initial'
