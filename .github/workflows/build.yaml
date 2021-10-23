@@ -17,7 +17,7 @@ jobs:
       with:
         node-version: '14'
         cache: 'npm'
-    - uses: microsoft/playwright-github-action@v1
+    - run: npx playwright install-deps chromium
     - run: npm ci
     - run: npm run build --if-present
     - run: npm run lint
