@@ -40,8 +40,7 @@
     "@material/theme": "^12.0.0",
     "@material/top-app-bar": "^12.0.0",
     "debounce": "^1.2.1",
-    "hyperdiff": "^2.0.8",
-    "material-design-icons": "^3.0.1"
+    "hyperdiff": "^2.0.8"
   },
   "devDependencies": {
     "@snowpack/plugin-sass": "^1.4.0",
