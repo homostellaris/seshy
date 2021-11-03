@@ -1,4 +1,6 @@
-[**Seshy** is available on the Chrome Web Store](https://chrome.google.com/webstore/detail/seshy/noeieddjehppejohbbchbcmheecaneac)
+# [**Seshy** is available on the Chrome Web Store](https://chrome.google.com/webstore/detail/seshy/noeieddjehppejohbbchbcmheecaneac)
+
+[![Build](https://github.com/moderatemisbehaviour/seshy/actions/workflows/build.yaml/badge.svg)](https://github.com/moderatemisbehaviour/seshy/actions/workflows/build.yaml)
 
 # What is Seshy?
 Having too many tabs open is bad for your productivity because you waste time looking for the tab you need.
