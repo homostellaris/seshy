@@ -1,4 +1,4 @@
-name: Release
+name: Publish
 
 on:
   release:
@@ -16,3 +16,6 @@ jobs:
     - run: npm ci
     - run: npm run build
     - run: node scripts/publish
+      env:
+        SESHY_PUBLISHER_CLIENT_ID: ${{ secrets.SESHY_PUBLISHER_CLIENT_ID }}
+        SESHY_PUBLISHER_REFRESH_TOKEN: ${{ secrets.SESHY_PUBLISHER_REFRESH_TOKEN }}
