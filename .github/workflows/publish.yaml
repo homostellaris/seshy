@@ -13,4 +13,6 @@ jobs:
       with:
         node-version: '14'
         cache: 'npm'
+    - run: npm ci
+    - run: npm run build
     - run: node scripts/publish
