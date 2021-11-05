@@ -8,9 +8,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
@@ -22,5 +20,3 @@ jobs:
     - run: npm run build
     - run: npm run lint
     - run: xvfb-run --auto-servernum -- npm test
-    - run: node scripts/publish
-      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
