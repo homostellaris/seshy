@@ -18,7 +18,7 @@ jobs:
         node-version: '14'
         cache: 'npm'
     - run: npx playwright install-deps chromium
-    - run: npm install
-    - run: npm run build --if-present
+    - run: npm ci
+    - run: npm run build
     - run: npm run lint
     - run: xvfb-run --auto-servernum -- npm test
