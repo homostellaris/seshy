@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "Seshy",
-	"version": "0.1.10",
+	"version": "0.2.0",
 	"description": "Chrome extension for effortlessly syncing browsing sessions.",
 	"background": {
     	"service_worker": "workerWrapper.js"

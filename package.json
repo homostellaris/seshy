@@ -1,6 +1,6 @@
 {
   "name": "seshy",
-  "version": "0.1.10",
+  "version": "0.2.0",
   "description": "Chrome extension for effortlessly syncing browsing sessions.",
   "scripts": {
     "build": "snowpack build",
@@ -45,10 +45,12 @@
   "devDependencies": {
     "@snowpack/plugin-sass": "^1.4.0",
     "ava": "^3.15.0",
+    "chrome-webstore-upload": "^1.0.0",
     "eslint": "^7.24.0",
     "playwright": "^1.9.0",
     "sinon": "^7.5.0",
     "sinon-chrome": "^3.0.1",
-    "snowpack": "^3.8.6"
+    "snowpack": "^3.8.6",
+    "zip-dir": "^2.0.0"
   }
 }
