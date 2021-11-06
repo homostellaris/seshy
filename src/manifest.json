@@ -21,9 +21,6 @@
 			}
 		}
 	},
-	"host_permissions": [
-		"https://*/"
-	],
 	"icons": {
 		"16": "ui/icons/seshy-logo-16.png",
 		"48": "ui/icons/seshy-logo-48.png",
