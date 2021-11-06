@@ -1,8 +1,5 @@
 @use "@material/theme" with (
-    $primary: #fcb8ab,
-    $secondary: #feeae6,
-    $on-primary: #442b2d, // TODO: Use this on activated list items
-    $on-secondary: #442b2d,
+    $primary: #FFA366,
 );
 // TODO: Find out why @material/package doesn't work.
 @use "@material/list";
