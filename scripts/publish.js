@@ -22,18 +22,36 @@ try {
 	await uploadZip(token);
 	await publish(token);
 } catch (error) {
-	console.error(error.message, '\n', error.response.body)
+	console.error(error.message)
+	process.exit(1)
 }
 
 async function publish (token) {
-	await store.publish('default', token);
+	let resource
+	try {
+		resource = await store.publish('default', token);
+	} catch (error) {
+		throw new Error(error.message + '\n' + error.response.body)
+	}
+	if (resource.itemError) {
+		throw Error('Publish failed: ' + resource.itemError[0].error_detail)
+	}
 	console.info('New version published');
 }
 
 async function uploadZip (token) {
 	const seshyZip = fs.createReadStream('./dist/seshy.zip');
-	const resource = await store.uploadExisting(seshyZip, token);
-	console.info('New version uploaded', resource);
+
+	let resource
+	try {
+		resource = await store.uploadExisting(seshyZip, token);
+	} catch (error) {
+		throw new Error(error.message + '\n' + error.response.body)
+	}
+	if (resource.itemError) {
+		throw Error('Upload failed: ' + resource.itemError[0].error_detail)
+	}
+	console.info('New version uploaded');
 }
 
 async function zipBuildFolder () {
