@@ -59,6 +59,8 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	const sessionManagerTitle = await playwrightPage.title()
 	// This is breaking the fourth wall a bit because its actually a window with the session manager that we're making assertions against.
 	await tester.assertUnsavedSessions([sessionManagerTitle])
+	await tester.assertUnshelvedPlaceholderExists()
+	await tester.assertShelvedPlaceholderExists()
 
 	const [page, window] = await tester.createWindow()
 	await playwrightPage.reload() // TODO: Try replacing with page.waitForSelector(selector[, options])
@@ -78,6 +80,7 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	await playwrightPage.reload()
 	await tester.assertUnsavedSessions([sessionManagerTitle])
 	await tester.assertUnshelvedSessions([])
+	await tester.assertUnshelvedPlaceholderExists()
 	await tester.assertShelvedSessions([savedSessionName])
 
 	const updatedSessionName = 'Test session updated'
@@ -95,6 +98,7 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	await tester.assertUnsavedSessions([sessionManagerTitle])
 	await tester.assertUnshelvedSessions([updatedSessionName])
 	await tester.assertShelvedSessions([])
+	await tester.assertShelvedPlaceholderExists()
 	const unshelvedSessionWindow = await tester.getCurrentWindow()
 	await tester.assertWindowTabUrls(unshelvedSessionWindow, urls)
 
@@ -106,9 +110,12 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	await playwrightPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
 	t.is((await tester.getWindows()).length, 1)
 
+	await playwrightPage.reload()
 	await tester.assertUnsavedSessions([sessionManagerTitle])
 	await tester.assertUnshelvedSessions([])
 	await tester.assertShelvedSessions([])
+	await tester.assertUnshelvedPlaceholderExists()
+	await tester.assertShelvedPlaceholderExists()
 })
 
 test.todo('Saving, re-opening, then deleting sessions (with keyboard shortcuts)')
@@ -140,6 +147,23 @@ class SessionManagerTester {
 
 		const actualSessionNames = await this.playwrightPage.$$eval(`[data-type="${sessionType}"] .session-name`, sessionNames => sessionNames.map(sessionName => sessionName.textContent))
 		this.avaExecutionContext.deepEqual(actualSessionNames, expectedSessionNames)
+	}
+
+	async assertUnsavedPlaceholderExists () {
+		await this.assertPlaceholderExists('unsaved')
+	}
+
+	async assertUnshelvedPlaceholderExists () {
+		await this.assertPlaceholderExists('unshelved')
+	}
+
+	async assertShelvedPlaceholderExists () {
+		await this.assertPlaceholderExists('shelved')
+	}
+
+	async assertPlaceholderExists (sessionType) {
+		const placeholder = await this.playwrightPage.$(`text=You have no ${sessionType} sessions.`)
+		this.avaExecutionContext.not(placeholder, null)
 	}
 
 	async createWindow() {

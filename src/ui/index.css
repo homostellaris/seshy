@@ -34,3 +34,18 @@ a {
   height: auto !important;
   width: 100%; /* Allows full width text input. */
 }
+
+.placeholder {
+  align-items: center;  
+  color: grey;
+  display: flex;
+  height: 60px;
+  justify-content: center;
+  text-align: center;
+}
+
+.placeholder img {
+  width: 25px;
+  height: 25px;
+  margin: 0 5px;
+}
