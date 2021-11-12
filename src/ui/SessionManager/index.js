@@ -138,6 +138,7 @@ class UnshelvedSessionManager extends OpenSessionManager {
 	async remove () {
 		await chrome.windows.remove(this.windowId)
 		// Event listener in worker will remove window ID from storage to stop tracking as an open saved session.
+		await bookmarks.removeFolder(this.bookmarkFolderId)
 		this.sessionCard.remove()
 	}
 

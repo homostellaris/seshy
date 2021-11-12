@@ -1,5 +1,5 @@
 function saved () {
-	chrome.action.setIcon({path: '../ui/status/saved.png'})
+	chrome.action.setIcon({path: '../ui/status/unshelved.png'})
 }
 
 function saving () {

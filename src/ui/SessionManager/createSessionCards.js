@@ -4,6 +4,11 @@ import SessionManager from './index.js'
 const unsavedSessionsHeader = document.getElementById('unsaved')
 const unshelvedSessionsHeader = document.getElementById('unshelved')
 const shelvedSessionsHeader = document.getElementById('shelved')
+const sessionHeaders = {
+	'unsaved': unsavedSessionsHeader,
+	'unshelved': unshelvedSessionsHeader,
+	'shelved': shelvedSessionsHeader,
+}
 
 async function createSessionCards () {
 	await createUnsavedSessionCards()
@@ -25,6 +30,8 @@ async function createUnsavedSessionCards () {
 		)
 		unsavedSessionsHeader.after(sessionCard)
 	})
+
+	if (!unsavedSessions.length) createPlaceholder('unsaved')
 }
 
 async function createUnshelvedSessionCards () {
@@ -41,6 +48,8 @@ async function createUnshelvedSessionCards () {
 		)
 		unshelvedSessionsHeader.after(sessionCard)
 	})
+
+	if (!unshelvedSessions.length) createPlaceholder('unshelved')
 }
 
 async function createShelvedSessionCards () {
@@ -56,6 +65,8 @@ async function createShelvedSessionCards () {
 		)
 		shelvedSessionsHeader.after(sessionCard)
 	})
+
+	if (!shelvedSessions.length) createPlaceholder('shelved')
 }
 
 async function addTabIndex () {
@@ -119,6 +130,16 @@ function getSessionInnerHtml (name, tabsCount, thumbnailUrl) {
 		</span>
   	`
 	return innerHtml
+}
+
+function createPlaceholder (type) {
+	const placeholder = document.createElement('div')
+	placeholder.classList.add('placeholder')
+	placeholder.innerHTML = `
+		<img src="/ui/status/${type}.png" width="60px"><span>You have no ${type} sessions.</span>
+	`
+	const sessionHeader = sessionHeaders[type]
+	sessionHeader.after(placeholder)
 }
 
 export default createSessionCards
