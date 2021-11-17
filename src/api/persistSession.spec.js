@@ -8,11 +8,17 @@ const exampleDotCom = 'http://example.com/'
 const githubDotCom = 'https://github.com/'
 const playwrightDotCom = 'https://playwright.dev/'
 
+test.beforeEach(() => {
+	chrome.bookmarks.create.resolves({})
+	chrome.bookmarks.move.resolves({})
+})
+
 test.afterEach(() => {
 	chrome.windows.get.flush()
 	chrome.bookmarks.getSubTree.flush()
 	chrome.bookmarks.create.flush()
 	chrome.bookmarks.move.flush()
+	chrome.bookmarks.remove.flush()
 })
 
 // TODO: Find out how to use sinon in parallely executed tests, see: https://github.com/avajs/ava/issues/1066
@@ -42,16 +48,18 @@ test('One new tab creates one new bookmark', async t => {
 			},
 		],
 	}])
-	chrome.bookmarks.create.resolves({})
 
 	await persistSession(windowId, bookmarkFolderId)
 
-	t.assert(chrome.bookmarks.create.calledOnceWith({
-		index: 1,
-		parentId: bookmarkFolderId,
-		title: 'GitHub',
-		url: githubDotCom,
-	}))
+	t.assert(chrome.bookmarks.create.calledTwice)
+	t.deepEqual(chrome.bookmarks.create.secondCall.args, [
+		{
+			index: 2,
+			parentId: '1',
+			title: 'GitHub',
+			url: 'https://github.com/',
+		},
+	])
 })
 
 test('Two new tabs creates two new bookmarks', async t => {
@@ -84,28 +92,25 @@ test('Two new tabs creates two new bookmarks', async t => {
 			},
 		],
 	}])
-	chrome.bookmarks.create.resolves({})
 
 	await persistSession(windowId, bookmarkFolderId)
 
-	t.assert(chrome.bookmarks.create.calledTwice)
-	t.assert(
-		chrome.bookmarks.create.calledWith({
-			index: 1,
+	t.assert(chrome.bookmarks.create.calledThrice)
+	t.deepEqual(
+		chrome.bookmarks.create.secondCall.args, [{
+			index: 2,
 			parentId: bookmarkFolderId,
 			title: 'GitHub',
 			url: githubDotCom,
-		}),
+		}],
 	)
-	t.assert(
-		chrome.bookmarks.create.calledWith(
-			{
-				index: 2,
-				parentId: bookmarkFolderId,
-				title: 'Playwright',
-				url: playwrightDotCom,
-			},
-		),
+	t.deepEqual(
+		chrome.bookmarks.create.thirdCall.args, [{
+			index: 3,
+			parentId: bookmarkFolderId,
+			title: 'Playwright',
+			url: playwrightDotCom,
+		}],
 	)
 })
 
@@ -135,7 +140,6 @@ test('One closed tab removes one bookmark', async t => {
 			},
 		],
 	}])
-	chrome.bookmarks.create.resolves({})
 
 	await persistSession(windowId, bookmarkFolderId)
 
@@ -183,14 +187,223 @@ test('One tab moved moves one bookmark', async t => {
 			},
 		],
 	}])
-	chrome.bookmarks.create.resolves({})
-	chrome.bookmarks.move.resolves({})
 
 	await persistSession(windowId, bookmarkFolderId)
-	// TODO: Deal with this dumb bug that means you have to increment index by 1 when the bookmark is moving to a higher index than its current one: https://stackoverflow.com/questions/13264060/chrome-bookmarks-api-using-move-to-reorder-bookmarks-in-the-same-folder
-	t.assert(chrome.bookmarks.move.calledTwice)
-	t.assert(chrome.bookmarks.move.calledWith('2', {index: 2}))	
-	t.assert(chrome.bookmarks.move.calledWith('3', {index: 1}))
+
+	t.deepEqual(chrome.bookmarks.move.args, [
+		['1', {index: 1}],
+		['3', {index: 3}],
+	])
 })
 
-// TODO: Add a test for when there are no children in the bookmark folder (in which case bookmarkFolder.children) is undefined
+test('Creates seshy bookmark with index 0', async t => {
+	chrome.windows.get.withArgs(windowId).resolves({
+		id: windowId,
+		tabs: [
+			{
+				id: '1',
+				index: 0,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+			{
+				id: '2',
+				index: 1,
+				title: 'Playwright',
+				url: playwrightDotCom,
+			},
+		],
+	})
+	chrome.bookmarks.getSubTree.withArgs(bookmarkFolderId).resolves([{
+		id: bookmarkFolderId,
+		children: [],
+	}])
+
+	await persistSession(windowId, bookmarkFolderId)
+
+	t.assert(chrome.bookmarks.create.calledThrice)
+	t.like(chrome.bookmarks.create.firstCall.args[0], {
+		index: 0,
+		url: 'seshy:///',
+	})
+	t.like(chrome.bookmarks.create.secondCall.args[0], {
+		index: 1,
+		url: exampleDotCom,
+	})
+	t.like(chrome.bookmarks.create.thirdCall.args[0], {
+		index: 2,
+		url: playwrightDotCom,
+	})
+})
+
+test('Updates seshy bookmark to have index 0 if it doesn\'t already', async t => {
+	chrome.windows.get.withArgs(windowId).resolves({
+		id: windowId,
+		tabs: [
+			{
+				id: '1',
+				index: 0,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+			{
+				id: '2',
+				index: 1,
+				title: 'Playwright',
+				url: playwrightDotCom,
+			},
+		],
+	})
+	chrome.bookmarks.getSubTree.withArgs(bookmarkFolderId).resolves([{
+		id: bookmarkFolderId,
+		children: [
+			{
+				id: '1',
+				index: 0,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+			{
+				id: '2',
+				index: 1,
+				title: 'Playwright',
+				url: playwrightDotCom,
+			},
+			{
+				id: '3',
+				index: 2,
+				title: '.seshy',
+				url: 'seshy:///',
+			},
+		],
+	}])
+
+	await persistSession(windowId, bookmarkFolderId)
+
+	t.assert(chrome.bookmarks.create.notCalled)
+	t.deepEqual(chrome.bookmarks.move.args, [
+		['1', {index: 1}],
+		['2', {index: 2}],
+		['3', {index: 0}],
+	])
+})
+
+test('Moving and removing tabs at the same time', async t => {
+	chrome.windows.get.withArgs(windowId).resolves({
+		id: windowId,
+		tabs: [
+			{
+				id: '1',
+				index: 0,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+		],
+	})
+	chrome.bookmarks.getSubTree.withArgs(bookmarkFolderId).resolves([{
+		id: bookmarkFolderId,
+		children: [
+			{
+				index: 0,
+				title: '.seshy',
+				url: 'seshy:///',
+			},
+			{
+				id: '2',
+				index: 1,
+				title: 'Playwright',
+				url: playwrightDotCom,
+			},
+			{
+				id: '3',
+				index: 2,
+				title: 'GitHub',
+				url: githubDotCom,
+			},
+			{
+				id: '1',
+				index: 3,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+		],
+	}])
+
+	await persistSession(windowId, bookmarkFolderId)
+
+	t.deepEqual(chrome.bookmarks.remove.args, [
+		['2'],
+		['3'],
+	])
+	t.deepEqual(chrome.bookmarks.move.args, [
+		['1', {index: 1}],
+	])
+})
+
+test('Adding and moving tabs at the same time', async t => {
+	chrome.windows.get.withArgs(windowId).resolves({
+		id: windowId,
+		tabs: [
+			{
+				id: '2',
+				index: 0,
+				title: 'Playwright',
+				url: playwrightDotCom,
+			},
+			{
+				id: '3',
+				index: 1,
+				title: 'GitHub',
+				url: githubDotCom,
+			},
+			{
+				id: '1',
+				index: 2,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+		],
+	})
+	chrome.bookmarks.getSubTree.withArgs(bookmarkFolderId).resolves([{
+		id: bookmarkFolderId,
+		children: [
+			{
+				index: 0,
+				title: '.seshy',
+				url: 'seshy:///',
+			},
+			{
+				id: '1',
+				index: 1,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+		],
+	}])
+
+	await persistSession(windowId, bookmarkFolderId)
+
+	t.deepEqual(chrome.bookmarks.create.args, [
+		[
+			{
+				index: 1,
+				parentId: '1',
+				title: 'Playwright',
+				url: playwrightDotCom,
+			},
+		],
+		[
+			{
+				index: 2,
+				parentId: '1',
+				title: 'GitHub',
+				url: githubDotCom,
+			},
+		],
+	])
+	t.deepEqual(chrome.bookmarks.move.args, [
+		['1', {index: 3}],
+	])
+})
+// TODO: When there are multiple of the same URL
+// TODO: When there are multiple of the same URL and far less tabs than the bookmarks folder

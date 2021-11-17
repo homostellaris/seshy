@@ -4,13 +4,14 @@ import localStorage from './chrome/localStorage.js'
 import openSavedSessionTracker from './openSavedSessionTracker/index.js'
 import {ShelvedSession, UnsavedSession, UnshelvedSession} from './session.js'
 
+// TODO: Is there any way to simplify thing using array order instead of the index property?
 export async function persistSession (windowId, bookmarkFolderId) {
 	const window = await chrome.windows.get(windowId, {populate: true})
 	const [bookmarkFolder] = await chrome.bookmarks.getSubTree(bookmarkFolderId)
 
-	const windowTabs = [...window.tabs]
+	// Other tab will have index 0 in the real window and so will displace .seshy index when their move operations come through.
 	const imageTab = getImageTab(window)
-	if (imageTab) windowTabs.unshift(imageTab)
+	const windowTabs = [imageTab, ...window.tabs.map(tab => ({...tab, index: tab.index + 1}))]
 
 	const {added, removed, common} = diff(bookmarkFolder.children || [], windowTabs || [], 'url')
 
@@ -21,14 +22,7 @@ export async function persistSession (windowId, bookmarkFolderId) {
 		url,
 	}))
 	const removeOperations = removed.map(tab => chrome.bookmarks.remove(tab.id)) // TODO: Update to use bookmark folder ID
-	const moveOperations = common
-		.filter(tab => {
-			return windowTabs[tab.index].url !== bookmarkFolder.children[tab.index].url
-		})
-		.map(tab => chrome.bookmarks.move(
-			bookmarkFolder.children.find(bookmark => bookmark.url === tab.url).id,
-			{index: tab.index}),
-		)
+	const moveOperations = getMoveOperations(common, windowTabs, bookmarkFolder, window) // TODO: Doesn't handle multiple tabs with same URL
 
 	await Promise.all([
 		...createOperations,
@@ -37,14 +31,37 @@ export async function persistSession (windowId, bookmarkFolderId) {
 	])
 }
 
+/**
+ * Moving a bookmark to a lower index will increment the index of the bookmarks between the target index and the current index (including the existing bookmark at the target index).
+ * Moving a bookmark to a higher index will decrement the index of the bookmarks between the target index and the current index (including the existing bookmark at the target index).
+ * There is also a bug that means tabs are moved to the index one less than the one passed as an argument when the bookmark is moving to a higher index than its current one: https://stackoverflow.com/questions/13264060/chrome-bookmarks-api-using-move-to-reorder-bookmarks-in-the-same-folder
+ * 
+ * @param {*} common 
+ * @param {*} windowTabs 
+ * @param {*} bookmarkFolder 
+ * @param {*} window 
+ * @returns 
+ */
+function getMoveOperations (bookmarks, tabs) {
+	return bookmarks
+		.filter(bookmark => {
+			const tabWithSameUrl = tabs.find(windowTab => windowTab.url === bookmark.url)
+			const tabHasMoved = bookmark.index !== tabWithSameUrl.index
+			return tabHasMoved
+		})
+		.map(bookmark => {
+			const tabWithSameUrl = tabs.find(windowTab => windowTab.url === bookmark.url)
+			return chrome.bookmarks.move(bookmark.id, {index: tabWithSameUrl.index})
+		})
+}
+
 function getImageTab(window) {
 	const image = window.tabs[0].favIconUrl
 	if (!image) {
 		console.warn('Unable to find image for url ' + window.tabs[0].url)
-		return null
 	}
 
-	const url = new URL(`seshy:///?image=${image}`).toString()
+	const url = new URL(`seshy:///${image ? '?image=' + image : ''}`).toString()
 	return {
 		index: 0,
 		title: '.seshy',
