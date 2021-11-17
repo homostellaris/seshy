@@ -5,6 +5,19 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Debug unit tests",
+      "request": "launch",
+      "runtimeArgs": [
+        "run-script",
+        "unit"
+      ],
+      "runtimeExecutable": "npm",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "pwa-node"
+    },
+    {
       "name": "Debug end-to-end tests",
       "request": "launch",
       "runtimeArgs": [
