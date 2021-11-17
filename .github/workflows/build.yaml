@@ -19,4 +19,5 @@ jobs:
     - run: npm ci
     - run: npm run build
     - run: npm run lint
+    - run: npm run unit
     - run: xvfb-run --auto-servernum -- npm test
