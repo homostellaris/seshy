@@ -405,5 +405,156 @@ test('Adding and moving tabs at the same time', async t => {
 		['1', {index: 3}],
 	])
 })
-// TODO: When there are multiple of the same URL
-// TODO: When there are multiple of the same URL and far less tabs than the bookmarks folder
+
+test('Adding a tab with the same URL as another tab', async t => {
+	chrome.windows.get.withArgs(windowId).resolves({
+		id: windowId,
+		tabs: [
+			{
+				id: '1',
+				index: 0,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+			{
+				id: '2',
+				index: 1,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+		],
+	})
+	chrome.bookmarks.getSubTree.withArgs(bookmarkFolderId).resolves([{
+		id: bookmarkFolderId,
+		children: [
+			{
+				index: 0,
+				title: '.seshy',
+				url: 'seshy:///',
+			},
+			{
+				id: '1',
+				index: 1,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+		],
+	}])
+
+	await persistSession(windowId, bookmarkFolderId)
+
+	t.deepEqual(chrome.bookmarks.create.args, [
+		[
+			{
+				index: 2,
+				parentId: '1',
+				title: 'Example',
+				url: exampleDotCom,
+			},
+		],
+	])
+})
+
+test('Removing a tab with the same URL as another tab', async t => {
+	chrome.windows.get.withArgs(windowId).resolves({
+		id: windowId,
+		tabs: [
+			{
+				id: '1',
+				index: 0,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+		],
+	})
+	chrome.bookmarks.getSubTree.withArgs(bookmarkFolderId).resolves([{
+		id: bookmarkFolderId,
+		children: [
+			{
+				index: 0,
+				title: '.seshy',
+				url: 'seshy:///',
+			},
+			{
+				id: '1',
+				index: 1,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+			{
+				id: '2',
+				index: 2,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+		],
+	}])
+
+	await persistSession(windowId, bookmarkFolderId)
+
+	t.deepEqual(chrome.bookmarks.remove.args, [
+		['2'],
+	])
+})
+
+test('Moving a tab with the same URL as another tab', async t => {
+	chrome.windows.get.withArgs(windowId).resolves({
+		id: windowId,
+		tabs: [
+			{
+				id: '1',
+				index: 0,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+			{
+				id: '3',
+				index: 1,
+				title: 'Playwright',
+				url: playwrightDotCom,
+			},
+			{
+				id: '2',
+				index: 2,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+		],
+	})
+	chrome.bookmarks.getSubTree.withArgs(bookmarkFolderId).resolves([{
+		id: bookmarkFolderId,
+		children: [
+			{
+				index: 0,
+				title: '.seshy',
+				url: 'seshy:///',
+			},
+			{
+				id: '1',
+				index: 1,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+			{
+				id: '2',
+				index: 2,
+				title: 'Example',
+				url: exampleDotCom,
+			},
+			{
+				id: '3',
+				index: 3,
+				title: 'Playwright',
+				url: playwrightDotCom,
+			},
+		],
+	}])
+
+	await persistSession(windowId, bookmarkFolderId)
+
+	// TODO: This works but could be accomplished with just ['2', {index: 3}].
+	t.deepEqual(chrome.bookmarks.move.args, [
+		['2', {index: 1}],
+		['3', {index: 2}],
+	])
+})
