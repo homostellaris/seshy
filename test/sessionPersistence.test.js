@@ -87,8 +87,8 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	await tester.updateShelvedSessionName(0, updatedSessionName)
 	await tester.assertShelvedSessions([updatedSessionName])
 
-	const [resumedSessionPage, _] = await Promise.all([
-		t.context.browserContext.waitForEvent('page', {timeout: 2000}),
+	const [resumedSessionPage] = await Promise.all([
+		t.context.browserContext.waitForEvent('page', {timeout: 2000}), // TODO: This doesn't make sense because a session may open many 'pages'
 		tester.resumeSessionByIndex(1),
 	])
 	resumedSessionPage.setDefaultTimeout(2000)
@@ -102,9 +102,27 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	const unshelvedSessionWindow = await tester.getCurrentWindow()
 	await tester.assertWindowTabUrls(unshelvedSessionWindow, urls)
 
+	const githubPage = await tester.getPageByUrl(githubDotCom)
+	await githubPage.close()
+	const windowWithTabRemoved = await tester.getCurrentWindow()
+	await tester.closeWindow(windowWithTabRemoved.id)
+	await playwrightPage.reload()
+	await playwrightPage.waitForTimeout(1000) // TODO: Without this only one session card is found in the session managerı
+	const [resumedSessionPageWithTabRemoved] = await Promise.all([
+		t.context.browserContext.waitForEvent('page', {timeout: 2000}),
+		tester.resumeSessionByIndex(1),
+	])
+	await playwrightPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
+	const unshelvedSessionWindowWithNoTab = await tester.getCurrentWindow()
+	await tester.assertWindowTabUrls(unshelvedSessionWindowWithNoTab, [
+		exampleDotCom,
+		playwrightDotCom,
+	])
+
 	t.is((await tester.getWindows()).length, 2)
+	await playwrightPage.reload()
 	await Promise.all([
-		resumedSessionPage.waitForEvent('close', {timeout: 2000}),
+		resumedSessionPageWithTabRemoved.waitForEvent('close', {timeout: 2000}),
 		tester.deleteSession(updatedSessionName),
 	])
 	await playwrightPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
@@ -187,6 +205,12 @@ class SessionManagerTester {
 		}), createProperties)
 	}
 
+	async getPageByUrl(url) {
+		const context = await this.playwrightPage.context()
+		const pages = await context.pages()
+		return pages.find(page => page.url() === url)
+	}
+
 	async closeNewTab(window) {
 		const newTab = window.tabs[0]
 		return await this.playwrightPage.evaluate(newTab => new Promise(resolve => {
@@ -246,7 +270,7 @@ class SessionManagerTester {
 			sessionName => {
 				const sessionCards = document.getElementsByClassName('session-card')
 				const sessionCard = Array.prototype.find.call(sessionCards, function (sessionCard) {
-					const sessionNameInput = sessionCard.getElementsByClassName('session-name-input')[0] // TODO: Update usages to session-name.textContentg
+					const sessionNameInput = sessionCard.getElementsByClassName('session-name-input')[0] // TODO: Update usages to session-name.textContent
 					return sessionNameInput.value === sessionName
 				})
 				const resumeButton = sessionCard.getElementsByClassName('resume-button')[0]
