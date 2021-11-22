@@ -2,7 +2,7 @@
 	"manifest_version": 3,
 	"name": "Seshy",
 	"version": "0.2.3",
-	"description": "Chrome extension for effortlessly syncing browsing sessions.",
+	"description": "Fewer tabs, more focus.",
 	"background": {
     	"service_worker": "workerWrapper.js"
 	},
