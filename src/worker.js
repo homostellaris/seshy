@@ -13,18 +13,40 @@ import status from './ui/status/index.js'
 	await bookmarks.createSeshyFolder()
 }())
 
+const debouncedTabChangeListener = debounce(tabChangeListener, 2000)
+
 // Listeners must be at the top-level: https://developer.chrome.com/docs/extensions/mv2/background_migration/#listeners
-chrome.tabs.onUpdated.addListener(debounce(onUpdatedListener, 2000))
+chrome.tabs.onUpdated.addListener((_, changeInfo, tab) => debouncedTabChangeListener(onUpdatedListener(tab, changeInfo)))
+chrome.tabs.onRemoved.addListener((_, removeInfo) => debouncedTabChangeListener(onRemovedListener(removeInfo)))
 chrome.windows.onRemoved.addListener(
 	openSavedSessionTracker.removeClosedWindowId,
 )
 chrome.storage.onChanged.addListener(openSavedSessionTracker.removeStaleWindowIds)
 chrome.windows.onFocusChanged.addListener(setActionIcon)
 
-async function onUpdatedListener (_, changeInfo, tab) {
+async function tabChangeListener (promise) {
+	await promise
+}
+
+async function onRemovedListener (removeInfo) {
+	console.debug('tab removed', removeInfo)
+	if (removeInfo.isWindowClosing) return
+
+	const bookmarkFolderId = await getBookmarkFolderId(removeInfo.windowId)
+	const isSavedSession = !!bookmarkFolderId
+
+	if (isSavedSession) {
+		console.debug('persisting session')
+		persistSession(removeInfo.windowId, bookmarkFolderId)
+	}
+}
+
+async function onUpdatedListener (tab, changeInfo) {
 	console.debug('tab updated', changeInfo)
+
 	const bookmarkFolderId = await getBookmarkFolderId(tab.windowId)
 	const isSavedSession = !!bookmarkFolderId
+
 	if (isSavedSession) {
 		console.debug('persisting session')
 		persistSession(tab.windowId, bookmarkFolderId)
