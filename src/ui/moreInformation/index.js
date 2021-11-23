@@ -5,7 +5,7 @@ function openNewTabThenExitActionPopup (url) {
 }
 
 function submitAFeatureRequest  () {
-	openNewTabThenExitActionPopup('https://github.com/moderatemisbehaviour/seshy/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement')
+	openNewTabThenExitActionPopup('https://github.com/moderatemisbehaviour/seshy/discussions/categories/ideas')
 }
 
 function reportABug  () {
