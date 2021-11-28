@@ -104,6 +104,7 @@ test('Saving, re-opening, then deleting sessions', async t => {
 
 	const githubPage = await tester.getPageByUrl(githubDotCom)
 	await githubPage.close()
+	await playwrightPage.waitForTimeout(1000) // Wait for debounce to persist session
 	const windowWithTabRemoved = await tester.getCurrentWindow()
 	await tester.closeWindow(windowWithTabRemoved.id)
 	await playwrightPage.reload()
