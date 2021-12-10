@@ -9,3 +9,22 @@
 #introduction p {
   padding: 16px 0;
 }
+
+img {
+  height: auto;
+  width: 24px;
+  margin-right: 5px;
+}
+
+main {
+  /* TODO: Use MDC variables */
+  color: rgba(0, 0, 0, 0.87);
+  font-family: Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  padding: 16px;
+}
+
+h3 {
+  display: flex;
+}

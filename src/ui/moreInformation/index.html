@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>More information</title>
+    <!-- Should be able to make use of SCSS by importing in the index JS and adding another entrypoint but the bundle: true in the snowpack config breaks this for some reason. -->
     <link rel="stylesheet" href="../index.css" />
     <link rel="stylesheet" href="./index.css" />
   </head>
@@ -23,34 +24,51 @@
     </header>
 
     <main id="content" class="mdc-top-app-bar--fixed-adjust">
+      <p>Welcome to Seshy! There are three core concepts that will help you to understand how it works.</p>
+
+      <h3><img src="/ui/status/unsaved.png">Unsaved sessions</h3>
+      <p>
+        When you first open Seshy you'll see cards representing your browser windows in the <em>unsaved sessions</em> section.
+      </p>
+      <p>
+        Seshy provides a quick way to switch focus between these windows.
+        Just open Seshy (<code>command + shift + s</code>),
+        navigate to the session you want to switch to (<code>arrow keys</code>),
+        and then select it (<code>enter</code> or left click).
+      </p>
+      <p>Because these sessions are <em>unsaved</em> they will disappear as soon as their browser window is closed.</p>
+      <p>
+        The name of each session will be the title of the first tab in the window by default but you can specify a name of your own when you save it.
+      </p>
+
+      <h3><img src="/ui/status/unshelved.png">Unshelved sessions</h3>
+      <p>
+        Saving a session makes it an <em>unshelved session</em>.
+        If the session is not short-lived then you will most likely want to do this.
+      </p>
+      <p>
+        To save a session click the edit button <i class="material-icons">edit</i> or press <code>r</code> with the session selected.
+        You'll be prompted to give it a name, you can stick with the default or provide one of your own.
+      </p>
+      <p>
+        It will now appear in the <em>unshelved sessions</em> section (a saved session that is currently open is an 'unshelved' session).
+        If you close the browser window the session will not be lost, it will just move to the <em>shelved sessions</em> section!
+      </p>
+
+      <h3><img src="/ui/status/shelved.png">Shelved sessions</h3>
+      <p>
+        <em>Shelved sessions</em> can be resumed at any time by
+        selecting their <em>session card</em> (<code>enter</code> or left click).
+        This will re-open the browser window as it was when you closed it.
+      </p>
+      <p>
+        ⚠️ Ensure that you close a <em>saved session</em> by closing the window
+        rather than closing all the tabs. Seshy re-saves sessions after every
+        change to a tab so closing all the tabs results in a
+        <em>saved session</em> with only one tab in it!
+      </p>
+
       <ul class="mdc-deprecated-list mdc-deprecated-list--non-interactive">
-        <li id="introduction" class="mdc-deprecated-list-item mdc-typography--body1">
-          <span class="mdc-deprecated-list-item__graphic">
-            <i class="material-icons">help</i>
-          </span>
-          <p>
-            <b>Welcome to Seshy.</b> The page you were just on is called the
-            <em>session manager</em>. It contains lists of <em>session cards</em>.
-            <br /><br />
-            At first <em>sessions</em> are <em>unsaved</em>
-            <i class="material-icons">bookmark_border</i>. <br /><br />
-            Clicking the edit <i class="material-icons">edit</i> button on a
-            <em>session card</em> allows you to give it a name. <br /><br />
-            Naming a <em>session</em> makes it a <em>saved session</em>
-            <i class="material-icons">bookmark</i>. <br /><br />
-            <em>Saved sessions</em> are stored as bookmarks in a folder under
-            <code>Other Bookmarks/Seshy</code> so they are synced with your other
-            devices. <br /><br />
-            <em>Saved sessions</em> become <em>shelved</em> sessions when their
-            window is closed which means they can be resumed at any time by
-            selecting their <em>session card</em> and pressing <code>ENTER</code>.
-            <br /><br />
-            Ensure that you close a <em>saved session</em> by closing the window
-            rather than closing all the tabs. Seshy re-saves sessions after every
-            change to a tab so closing all the tabs results in a
-            <em>saved session</em> with only one tab in it!
-          </p>
-        </li>
         <li role="separator" class="mdc-deprecated-list-divider"></li>
         <li id="show-keyboard-shortcuts" class="mdc-deprecated-list-item">
           <span class="mdc-deprecated-list-item__graphic">
@@ -73,9 +91,9 @@
           </span>
           Report a bug
         </li>
-        <li id="report-a-bug" class="mdc-deprecated-list-item">
+        <li id="leave-a-review" class="mdc-deprecated-list-item">
           <span class="mdc-deprecated-list-item__graphic">
-            <i class="material-icons">bug_report</i>
+            <i class="material-icons">rate_review</i>
           </span>
           Leave a review
         </li>
