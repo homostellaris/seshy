@@ -4,7 +4,7 @@
 [**Seshy** is available on the Chrome Web Store.](https://chrome.google.com/webstore/detail/seshy/noeieddjehppejohbbchbcmheecaneac)
 
 # Hang on... What even _is_ Seshy?
-// TODO: insert video here
+https://user-images.githubusercontent.com/15190231/145776966-35dddd57-7ff1-44a7-b61b-f99b0c144ea2.mov
 
 Having too many tabs open is bad for your productivity because you waste time looking for the tab you need.
 
