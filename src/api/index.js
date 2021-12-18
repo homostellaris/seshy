@@ -4,14 +4,21 @@ import localStorage from './chrome/localStorage.js'
 import openSavedSessionTracker from './openSavedSessionTracker/index.js'
 import {ShelvedSession, UnsavedSession, UnshelvedSession} from './session.js'
 
+let concurrency = 0
+
 // TODO: Is there any way to simplify thing using array order instead of the index property?
 export async function persistSession (windowId, bookmarkFolderId) {
-	const window = await chrome.windows.get(windowId, {populate: true})
-	const [bookmarkFolder] = await chrome.bookmarks.getSubTree(bookmarkFolderId)
+	if (++concurrency > 1) console.error(`Concurency is ${concurrency} at ${new Date()}`)
 
+	const window = await chrome.windows.get(windowId, {populate: true})
 	// Other tab will have index 0 in the real window and so will displace .seshy index when their move operations come through.
 	const imageTab = getImageTab(window)
 	const windowTabs = [imageTab, ...window.tabs.map(tab => ({...tab, index: tab.index + 1}))]
+
+	if (windowTabs.find(tab => tab.pendingUrl)) return // Tabs with an empty string for their url property aren't 'committed' yet and will have a pendingUrl value instead. I don't know what that means but it doesn't sound great. What's more they don't have titles which we need for creating bookmarks that are readable. Another tab update should be fired once they are committed so it should be picked up later anyway.
+	console.debug('persisting session')
+
+	const [bookmarkFolder] = await chrome.bookmarks.getSubTree(bookmarkFolderId)
 
 	const {added, removed, common} = diff(bookmarkFolder.children || [], windowTabs || [], 'url')
 
@@ -21,14 +28,16 @@ export async function persistSession (windowId, bookmarkFolderId) {
 		title,
 		url,
 	}))
-	const removeOperations = removed.map(tab => chrome.bookmarks.remove(tab.id)) // TODO: Update to use bookmark folder ID
-	const moveOperations = getMoveOperations(common, windowTabs, bookmarkFolder, window) // TODO: Doesn't handle multiple tabs with same URL
+	const removeOperations = removed.map(tab => chrome.bookmarks.remove(tab.id))
+	const moveOperations = getMoveOperations(common, windowTabs)
 
 	await Promise.all([
 		...createOperations,
 		...removeOperations,
 		...moveOperations,
 	])
+
+	concurrency -= 1
 }
 
 /**
@@ -36,10 +45,8 @@ export async function persistSession (windowId, bookmarkFolderId) {
  * Moving a bookmark to a higher index will decrement the index of the bookmarks between the target index and the current index (including the existing bookmark at the target index).
  * There is also a bug that means tabs are moved to the index one less than the one passed as an argument when the bookmark is moving to a higher index than its current one: https://stackoverflow.com/questions/13264060/chrome-bookmarks-api-using-move-to-reorder-bookmarks-in-the-same-folder
  * 
- * @param {*} common 
- * @param {*} windowTabs 
- * @param {*} bookmarkFolder 
- * @param {*} window 
+ * @param {*} tabs 
+ * @param {*} bookmarks 
  * @returns 
  */
 function getMoveOperations (bookmarks, tabs) {

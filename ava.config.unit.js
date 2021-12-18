@@ -1,5 +1,5 @@
 export default {
 	'require': [
-		'./test/mockChrome.js'
-	]
+		'./test/mockChrome.js',
+	],
 }

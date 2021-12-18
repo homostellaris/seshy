@@ -22,7 +22,7 @@ test.beforeEach(async t => {
 			`--disable-extensions-except=${pathToExtension}`,
 			`--load-extension=${pathToExtension}`,
 		],
-		// slowMo: 1000
+		// slowMo: 1000,
 	})
 
 	const playwrightPage = t.context.playwrightPage = await browserContext.pages()[0]
@@ -104,11 +104,11 @@ test('Saving, re-opening, then deleting sessions', async t => {
 
 	const githubPage = await tester.getPageByUrl(githubDotCom)
 	await githubPage.close()
-	await playwrightPage.waitForTimeout(1000) // Wait for debounce to persist session
+	await playwrightPage.waitForTimeout(3000) // Wait for debounce to persist session
 	const windowWithTabRemoved = await tester.getCurrentWindow()
 	await tester.closeWindow(windowWithTabRemoved.id)
 	await playwrightPage.reload()
-	await playwrightPage.waitForTimeout(1000) // TODO: Without this only one session card is found in the session managerı
+	await playwrightPage.waitForTimeout(1000) // TODO: Without this only one session card is found in the session manager
 	const [resumedSessionPageWithTabRemoved] = await Promise.all([
 		t.context.browserContext.waitForEvent('page', {timeout: 2000}),
 		tester.resumeSessionByIndex(1),
@@ -145,7 +145,6 @@ class SessionManagerTester {
 		this.playwrightPage = playwrightPage
 	}
 
-	// TODO: Create a SesssionManagerPageAsserter or something like that to avoid passing it as an arg all the time.
 	async assertUnsavedSessions(expectedUnsavedSessionNames) {
 		await this.assertSession('unsaved', expectedUnsavedSessionNames)
 	}
@@ -253,11 +252,10 @@ class SessionManagerTester {
 	}
 
 	async closeWindow (windowId) {
-		const window = await this.playwrightPage.evaluate(windowId => new Promise(resolve => {
+		await this.playwrightPage.evaluate(windowId => new Promise(resolve => {
 			chrome.windows.remove(windowId, resolve)
 		}), windowId)
 		await this.playwrightPage.waitForTimeout(1000) // Necessary because it returns before the window is actually considered closed by Chrome. Wait on page close doesn't work because that's only one tab.
-		return window
 	}
 
 	async resumeSessionByIndex(sessionIndex) {
@@ -282,7 +280,7 @@ class SessionManagerTester {
 	}
 
 	async getCurrentWindow() {
-		return await this.playwrightPage.evaluate(() => new Promise(resolve => {
+		return this.playwrightPage.evaluate(() => new Promise(resolve => {
 			chrome.windows.getLastFocused({populate: true}, window => {
 				resolve(window)
 			})
@@ -290,7 +288,7 @@ class SessionManagerTester {
 	}
 
 	async getWindows() {
-		return await this.playwrightPage.evaluate(() => new Promise(resolve => {
+		return this.playwrightPage.evaluate(() => new Promise(resolve => {
 			chrome.windows.getAll({populate: true}, windows => {
 				resolve(windows)
 			})
@@ -303,7 +301,6 @@ class SessionManagerTester {
 	}
 
 	async deleteSession(sessionName) {
-		const deleteButton = await this.playwrightPage.$(`.session-card:has-text("${sessionName}") .delete-button`)
-		await deleteButton.click()
+		await this.playwrightPage.click(`.session-card:has-text("${sessionName}") .delete-button`)
 	}
 }

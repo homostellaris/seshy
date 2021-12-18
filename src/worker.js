@@ -18,15 +18,17 @@ const debouncedTabChangeListener = debounce(tabChangeListener, 2000)
 // Listeners must be at the top-level: https://developer.chrome.com/docs/extensions/mv2/background_migration/#listeners
 chrome.runtime.onStartup.addListener(openSavedSessionTracker.removeStaleWindowIds)
 chrome.storage.onChanged.addListener(openSavedSessionTracker.removeStaleWindowIds) // TODO: Is this triggered by the onRemoved listener?
-chrome.tabs.onUpdated.addListener((_, changeInfo, tab) => debouncedTabChangeListener(onUpdatedListener(tab, changeInfo)))
-chrome.tabs.onRemoved.addListener((_, removeInfo) => debouncedTabChangeListener(onRemovedListener(removeInfo)))
+chrome.tabs.onUpdated.addListener((_, changeInfo, tab) => debouncedTabChangeListener(() => onUpdatedListener(tab, changeInfo)))
+chrome.tabs.onRemoved.addListener((_, removeInfo) => debouncedTabChangeListener(() => onRemovedListener(removeInfo)))
 chrome.windows.onRemoved.addListener(
 	openSavedSessionTracker.removeClosedWindowId,
 )
 chrome.windows.onFocusChanged.addListener(setActionIcon)
 
-async function tabChangeListener (promise) {
-	await promise
+async function tabChangeListener (func) {
+	// status.saving()
+	func()
+	// status.saved()
 }
 
 async function onRemovedListener (removeInfo) {
@@ -37,7 +39,6 @@ async function onRemovedListener (removeInfo) {
 	const isSavedSession = !!bookmarkFolderId
 
 	if (isSavedSession) {
-		console.debug('persisting session')
 		persistSession(removeInfo.windowId, bookmarkFolderId)
 	}
 }
