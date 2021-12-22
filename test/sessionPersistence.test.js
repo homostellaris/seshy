@@ -25,60 +25,59 @@ test.beforeEach(async t => {
 		// slowMo: 1000,
 	})
 
-	const playwrightPage = t.context.playwrightPage = await browserContext.pages()[0]
+	const actionPopup = t.context.actionPopup = await browserContext.pages()[0]
 
-	playwrightPage.on('console', async consoleMessage => {
+	actionPopup.on('console', async consoleMessage => {
 		for (let i = 0; i < consoleMessage.args().length; ++i) {
 			const type = consoleMessage.type()
 			const consoleMethod = type === 'warning' ? 'warn' : type
 			console[consoleMethod](`Console ${type}:` , await consoleMessage.args()[i].jsonValue())
 		}
 	})
-	playwrightPage.on('pageerror', (error) => {
+	actionPopup.on('pageerror', (error) => {
 		console.error('Error:', error.message)
 	})
 
-	await playwrightPage.goto('chrome://extensions')
-	await playwrightPage.click('#devMode')
-	const extensionId = (await playwrightPage.innerText('#extension-id')).substring(4)
-	await playwrightPage.goto(`chrome-extension://${extensionId}/ui/index.html`)
+	await actionPopup.goto('chrome://extensions')
+	await actionPopup.click('#devMode')
+	const extensionId = (await actionPopup.innerText('#extension-id')).substring(4)
+	await actionPopup.goto(`chrome-extension://${extensionId}/ui/index.html`)
 
-	playwrightPage.setDefaultTimeout(5000) // Otherwise failed tests hang for ages if waitForEvent is never satisfied.
+	browserContext.setDefaultTimeout(5000) // Otherwise failed tests hang for ages if waitForEvent is never satisfied.
 })
 
 test.afterEach.always(async t => {
-	if (process.env.PWDEBUG) await t.context.playwrightPage.waitForTimeout(1000000)
+	if (process.env.PWDEBUG) await t.context.playwrightPage.waitForTimeout(1000000) // Leave the page open for debugging.
 	await t.context.browserContext.close()
 })
 
 test('Saving, re-opening, then deleting sessions', async t => {
-	const {playwrightPage} = t.context
-	const tester = new SessionManagerTester(t, playwrightPage)
+	const {actionPopup} = t.context
+	const tester = new SessionManagerTester(t, actionPopup, t.context.browserContext)
 
-	await playwrightPage.reload()
-	const sessionManagerTitle = await playwrightPage.title()
-	// This is breaking the fourth wall a bit because its actually a window with the session manager that we're making assertions against.
-	await tester.assertUnsavedSessions([sessionManagerTitle])
+	await actionPopup.reload()
+	const actionPopupTitle = await actionPopup.title()
+	await tester.assertUnsavedSessions([actionPopupTitle]) 	// This is breaking the fourth wall a bit because the action popup itself is being opened in a window rather than as an action popup and is therefore considered a session.
 	await tester.assertUnshelvedPlaceholderExists()
 	await tester.assertShelvedPlaceholderExists()
 
-	const [page, window] = await tester.createWindow()
-	await playwrightPage.reload() // TODO: Try replacing with page.waitForSelector(selector[, options])
-	await tester.assertUnsavedSessions([sessionManagerTitle, await page.title()])
+	const [window, page] = await tester.createWindow()
+	await actionPopup.reload()
+	await tester.assertUnsavedSessions([actionPopupTitle, await page.title()])
 
 	await tester.createTabs(window.id, urls)
 	await tester.closeNewTab(window)
 
 	const savedSessionName = 'Test session'
 	await tester.updateUnsavedSessionName(1, savedSessionName)
-	await tester.assertUnsavedSessions([sessionManagerTitle, savedSessionName])
-	await playwrightPage.reload()
-	await tester.assertUnsavedSessions([sessionManagerTitle])
+	await tester.assertUnsavedSessions([actionPopupTitle, savedSessionName])
+	await actionPopup.reload()
+	await tester.assertUnsavedSessions([actionPopupTitle])
 	await tester.assertUnshelvedSessions([savedSessionName])
 
 	await tester.closeWindow(window.id)
-	await playwrightPage.reload()
-	await tester.assertUnsavedSessions([sessionManagerTitle])
+	await actionPopup.reload()
+	await tester.assertUnsavedSessions([actionPopupTitle])
 	await tester.assertUnshelvedSessions([])
 	await tester.assertUnshelvedPlaceholderExists()
 	await tester.assertShelvedSessions([savedSessionName])
@@ -87,62 +86,51 @@ test('Saving, re-opening, then deleting sessions', async t => {
 	await tester.updateShelvedSessionName(0, updatedSessionName)
 	await tester.assertShelvedSessions([updatedSessionName])
 
-	const [resumedSessionPage] = await Promise.all([
-		t.context.browserContext.waitForEvent('page', {timeout: 2000}), // TODO: This doesn't make sense because a session may open many 'pages'
-		tester.resumeSessionByIndex(1),
-	])
-	resumedSessionPage.setDefaultTimeout(2000)
+	const [unshelvedSessionWindow] = await tester.resumeSession({
+		sessionName: updatedSessionName,
+		expectedTabsCount: urls.length,
+	})
+	await actionPopup.reload()
 
-	await playwrightPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
-	await playwrightPage.reload()
-	await tester.assertUnsavedSessions([sessionManagerTitle])
+	await tester.assertUnsavedSessions([actionPopupTitle])
 	await tester.assertUnshelvedSessions([updatedSessionName])
 	await tester.assertShelvedSessions([])
 	await tester.assertShelvedPlaceholderExists()
-	const unshelvedSessionWindow = await tester.getCurrentWindow()
 	await tester.assertWindowTabUrls(unshelvedSessionWindow, urls)
 
 	const githubPage = await tester.getPageByUrl(githubDotCom)
 	await githubPage.close()
-	await playwrightPage.waitForTimeout(3000) // Wait for debounce to persist session
-	const windowWithTabRemoved = await tester.getCurrentWindow()
-	await tester.closeWindow(windowWithTabRemoved.id)
-	await playwrightPage.reload()
-	await playwrightPage.waitForTimeout(1000) // TODO: Without this only one session card is found in the session manager
-	const [resumedSessionPageWithTabRemoved] = await Promise.all([
-		t.context.browserContext.waitForEvent('page', {timeout: 2000}),
-		tester.resumeSessionByIndex(1),
-	])
-	await playwrightPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
-	const unshelvedSessionWindowWithNoTab = await tester.getCurrentWindow()
+	await tester.waitForDebouncedPersistSession()
+
+	await tester.closeWindow(unshelvedSessionWindow.id)
+	await actionPopup.reload()
+	const [unshelvedSessionWindowWithNoTab] = await tester.resumeSession({
+		sessionName: updatedSessionName,
+		expectedTabsCount: urls.length - 1,
+	})
 	await tester.assertWindowTabUrls(unshelvedSessionWindowWithNoTab, [
 		exampleDotCom,
 		playwrightDotCom,
 	])
 
 	t.is((await tester.getWindows()).length, 2)
-	await playwrightPage.reload()
-	await Promise.all([
-		resumedSessionPageWithTabRemoved.waitForEvent('close', {timeout: 2000}),
-		tester.deleteSession(updatedSessionName),
-	])
-	await playwrightPage.waitForTimeout(1000) // TODO: Find out how to properly wait for resumed session ID to be added to mapping.
+	await actionPopup.reload()
+	await tester.deleteSession(updatedSessionName),
 	t.is((await tester.getWindows()).length, 1)
 
-	await playwrightPage.reload()
-	await tester.assertUnsavedSessions([sessionManagerTitle])
+	await actionPopup.reload()
+	await tester.assertUnsavedSessions([actionPopupTitle])
 	await tester.assertUnshelvedSessions([])
 	await tester.assertShelvedSessions([])
 	await tester.assertUnshelvedPlaceholderExists()
 	await tester.assertShelvedPlaceholderExists()
 })
 
-test.todo('Saving, re-opening, then deleting sessions (with keyboard shortcuts)')
-
 class SessionManagerTester {
-	constructor (avaExecutionContext, playwrightPage) {
+	constructor (avaExecutionContext, playwrightPage, playwrightBrowserContext) {
 		this.avaExecutionContext = avaExecutionContext
 		this.playwrightPage = playwrightPage
+		this.playwrightBrowserContext = playwrightBrowserContext
 	}
 
 	async assertUnsavedSessions(expectedUnsavedSessionNames) {
@@ -185,15 +173,15 @@ class SessionManagerTester {
 	}
 
 	async createWindow() {
-		const [page, window] = await Promise.all([
-			this.avaExecutionContext.context.browserContext.waitForEvent('page'),
+		const [window, page] = await Promise.all([
 			this.playwrightPage.evaluate(() => new Promise(resolve => {
 				chrome.windows.create(window => {
 					resolve(window)
 				})
 			})),
+			this.avaExecutionContext.context.browserContext.waitForEvent('page'),
 		])
-		return [page, window]
+		return [window, page]
 	}
 
 	async createTab(createProperties) {
@@ -249,37 +237,55 @@ class SessionManagerTester {
 		await editButton.click()
 		await this.playwrightPage.keyboard.type(name)
 		await editButton.click()
+		await this.playwrightPage.waitForSelector(`[data-type="${sessionType}"] .edit-button >> nth=${sessionIndex} >> text=edit`)
 	}
 
 	async closeWindow (windowId) {
-		await this.playwrightPage.evaluate(windowId => new Promise(resolve => {
-			chrome.windows.remove(windowId, resolve)
-		}), windowId)
-		await this.playwrightPage.waitForTimeout(1000) // Necessary because it returns before the window is actually considered closed by Chrome. Wait on page close doesn't work because that's only one tab.
+		const window = await this.getWindow(windowId)
+
+		const tabUrls = window.tabs.map(tab => tab.url || tab.pendingUrl)
+		const pages = await this.playwrightBrowserContext.pages()
+		const pagesForWindow = pages.filter(page => tabUrls.includes(page.url()))
+
+		await Promise.all([
+			this.playwrightPage.evaluate(windowId => new Promise(resolve => {
+				chrome.windows.remove(windowId, resolve)
+			}), window.id),
+			...pagesForWindow.map(page => page.waitForEvent('close')),
+		])
 	}
 
-	async resumeSessionByIndex(sessionIndex) {
-		const sessionCards = await this.playwrightPage.$$('.session-card')
-		const resumeButton = await sessionCards[sessionIndex].$('.resume-button')
-		await resumeButton.click()
+	async resumeSession({sessionName, expectedTabsCount}) {
+		let pages = []
+		let tabsCount = 0
+
+		const [window] = await Promise.all([
+			this.playwrightPage.evaluate(
+				() => new Promise(resolve => {
+					chrome.windows.onCreated.addListener(window => {
+						chrome.windows.onCreated.removeListener(this)
+						resolve(window)
+					})
+				}),
+			),
+			this.playwrightBrowserContext.waitForEvent('page', page => {
+				pages.push(page)
+				return ++tabsCount === expectedTabsCount
+			}),
+			this.playwrightPage.click(`.session-card:has-text("${sessionName}") .resume-button`),
+		])
+		await Promise.all(pages.map(page => page.waitForLoadState()))
+
+		const windowWithTabs = await this.getWindow(window.id)
+
+		return [windowWithTabs, pages]
 	}
 
-	async resumeSessionByName (sessionName) {
-		await this.playwrightPage.evaluate(
-			sessionName => {
-				const sessionCards = document.getElementsByClassName('session-card')
-				const sessionCard = Array.prototype.find.call(sessionCards, function (sessionCard) {
-					const sessionNameInput = sessionCard.getElementsByClassName('session-name-input')[0] // TODO: Update usages to session-name.textContent
-					return sessionNameInput.value === sessionName
-				})
-				const resumeButton = sessionCard.getElementsByClassName('resume-button')[0]
-				resumeButton.click()
-			},
-			sessionName,
-		)
+	async getSessionCardByName (sessionName) {
+		return this.playwrightPage.$(`.session-card:has-text("${sessionName}")`)
 	}
 
-	async getCurrentWindow() {
+	async getCurrentWindow () {
 		return this.playwrightPage.evaluate(() => new Promise(resolve => {
 			chrome.windows.getLastFocused({populate: true}, window => {
 				resolve(window)
@@ -287,7 +293,13 @@ class SessionManagerTester {
 		}))
 	}
 
-	async getWindows() {
+	async getWindow (id) {
+		return this.playwrightPage.evaluate(id => new Promise(resolve => {
+			chrome.windows.get(id, {populate: true}, resolve)
+		}), id)
+	}
+
+	async getWindows () {
 		return this.playwrightPage.evaluate(() => new Promise(resolve => {
 			chrome.windows.getAll({populate: true}, windows => {
 				resolve(windows)
@@ -301,6 +313,29 @@ class SessionManagerTester {
 	}
 
 	async deleteSession(sessionName) {
-		await this.playwrightPage.click(`.session-card:has-text("${sessionName}") .delete-button`)
+		const [window] = await Promise.all([
+			this.playwrightPage.evaluate(
+				() => new Promise(resolve => {
+					chrome.windows.onRemoved.addListener(window => {
+						chrome.windows.onRemoved.removeListener(this)
+						resolve(window)
+					})
+				}),
+			),
+			this.playwrightPage.evaluate(
+				() => new Promise(resolve => {
+					chrome.storage.onChanged.addListener(() => {
+						chrome.storage.onChanged.removeListener(this)
+						resolve()
+					})
+				}),
+			),
+			this.playwrightPage.click(`.session-card:has-text("${sessionName}") .delete-button`),
+		])
+		return window
+	}
+
+	async waitForDebouncedPersistSession () {
+		await this.playwrightPage.waitForTimeout(3000) // TODO: Find a better way to do this, perhaps by overriding the debounce?
 	}
 }
