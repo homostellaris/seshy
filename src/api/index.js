@@ -8,7 +8,7 @@ let concurrency = 0
 
 // TODO: Is there any way to simplify thing using array order instead of the index property?
 export async function persistSession (windowId, bookmarkFolderId) {
-	if (++concurrency > 1) console.error(`Concurency is ${concurrency} at ${new Date()}`)
+	if (++concurrency > 1) console.warn(`Concurency is ${concurrency} at ${new Date()}`)
 
 	const window = await chrome.windows.get(windowId, {populate: true})
 	// Other tab will have index 0 in the real window and so will displace .seshy index when their move operations come through.
